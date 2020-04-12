@@ -3,13 +3,16 @@ import 'react-native-gesture-handler'
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import UC from './src/connections/UserConnection'
 
-import { LoginScreen, OTPScreen, RegisterScreen, HomeScreen } from './src/views'
+import { LoginScreen, OTPScreen, RegisterScreen, HomeScreen, HealthRecordPage, AnalysisPage, ProfilePage } from './src/views'
 import { Colors } from './src/styles'
 
 const Stack = createStackNavigator()
+const MTab = createMaterialBottomTabNavigator()
 
 const theme = {
   ...DefaultTheme,
@@ -22,7 +25,7 @@ const theme = {
 }
 
 export default function App() {
-  const currentRoute = 'Login'
+  const currentRoute = 'Home'
   // const [ isLogin, setLogin ] = useState(false)
   // const navigation = useNavigation()
 
@@ -35,7 +38,7 @@ export default function App() {
 
   const paths: Path[] = [
     ...[
-      { title: 'Home', component: HomeScreen },
+      { title: 'Home', component: pageAtBottomNav },
       { title: 'Login', component: LoginScreen },
       { title: 'OTP', component: OTPScreen },
       { title: 'Register', component: RegisterScreen }
@@ -55,6 +58,32 @@ export default function App() {
         </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>
+  )
+}
+
+function pageAtBottomNav() {
+  const currentRoute = 'Home'
+  const paths: Path[] = [
+    ...[
+      { title: 'Home', icon: 'home', color: '#4cb5f5', component: HomeScreen },
+      { title: 'HealthRecord', icon: 'file-document', color: '#34675c', component: HealthRecordPage },
+      { title: 'Analysis', icon: 'google-analytics', color: '#b3c100', component: AnalysisPage },
+      { title: 'Profile', icon: 'account', color: '#b7b8b6', component: ProfilePage }
+    ].map(p  => ({
+      ...p, 
+      options: {
+        headerShown: false,
+        tabBarColor: p.color,
+        tabBarIcon: () => 
+          <MaterialCommunityIcons name={p.icon} color={Colors.surface} size={26}/>
+      }
+    }))
+  ]
+
+  return (
+    <MTab.Navigator initialRouteName={currentRoute ?? 'Home'}>
+      { paths.map(({title, component, options}) => <MTab.Screen key={title} name={title} component={component} options={options}/>) }
+    </MTab.Navigator>
   )
 }
 

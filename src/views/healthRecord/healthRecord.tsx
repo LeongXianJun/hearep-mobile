@@ -5,9 +5,9 @@ import {
 import {
   Text
 } from 'react-native-paper'
-import { Colors } from '../styles'
+import { Colors } from '../../styles'
 
-export default function HomePage({navigation}) {
+export default function HealthRecordPage({navigation}) {
 
   return (
     <React.Fragment>
@@ -15,7 +15,7 @@ export default function HomePage({navigation}) {
       <KeyboardAvoidingView style={styles.container} behavior={Platform.OS == "ios" ? "padding" : "height"}>
         <View style={styles.content}>
           <View style={{flex: 5, justifyContent: 'center', alignItems: 'center'}}>
-            <Text>{'Home'}</Text>
+            <Text>{'Health Record'}</Text>
           </View>
         </View>
       </KeyboardAvoidingView>
