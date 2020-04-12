@@ -1,2 +1,5 @@
+export * from './analysis'
 export * from './authentication'
-export { default as HomeScreen } from './home'
+export * from './healthRecord'
+export * from './home'
+export * from './profile'

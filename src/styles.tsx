@@ -3,7 +3,7 @@ export const Colors = {
   primaryVariant: '#da695c',
   secondary: '#c7ffff',
   secondaryVariant: '#6bf4ff',
-  background: '#20232a',
+  background: '#404654',
   surface: '#f5f5f5',
   text: '#ffffff',
   disabled: '#c2c2c2',
