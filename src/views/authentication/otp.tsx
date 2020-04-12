@@ -6,7 +6,7 @@ import {
   Text, Button, TextInput, Snackbar
 } from 'react-native-paper'
 
-import UC from '../../connections/UserConnection'
+import { UserC } from '../../connections'
 import { Colors } from '../../styles'
 import { ScrollView } from 'react-native-gesture-handler'
 
@@ -17,7 +17,7 @@ export default function LoginPage({ route, navigation }) {
     if(isRegister === 'true') {
       navigation.navigate('Register')
     } else {
-      UC.login()
+      UserC.login()
       navigation.navigate('Home')
     }
   }

@@ -5,9 +5,16 @@ import {
 import {
   Text
 } from 'react-native-paper'
-import { Colors } from '../../styles'
+import { Colors } from '../../../styles'
 
-export default function AnalysisPage({navigation}) {
+export default function HealthPrescriptionPage({navigation}) {
+  navigation.setOptions({
+    title: 'Health Prescription',
+    headerStyle: {
+      backgroundColor: '#34675c',
+    },
+    headerTintColor: '#ffffff'
+  })
 
   return (
     <React.Fragment>
@@ -15,7 +22,7 @@ export default function AnalysisPage({navigation}) {
       <SafeAreaView style={styles.container}>
         <ScrollView style={{flex: 1}} contentContainerStyle={styles.content}>
           <View style={{flex: 5, justifyContent: 'center', alignItems: 'center'}}>
-            <Text>{'Analysis'}</Text>
+            <Text>{'Health Prescription'}</Text>
           </View>
         </ScrollView>
       </SafeAreaView>
