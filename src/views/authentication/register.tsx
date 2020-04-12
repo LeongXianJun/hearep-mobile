@@ -3,13 +3,14 @@ import {
   StatusBar, Platform, KeyboardAvoidingView, View, StyleSheet, ScrollView, Dimensions
 } from 'react-native'
 import {
-  Text, Button, TextInput
+  Text, Button, TextInput, RadioButton
 } from 'react-native-paper'
 import { Colors } from '../../styles'
 
 export default function RegisterPage({navigation}) {
   const [ fullname, setFullname ] = useState('')
   const [ dob, setDob ] = useState('')
+  const [ gender, setGender ] = useState('M')
   const [ email, setEmail ] = useState('')
   const [ altEmail, setAltEmail ] = useState('')
   const [ occupation, setOccupation ] = useState('')
@@ -43,7 +44,17 @@ export default function RegisterPage({navigation}) {
               onChangeText={text => setDob(text)}
               style={styles.textInput}
             />
-            {/* put gender and radio */}
+            <View style={[styles.textInput, {flex: 1, flexDirection: 'row', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 3, borderColor: 'white', borderWidth: 1}]}>
+              <View style={{flex: 1, justifyContent: 'center'}}>
+                <Text style={{ fontSize: 18, marginLeft: 3 }}>Gender</Text>
+              </View>
+              <View style={{flex: 2, flexDirection: 'row', alignContent: 'center'}}>
+                <RadioButton.Group value={gender} onValueChange={val => setGender(val)}>
+                  <RadioButton.Item label='Male' value="M"/>
+                  <RadioButton.Item label='Female' value="F"/>
+                </RadioButton.Group>
+              </View>
+            </View>
             <TextInput
               label='Email'
               mode='outlined'
