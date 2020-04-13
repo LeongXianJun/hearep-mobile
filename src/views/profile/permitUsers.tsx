@@ -7,7 +7,14 @@ import {
 } from 'react-native-paper'
 import { Colors } from '../../styles'
 
-export default function HomePage({navigation}) {
+export default function PermitUsersPage({navigation}) {
+  navigation.setOptions({
+    title: 'Permit User for Emergency',
+    headerStyle: {
+      backgroundColor: '#b7b8b6',
+    },
+    headerTintColor: '#ffffff'
+  })
 
   return (
     <React.Fragment>
@@ -15,7 +22,7 @@ export default function HomePage({navigation}) {
       <SafeAreaView style={styles.container}>
         <ScrollView style={{flex: 1}} contentContainerStyle={styles.content}>
           <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <Text>{'Home'}</Text>
+            <Text>{'Permit Users'}</Text>
           </View>
         </ScrollView>
       </SafeAreaView>

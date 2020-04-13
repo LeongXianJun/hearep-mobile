@@ -12,7 +12,6 @@ export default function RegisterPage({navigation}) {
   const [ dob, setDob ] = useState('')
   const [ gender, setGender ] = useState('M')
   const [ email, setEmail ] = useState('')
-  const [ altEmail, setAltEmail ] = useState('')
   const [ occupation, setOccupation ] = useState('')
 
   const register = () => {
@@ -63,13 +62,6 @@ export default function RegisterPage({navigation}) {
               style={styles.textInput}
             />
             <TextInput
-              label='Alternative Email'
-              mode='outlined'
-              value={altEmail}
-              onChangeText={text => setAltEmail(text)}
-              style={styles.textInput}
-            />
-            <TextInput
               label='Occupation'
               mode='outlined'
               value={occupation}
@@ -78,7 +70,7 @@ export default function RegisterPage({navigation}) {
             />
           </View>
           <View style={[styles.lastView, styles.buttons, {flex: 1, justifyContent: 'center', alignItems: 'center'}]}>
-            <Button mode='contained' style={styles.button} onPress={register}>{'Register'}</Button>
+            <Button mode='contained' style={styles.button} labelStyle={{color: Colors.text}} onPress={register}>{'Register'}</Button>
           </View> 
         </ScrollView>
       </KeyboardAvoidingView>

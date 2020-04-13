@@ -10,7 +10,7 @@ import { UserC } from './src/connections'
 
 import { LoginScreen, OTPScreen, RegisterScreen, HomeScreen, HealthRecordPage, 
   AnalysisPage, ProfilePage, HealthPrescriptionPage, LabTestResultPage, UpdateHealthRecordScreen,
-  AuthenticationDialog } from './src/views'
+  AuthenticationDialog, PermitUsersPage, UpdateProfilePage } from './src/views'
 import { Colors } from './src/styles'
 
 const Stack = createStackNavigator()
@@ -66,6 +66,8 @@ export default function App() {
       { title: 'HealthRecord/HealthPrescription', component: HealthPrescriptionPage },
       { title: 'HealthRecord/LabTestResult', component: LabTestResultPage },
       { title: 'HealthCondition/Update', component: UpdateHealthRecordScreen },
+      { title: 'Profile/Update', component: UpdateProfilePage },
+      { title: 'Profile/PermitUsers', component: PermitUsersPage },
     ]
   ]
 
@@ -82,7 +84,7 @@ export default function App() {
 }
 
 function PageAtBottomNav() {
-  const currentRoute = 'Home'
+  const currentRoute = 'Profile'
   const paths: Path[] = [
     ...[
       { title: 'Home', icon: 'home', color: '#4cb5f5', component: HomeScreen },

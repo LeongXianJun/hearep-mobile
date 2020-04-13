@@ -1,31 +1,31 @@
 class UserConnection {
-  currentUser: User = undefined
+  currentUser: User = { 
+    fullname: 'Leong Xian Jun', dob: new Date(1999, 0, 16), gender: 'M', occupation: 'student',
+    contacts: [
+      { type: 'email', value: 'joneleong@gmail.com' }, 
+      { type: 'phone', value: '+60-165663878' }
+    ]
+  }
 
   isLogin = () => this.currentUser !== undefined
 
   login = () => {
     this.currentUser = { 
-      username: 'Xian Jun', password: '', email: 'leongxianjun@utar.my', occupation: 'student',
-      detail: { 
-        fullname: 'Leong Xian Jun', dob: new Date('1999-1-16'), gender: 'M', 
-        contacts: [
-          { type: 'email', value: 'joneleong@gmail.com' }, 
-          { type: 'phone', value: '+60-165663878' }
-        ] 
-      } 
+      fullname: 'Leong Xian Jun', dob: new Date(1999, 0, 16), gender: 'M', occupation: 'student',
+      contacts: [
+        { type: 'email', value: 'joneleong@gmail.com' }, 
+        { type: 'phone', value: '+60-165663878' }
+      ]
     }
   }
 
   medicalStaffDB: MedicalStaff[] = [
     { 
-      id: 1, username: 'Dr. JoneLeong', password: '123123123', email: 'leongxianjun@1utar.my', 
-      detail: { 
-        fullname: 'Jone Leong', dob: new Date('1999-1-16'), gender: 'M', 
-        contacts: [
-          { type: 'email', value: 'joneleong@gmail.com' }, 
-          { type: 'phone', value: '+60-165663878' }
-        ] 
-      },
+      id: 1, fullname: 'Jone Leong', dob: new Date(1999, 0, 16), gender: 'M', 
+      contacts: [
+        { type: 'email', value: 'joneleong@gmail.com' }, 
+        { type: 'phone', value: '+60-165663878' }
+      ],
       medicalInstituition: {
         role: 'Doctor',
         name: 'Leong Hospital',
@@ -33,14 +33,11 @@ class UserConnection {
         department: 'Common Illness'
       }
     }, { 
-      id: 2, username: 'Dr. Jane', password: '123123123', email: 'jane@hearep.info', 
-      detail: { 
-        fullname: 'Jane', dob: new Date('1980-3-15'), gender: 'F', 
-        contacts: [
-          { type: 'email', value: 'jane@gmail.com' }, 
-          { type: 'phone', value: '+60-123456789' }
-        ] 
-      },
+      id: 2, fullname: 'Jane', dob: new Date(1980, 2, 15), gender: 'F', 
+      contacts: [
+        { type: 'email', value: 'jane@gmail.com' }, 
+        { type: 'phone', value: '+60-123456789' }
+      ],
       medicalInstituition: {
         role: 'Doctor',
         name: 'Leong Hospital',
@@ -54,18 +51,13 @@ class UserConnection {
 export default new UserConnection()
 
 export class User {
-  username: string
-  email: string
-  password: string
-  detail?: {
-    fullname: string
-    dob: Date
-    gender: 'M' | 'F'
-    contacts?: {
-      type: 'email' | 'phone'
-      value: string
-    } []
-  }
+  fullname: string
+  dob: Date
+  gender: 'M' | 'F'
+  contacts?: {
+    type: 'email' | 'phone'
+    value: string
+  } []
   occupation?: string
 }
 
