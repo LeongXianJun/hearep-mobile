@@ -1,6 +1,6 @@
 import React from 'react'
 import {
-  StatusBar, Platform, KeyboardAvoidingView, View, StyleSheet, 
+  StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions, 
 } from 'react-native'
 import {
   Text
@@ -12,13 +12,13 @@ export default function ProfilePage({navigation}) {
   return (
     <React.Fragment>
       <StatusBar barStyle='default'/>
-      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS == "ios" ? "padding" : "height"}>
-        <View style={styles.content}>
+      <SafeAreaView style={styles.container}>
+        <ScrollView style={{flex: 1}} contentContainerStyle={styles.content}>
           <View style={{flex: 5, justifyContent: 'center', alignItems: 'center'}}>
             <Text>{'Profile'}</Text>
           </View>
-        </View>
-      </KeyboardAvoidingView>
+        </ScrollView>
+      </SafeAreaView>
     </React.Fragment>
   )
 }
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background 
   },
   content: {
-    flex: 1,
+    minHeight: Dimensions.get('window').height - StatusBar.currentHeight,
     marginHorizontal: '10%'
   },
   button: {

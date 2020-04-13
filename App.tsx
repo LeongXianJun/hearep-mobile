@@ -6,9 +6,10 @@ import { createStackNavigator } from '@react-navigation/stack'
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
-import UC from './src/connections/UserConnection'
+import { UserC } from './src/connections'
 
-import { LoginScreen, OTPScreen, RegisterScreen, HomeScreen, HealthRecordPage, AnalysisPage, ProfilePage } from './src/views'
+import { LoginScreen, OTPScreen, RegisterScreen, HomeScreen, HealthRecordPage, 
+  AnalysisPage, ProfilePage, HealthPrescriptionPage, LabTestResultPage } from './src/views'
 import { Colors } from './src/styles'
 
 const Stack = createStackNavigator()
@@ -16,7 +17,7 @@ const MTab = createMaterialBottomTabNavigator()
 
 const theme = {
   ...DefaultTheme,
-  roundness: 2,
+  roundness: 3,
   colors: {
     ...DefaultTheme.colors,
     ...Colors,
@@ -31,14 +32,14 @@ export default function App() {
 
   // useEffect(() => {
   //   navigation.addListener('state', () => {
-  //     setLogin(UC.isLogin())
+  //     setLogin(UserC.isLogin())
   //   })
   //   return navigation.removeListener('state', () => {})
   // }, [navigation])
 
   const paths: Path[] = [
     ...[
-      { title: 'Home', component: pageAtBottomNav },
+      { title: 'Home', component: PageAtBottomNav },
       { title: 'Login', component: LoginScreen },
       { title: 'OTP', component: OTPScreen },
       { title: 'Register', component: RegisterScreen }
@@ -47,7 +48,11 @@ export default function App() {
       options: {
         headerShown: false
       }
-    }))
+    })),
+    ...[
+      { title: 'HealthRecord/HealthPrescription', component: HealthPrescriptionPage },
+      { title: 'HealthRecord/LabTestResult', component: LabTestResultPage },
+    ]
   ]
 
   return (
@@ -61,7 +66,7 @@ export default function App() {
   )
 }
 
-function pageAtBottomNav() {
+function PageAtBottomNav() {
   const currentRoute = 'Home'
   const paths: Path[] = [
     ...[
