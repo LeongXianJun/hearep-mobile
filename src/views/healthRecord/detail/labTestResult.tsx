@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Fragment } from 'react'
 import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions, 
 } from 'react-native'
@@ -94,7 +94,7 @@ export default function LabTestPage({route, navigation}) {
         <Card.Content style={{flex: 1}}>
           {
             record.data.map(({field, result, normalRange}, index) =>
-              <>
+              <Fragment key={'r-' + index}>
                 { index !==0? <Divider style={{marginVertical: 5}}/>: undefined }
                 <View style={{flex: 1, marginVertical: 5}}>
                   <View style={{flex: 1}}>
@@ -109,7 +109,7 @@ export default function LabTestPage({route, navigation}) {
                     </View>
                   </View>
                 </View>
-              </>
+              </Fragment>
             )
           }
         </Card.Content>
