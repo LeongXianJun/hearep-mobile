@@ -17,7 +17,7 @@ const MTab = createMaterialBottomTabNavigator()
 
 const theme = {
   ...DefaultTheme,
-  roundness: 2,
+  roundness: 3,
   colors: {
     ...DefaultTheme.colors,
     ...Colors,

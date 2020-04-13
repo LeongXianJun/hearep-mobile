@@ -32,7 +32,7 @@ export default function HealthRecordPage({navigation}) {
   }
 
   const renderItem = (category) => ({item, index}) => 
-    <TouchableRipple key={'c-' + index + '-' + Date.now()} style={{margin: 5, borderRadius: 5}} onPress={navigate(category)(index)} rippleColor="rgba(0, 0, 0, .32)">
+    <TouchableRipple key={'c-' + index + '-' + Date.now()} style={{margin: 5, borderRadius: 5}} onPress={navigate(category)(item.id)} rippleColor="rgba(0, 0, 0, .32)">
       <Card>
         <Card.Cover source={imgs[category]}/>
         <Card.Content>

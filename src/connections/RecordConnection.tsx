@@ -14,23 +14,43 @@ class RecordConnection {
     },
     { 
       id: 4, type: 'medication record', date: new Date(2020, 2, 27), prescriptionID: 1,
-      medications: []
+      medications: [
+        { medicine: 'Acetaminophen (Tylenol)', dosage: 10, usage: '2mL' },
+        { medicine: 'Ibuprofen (Advil, Motrin)', dosage: 15, usage: '3mL' },
+        { medicine: 'Aspirin', dosage: 10, usage: '2mL' }
+      ]
     },
     { 
       id: 5, type: 'medication record', date: new Date(2020, 2, 27), prescriptionID: 2,
-      medications: []
+      medications: [
+        { medicine: 'Acetaminophen (Tylenol)', dosage: 10, usage: '2mL' },
+        { medicine: 'Ibuprofen (Advil, Motrin)', dosage: 15, usage: '3mL' },
+        { medicine: 'Aspirin', dosage: 10, usage: '2mL' }
+      ]
     },
     { 
       id: 6, type: 'medication record', date: new Date(2020, 2, 28), prescriptionID: 2,
-      medications: []
+      medications: [
+        { medicine: 'Acetaminophen (Tylenol)', dosage: 10, usage: '2mL' },
+        { medicine: 'Ibuprofen (Advil, Motrin)', dosage: 15, usage: '3mL' },
+        { medicine: 'Aspirin', dosage: 10, usage: '2mL' }
+      ]
     },
     { 
       id: 7, type: 'medication record', date: new Date(2020, 2, 28), prescriptionID: 3,
-      medications: []
+      medications: [
+        { medicine: 'Acetaminophen (Tylenol)', dosage: 10, usage: '2mL' },
+        { medicine: 'Ibuprofen (Advil, Motrin)', dosage: 15, usage: '3mL' },
+        { medicine: 'Aspirin', dosage: 10, usage: '2mL' }
+      ]
     },
     { 
       id: 8, type: 'medication record', date: new Date(2020, 2, 30), prescriptionID: 3,
-      medications: []
+      medications: [
+        { medicine: 'Acetaminophen (Tylenol)', dosage: 10, usage: '2mL' },
+        { medicine: 'Ibuprofen (Advil, Motrin)', dosage: 15, usage: '3mL' },
+        { medicine: 'Aspirin', dosage: 10, usage: '2mL' }
+      ]
     },
     { 
       id: 9, type: 'lab test result', date: new Date(2020, 2, 30), appID: 4, comment: 'Time to work out more', title: 'Urine Test',
@@ -42,7 +62,7 @@ class RecordConnection {
         {field: 'Dopamine', result: '222', normalRange: '65 - 400' }
       ] 
     },
-    { id: 10, type: 'lab test result', date: new Date(2020, 2, 30), appID: 9, comment: 'Time to work out more', title: 'Blood Test',
+    { id: 10, type: 'lab test result', date: new Date(2020, 2, 30), appID: 9, comment: 'Time to work out more and have more rest', title: 'Blood Test',
       data: [ 
         {field: 'White Blood Cells', result: '1,400', normalRange: '4,000 - 11,000' }, 
         {field: 'Neutrophils', result: '800', normalRange: '1,500 - 5,000' }, 
@@ -84,6 +104,9 @@ class RecordConnection {
     )
     return Object.keys(temp).map(k => ({ type: k, data: temp[k] }))
   }
+
+  public getRecord = (id: number): Record => this.recordDB.find(r => r.id === id)
+  public getMedicationRecords = (preID: number): Record[] => this.recordDB.filter(r => isMedicationRecord(r) && r.prescriptionID === preID)
 }
 
 export default new RecordConnection()
