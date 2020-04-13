@@ -3,16 +3,18 @@ import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions, 
 } from 'react-native'
 import {
-  Text, Card, Title, Button, IconButton, Checkbox, Searchbar, FAB, List, DefaultTheme
+  Title, IconButton, Checkbox, Searchbar, FAB, List, DefaultTheme
 } from 'react-native-paper'
 import { Colors } from '../../styles'
 import { UserC } from '../../connections'
+
+const barColor = '#b3c100'
 
 export default function PermitUsersPage({navigation}) {
   navigation.setOptions({
     title: 'Permit User for Emergency',
     headerStyle: {
-      backgroundColor: '#b7b8b6',
+      backgroundColor: barColor,
     },
     headerTintColor: '#ffffff'
   })
@@ -37,7 +39,7 @@ export default function PermitUsersPage({navigation}) {
 
   return (
     <React.Fragment>
-      <StatusBar barStyle='default' animated backgroundColor='#b7b8b6'/>
+      <StatusBar barStyle='default' animated backgroundColor={barColor}/>
       <SafeAreaView style={styles.container}>
         <ScrollView style={{flex: 1}} contentContainerStyle={styles.content}>
           <View style={{flex: 1}}>
@@ -67,10 +69,10 @@ export default function PermitUsersPage({navigation}) {
       <View style={{marginTop: 10}}>
         <List.Accordion
           title='Permitted Users'
-          titleStyle={{color: 'black', fontWeight: 'bold'}}
+          titleStyle={{color: Colors.text, fontWeight: 'bold'}}
           theme={DefaultTheme}
           expanded={permittedVis}
-          style={{backgroundColor: Colors.surface}}
+          style={styles.listStart}
           onPress={() => setPermittedVis(!permittedVis)}
         >
           {
@@ -97,10 +99,10 @@ export default function PermitUsersPage({navigation}) {
       <View style={[{marginTop: 10}, styles.lastView]}>
         <List.Accordion
           title='Other Users'
-          titleStyle={{color: 'black', fontWeight: 'bold'}}
+          titleStyle={{color: Colors.text, fontWeight: 'bold'}}
           theme={DefaultTheme}
           expanded={otherVis}
-          style={{backgroundColor: Colors.surface}}
+          style={styles.listStart}
           onPress={() => setOtherVis(!otherVis)}
         >
           <Searchbar
@@ -118,7 +120,7 @@ export default function PermitUsersPage({navigation}) {
                 title={ name }
                 titleStyle={[styles.text, {textTransform: 'capitalize'}]}
                 right={props => 
-                  <Checkbox color={Colors.primaryVariant} uncheckedColor={Colors.primary}
+                  <Checkbox {...props} color={Colors.primaryVariant} uncheckedColor={Colors.primary}
                     status={checked[id]? 'checked' : 'unchecked'}
                     onPress={check(id)}
                   />
@@ -136,6 +138,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1, 
     backgroundColor: Colors.background 
+  },
+  listStart: {
+    backgroundColor: barColor, 
+    borderTopRightRadius: 5, 
+    borderTopLeftRadius: 5
   },
   text: {
     color: 'black',

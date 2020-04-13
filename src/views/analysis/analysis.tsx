@@ -3,11 +3,13 @@ import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions, 
 } from 'react-native'
 import {
-  Text, Button, Card, FAB
+  Text, Card, FAB
 } from 'react-native-paper'
 import { Colors } from '../../styles'
 
 const AmountGraph = require('../../resources/images/AmountGraph.png')
+
+const barColor = '#34675c'
 
 export default function AnalysisPage({navigation}) {
 
@@ -24,7 +26,7 @@ export default function AnalysisPage({navigation}) {
                 { title: 'BMI', graph: <Card.Cover style={styles.img} source={AmountGraph}/> }
               ].map(({title, graph}, index, arr) => 
                 <View key={'graph-' + index} style={[{marginVertical: 10}, index === arr.length - 1? styles.lastView: undefined]}>
-                  <Card style={{backgroundColor: '#b3c100'}}>
+                  <Card style={{backgroundColor: barColor}}>
                     <Card.Title title={title}/>
                     { graph }
                     <Card.Content>{}</Card.Content>

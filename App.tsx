@@ -9,8 +9,8 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { UserC } from './src/connections'
 
 import { LoginScreen, OTPScreen, RegisterScreen, HomeScreen, HealthRecordPage, 
-  AnalysisPage, ProfilePage, HealthPrescriptionPage, LabTestResultPage, UpdateHealthRecordScreen,
-  AuthenticationDialog, PermitUsersPage, UpdateProfilePage } from './src/views'
+  AnalysisPage, ProfilePage, HealthPrescriptionPage, LabTestResultPage, 
+  UpdateHealthRecordScreen, AuthenticationDialog, PermitUsersPage, UpdateProfilePage, } from './src/views'
 import { Colors } from './src/styles'
 
 const Stack = createStackNavigator()
@@ -18,7 +18,7 @@ const MTab = createMaterialBottomTabNavigator()
 
 const theme = {
   ...DefaultTheme,
-  roundness: 3,
+  roundness: 5,
   colors: {
     ...DefaultTheme.colors,
     ...Colors,
@@ -28,7 +28,7 @@ const theme = {
 
 
 export default function App() {
-  const currentRoute = 'Home'
+  const currentRoute = 'Login'
   const [ ADVisible, setADVisible ] = useState(false)
 
   useEffect(() => {
@@ -84,13 +84,13 @@ export default function App() {
 }
 
 function PageAtBottomNav() {
-  const currentRoute = 'Profile'
+  const currentRoute = 'Home'
   const paths: Path[] = [
     ...[
-      { title: 'Home', icon: 'home', color: '#4cb5f5', component: HomeScreen },
-      { title: 'HealthRecord', icon: 'file-document', color: '#34675c', component: HealthRecordPage },
-      { title: 'Analysis', icon: 'google-analytics', color: '#b3c100', component: AnalysisPage },
-      { title: 'Profile', icon: 'account', color: '#b7b8b6', component: ProfilePage }
+      { title: 'Home', icon: 'home', color: Colors.primaryVariant, component: HomeScreen },
+      { title: 'HealthRecord', icon: 'file-document', color: '#4cb5f5', component: HealthRecordPage },
+      { title: 'Analysis', icon: 'google-analytics', color: '#34675c', component: AnalysisPage },
+      { title: 'Profile', icon: 'account', color: '#b3c100', component: ProfilePage }
     ].map(p  => ({
       ...p, 
       options: {

@@ -15,11 +15,13 @@ type HealthPrescription = {
   clinicalOpinion: string
 }
 
+const barColor = '#4cb5f5'
+
 export default function HealthPrescriptionPage({route, navigation}) {
   navigation.setOptions({
     title: 'Health Prescription',
     headerStyle: {
-      backgroundColor: '#34675c',
+      backgroundColor: barColor,
     },
     headerTintColor: '#ffffff'
   })
@@ -40,7 +42,7 @@ export default function HealthPrescriptionPage({route, navigation}) {
 
   return (
     <React.Fragment>
-      <StatusBar barStyle='default' animated backgroundColor='#34675c'/>
+      <StatusBar barStyle='default' animated backgroundColor={barColor}/>
       <SafeAreaView style={styles.container}>
         <ScrollView style={{flex: 1}} contentContainerStyle={styles.content}>
           <View style={{flex: 1, marginTop: 10}}>
@@ -77,7 +79,7 @@ export default function HealthPrescriptionPage({route, navigation}) {
   function RecordInformation(record: HealthPrescription) {
     return (
       <Card style={{marginVertical: 10}}>
-        <Card.Title title={'Record Information'} titleStyle={{color: 'black'}}/>
+        <Card.Title title={'Record Information'} style={styles.cardStart}/>
         <Card.Content>
           <View style={{flex: 1, flexDirection: 'row', marginVertical: 10}}>
             <View style={{flex: 2}}>
@@ -104,6 +106,7 @@ export default function HealthPrescriptionPage({route, navigation}) {
             </View>
           </View>
         </Card.Content>
+        <Card.Actions style={styles.cardEnd}>{}</Card.Actions>
       </Card>
     )
   }
@@ -111,7 +114,7 @@ export default function HealthPrescriptionPage({route, navigation}) {
   function AppointmentDetail(app: Appointment) {
     return (
       <Card style={{marginVertical: 10}}>
-        <Card.Title title={'Appointment Detail'} titleStyle={{color: 'black'}}/>
+        <Card.Title title={'Appointment Detail'} style={styles.cardStart}/>
         <Card.Content>
           <View style={{flex: 1, flexDirection: 'row', marginVertical: 10}}>
             <View style={{flex: 2}}>
@@ -148,6 +151,7 @@ export default function HealthPrescriptionPage({route, navigation}) {
             </View>
           }
         </Card.Content>
+        <Card.Actions style={styles.cardEnd}>{}</Card.Actions>
       </Card>
     )
   }
@@ -156,6 +160,7 @@ export default function HealthPrescriptionPage({route, navigation}) {
     const width = Dimensions.get('window').width
     const renderItem = ({item, index}: {item: Record, index: number}) => 
       <Card key={'mr-' + index} style={{flex: 1}}>
+        <Card.Content style={styles.cardStart}>{}</Card.Content>
         <Card.Content style={{flex: 1}}>
           {
             isMedicationRecord(item)
@@ -181,8 +186,9 @@ export default function HealthPrescriptionPage({route, navigation}) {
           }
         </Card.Content>
         <Card.Actions>
-          <Button style={styles.button} onPress={() => setSnackVisible(true)}>{'Add Reminder'}</Button>
+          <Button mode='contained' labelStyle={{color: 'white', paddingHorizontal: 10}} style={styles.button} onPress={() => setSnackVisible(true)}>{'Add Reminder'}</Button>
         </Card.Actions>
+        <Card.Actions style={styles.cardEnd}>{}</Card.Actions>
       </Card>
     
     return (
@@ -208,6 +214,16 @@ const styles = StyleSheet.create({
   content: {
     minHeight: Dimensions.get('window').height - StatusBar.currentHeight - 60,
     marginHorizontal: '10%'
+  },
+  cardStart: {
+    backgroundColor: barColor, 
+    borderTopRightRadius: 5, 
+    borderTopLeftRadius: 5
+  },
+  cardEnd: {
+    backgroundColor: barColor, 
+    borderBottomRightRadius: 5, 
+    borderBottomLeftRadius: 5
   },
   header: {
     fontWeight: '500',

@@ -104,6 +104,7 @@ class RecordConnection {
     )
     return Object.keys(temp).map(k => ({ type: k, data: temp[k] }))
   }
+  public allMedicationRecords = (): Record[] => this.recordDB.filter(r => r.type === 'medication record')
 
   public getRecord = (id: number): Record => this.recordDB.find(r => r.id === id)
   public getMedicationRecords = (preID: number): Record[] => this.recordDB.filter(r => isMedicationRecord(r) && r.prescriptionID === preID)
