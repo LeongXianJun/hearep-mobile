@@ -4,7 +4,7 @@ import {
   Dimensions, Image
 } from 'react-native'
 import {
-  Text, Card, FAB, Title
+  Text, Card, FAB
 } from 'react-native-paper'
 import { Colors } from '../../styles'
 import { UserC, User } from '../../connections'
@@ -37,42 +37,27 @@ export default function ProfilePage({navigation}) {
     return (
       <Card style={{marginTop: 60, marginBottom: 10}}>
         <View style={{position: 'absolute', top: -50, width: '100%', alignItems: 'center'}}>
-          <Image source={avatar[currentUser.gender]()} style={{width: 100, height: 100, borderRadius: 50}}/>
+          <Image source={avatar[info.gender]()} style={{width: 100, height: 100, borderRadius: 50}}/>
         </View>
         <Card.Title title={''}/>
         <Card.Content>
-          <View style={{flex: 1, flexDirection: 'row', marginVertical: 10}}>
-            <View style={{flex: 2}}>
-              <Text style={styles.text}>{ 'Fullname' }</Text>
-            </View>
-            <View style={{flex: 3}}>
-              <Text style={styles.text}>{ currentUser.fullname }</Text>                          
-            </View>
-          </View>
-          <View style={{flex: 1, flexDirection: 'row', marginVertical: 10}}>
-            <View style={{flex: 2}}>
-              <Text style={styles.text}>{ 'Gender' }</Text>
-            </View>
-            <View style={{flex: 3}}>
-              <Text style={styles.text}>{ currentUser.gender }</Text>                          
-            </View>
-          </View>
-          <View style={{flex: 1, flexDirection: 'row', marginVertical: 10}}>
-            <View style={{flex: 2}}>
-              <Text style={styles.text}>{ 'Age' }</Text>
-            </View>
-            <View style={{flex: 3}}>
-              <Text style={styles.text}>{ (new Date()).getFullYear() - currentUser.dob.getFullYear() }</Text>                          
-            </View>
-          </View>
-          <View style={{flex: 1, flexDirection: 'row', marginVertical: 10}}>
-            <View style={{flex: 2}}>
-              <Text style={styles.text}>{'Occupation'}</Text>
-            </View>
-            <View style={{flex: 3}}>
-              <Text style={[styles.text, {textTransform: 'capitalize'}]}>{ info.occupation }</Text>
-            </View>
-          </View>
+          {
+            [
+              { field: 'Fullname', val: info.fullname },
+              { field: 'Gender', val: info.gender === 'F'? 'Female': 'Male' },
+              { field: 'Age', val: (new Date()).getFullYear() - info.dob.getFullYear() },
+              { field: 'Occupation', val: info.occupation }
+            ].map(({field, val}, index) => 
+              <View key={'bi-' + index} style={{flex: 1, flexDirection: 'row', marginVertical: 10}}>
+                <View style={{flex: 2}}>
+                  <Text style={styles.text}>{ field }</Text>
+                </View>
+                <View style={{flex: 3}}>
+                  <Text style={[styles.text, {textTransform: 'capitalize'}]}>{ val }</Text>                          
+                </View>
+              </View>
+            )
+          }
         </Card.Content>
       </Card>
     )

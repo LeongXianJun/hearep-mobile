@@ -1,6 +1,6 @@
 import React from 'react'
 import {
-  StatusBar, Platform, SafeAreaView, ScrollView, View, StyleSheet, Dimensions
+  StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions
 } from 'react-native'
 import {
   Text, Card, Title, TouchableRipple
