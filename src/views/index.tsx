@@ -3,3 +3,5 @@ export * from './authentication'
 export * from './healthRecord'
 export * from './home'
 export * from './profile'
+
+export { default as AuthenticationDialog } from './authenticationDialog'

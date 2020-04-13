@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background 
   },
   content: {
-    minHeight: Dimensions.get('window').height - StatusBar.currentHeight,
+    minHeight: Dimensions.get('window').height - StatusBar.currentHeight - 60,
     marginHorizontal: '10%'
   },
   title: {

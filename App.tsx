@@ -9,7 +9,8 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { UserC } from './src/connections'
 
 import { LoginScreen, OTPScreen, RegisterScreen, HomeScreen, HealthRecordPage, 
-  AnalysisPage, ProfilePage, HealthPrescriptionPage, LabTestResultPage, UpdateHealthRecordScreen } from './src/views'
+  AnalysisPage, ProfilePage, HealthPrescriptionPage, LabTestResultPage, UpdateHealthRecordScreen,
+  AuthenticationDialog } from './src/views'
 import { Colors } from './src/styles'
 
 const Stack = createStackNavigator()
@@ -25,8 +26,20 @@ const theme = {
   },
 }
 
+
 export default function App() {
   const currentRoute = 'Home'
+  const [ ADVisible, setADVisible ] = useState(false)
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setADVisible(true)
+    }, 10000)
+
+    return () => {
+      clearTimeout(timeout)
+    }
+  }, [])
   // const [ isLogin, setLogin ] = useState(false)
   // const navigation = useNavigation()
 
@@ -58,6 +71,7 @@ export default function App() {
 
   return (
     <PaperProvider theme={theme}>
+      <AuthenticationDialog visible={ADVisible} onClose={() => setADVisible(false)}/>
       <NavigationContainer>
         <Stack.Navigator initialRouteName={currentRoute ?? 'Login'}>
           { paths.map(({title, component, options}) => <Stack.Screen key={title} name={title} component={component} options={options}/>) }
@@ -68,7 +82,7 @@ export default function App() {
 }
 
 function PageAtBottomNav() {
-  const currentRoute = 'Analysis'
+  const currentRoute = 'Home'
   const paths: Path[] = [
     ...[
       { title: 'Home', icon: 'home', color: '#4cb5f5', component: HomeScreen },
