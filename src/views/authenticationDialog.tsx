@@ -33,7 +33,7 @@ export default function AuthenticationDialog(props: AuthenticationDialogProps) {
             <View style={styles.modalView}>
               <View>
                 <Title style={{color: 'black'}}>Authorize the Access to Your Health Records</Title>
-                <Paragraph style={{color: 'black'}}>{'Medical staff, Dr Jone want to acceess your health record. Do you authoize him to view your records?'}</Paragraph>
+                <Paragraph style={{color: 'black'}}>{'Medical staff, Dr Jone want to acceess your health record. Do you authorize him to view your records?'}</Paragraph>
               </View>
               <Divider style={{marginVertical: 5}}/>
               <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
