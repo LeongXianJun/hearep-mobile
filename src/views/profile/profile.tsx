@@ -1,9 +1,10 @@
 import React from 'react'
 import {
-  StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions, Image
+  StatusBar, SafeAreaView, ScrollView, View, StyleSheet, 
+  Dimensions, Image
 } from 'react-native'
 import {
-  Text, Card, FAB
+  Text, Card, FAB, Title
 } from 'react-native-paper'
 import { Colors } from '../../styles'
 import { UserC, User } from '../../connections'
