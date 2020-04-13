@@ -9,7 +9,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { UserC } from './src/connections'
 
 import { LoginScreen, OTPScreen, RegisterScreen, HomeScreen, HealthRecordPage, 
-  AnalysisPage, ProfilePage, HealthPrescriptionPage, LabTestResultPage } from './src/views'
+  AnalysisPage, ProfilePage, HealthPrescriptionPage, LabTestResultPage, UpdateHealthRecordScreen } from './src/views'
 import { Colors } from './src/styles'
 
 const Stack = createStackNavigator()
@@ -52,6 +52,7 @@ export default function App() {
     ...[
       { title: 'HealthRecord/HealthPrescription', component: HealthPrescriptionPage },
       { title: 'HealthRecord/LabTestResult', component: LabTestResultPage },
+      { title: 'HealthCondition/Update', component: UpdateHealthRecordScreen },
     ]
   ]
 
@@ -67,7 +68,7 @@ export default function App() {
 }
 
 function PageAtBottomNav() {
-  const currentRoute = 'Home'
+  const currentRoute = 'Analysis'
   const paths: Path[] = [
     ...[
       { title: 'Home', icon: 'home', color: '#4cb5f5', component: HomeScreen },

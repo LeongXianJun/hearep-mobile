@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Fragment } from 'react'
 import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions, 
 } from 'react-native'
 import {
-  Text, Title, Card, Button, Divider, Snackbar
+  Text, Title, Card, Button, Divider, Snackbar, Paragraph
 } from 'react-native-paper'
 import { Colors } from '../../../styles'
 import { RecordC, Record, isMedicationRecord, isHealthPrescription, AppointmentC, Appointment, isByTime } from '../../../connections'
@@ -100,7 +100,7 @@ export default function HealthPrescriptionPage({route, navigation}) {
               <Text style={styles.text}>{'Clinical Opinion'}</Text>
             </View>
             <View style={{flex: 3}}>
-              <Text style={styles.text}>{record.clinicalOpinion}</Text>                          
+              <Paragraph style={styles.text}>{record.clinicalOpinion}</Paragraph>                          
             </View>
           </View>
         </Card.Content>
@@ -126,7 +126,7 @@ export default function HealthPrescriptionPage({route, navigation}) {
               <Text style={styles.text}>{'Address'}</Text>
             </View>
             <View style={{flex: 3}}>
-              <Text style={styles.text}>{app.address}</Text>                          
+              <Paragraph style={styles.text}>{app.address}</Paragraph>                          
             </View>
           </View>
           {isByTime(app)
@@ -160,7 +160,7 @@ export default function HealthPrescriptionPage({route, navigation}) {
           {
             isMedicationRecord(item)
             ? item.medications.map((m, index) => 
-                <>
+                <Fragment key={'m-' + index}>
                   { index !== 0? <Divider style={{marginVertical: 5}}/>: undefined}
                   <View style={{flex: 1, marginVertical: 5}}>
                     <View style={{flex: 1}}>
@@ -175,7 +175,7 @@ export default function HealthPrescriptionPage({route, navigation}) {
                       </View>
                     </View>
                   </View>
-                </>
+                </Fragment>
               )
             : undefined
           }

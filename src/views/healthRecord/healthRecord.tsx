@@ -1,6 +1,6 @@
 import React from 'react'
 import {
-  StatusBar, Platform, KeyboardAvoidingView, ScrollView, View, StyleSheet, Dimensions
+  StatusBar, Platform, SafeAreaView, ScrollView, View, StyleSheet, Dimensions
 } from 'react-native'
 import {
   Text, Card, Title, TouchableRipple
@@ -33,10 +33,10 @@ export default function HealthRecordPage({navigation}) {
 
   const renderItem = (category) => ({item, index}) => 
     <TouchableRipple key={'c-' + index + '-' + Date.now()} style={{margin: 5, borderRadius: 5}} onPress={navigate(category)(item.id)} rippleColor="rgba(0, 0, 0, .32)">
-      <Card>
+      <Card style={{backgroundColor: '#34675c'}}>
         <Card.Cover source={imgs[category]}/>
         <Card.Content>
-          <Title style={{color: 'black'}}>{item.date.toDateString()}</Title>
+          <Title>{item.date.toDateString()}</Title>
         </Card.Content>
       </Card>
     </TouchableRipple>
@@ -44,7 +44,7 @@ export default function HealthRecordPage({navigation}) {
   return (
     <React.Fragment>
       <StatusBar barStyle='default'/>
-      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS == "ios" ? "padding" : "height"}>
+      <SafeAreaView style={styles.container}>
         <ScrollView style={{flex: 1}} contentContainerStyle={styles.content}>
           <Text style={styles.title}>{'All Health Records'}</Text>
           {
@@ -62,7 +62,7 @@ export default function HealthRecordPage({navigation}) {
             )
           }
         </ScrollView>
-      </KeyboardAvoidingView>
+      </SafeAreaView>
     </React.Fragment>
   )
 }

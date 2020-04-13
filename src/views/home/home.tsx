@@ -3,7 +3,7 @@ import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions, 
 } from 'react-native'
 import {
-  Text
+  Text, Button
 } from 'react-native-paper'
 import { Colors } from '../../styles'
 
@@ -31,14 +31,5 @@ const styles = StyleSheet.create({
   content: {
     minHeight: Dimensions.get('window').height - StatusBar.currentHeight,
     marginHorizontal: '10%'
-  },
-  button: {
-    marginVertical: 10,
-    width: '60%',
-    height: '15%'
-  },
-  textInput: {
-    marginVertical: 10,
-    width: '80%'
   }
 })
