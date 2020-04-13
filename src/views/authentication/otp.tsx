@@ -10,6 +10,8 @@ import { UserC } from '../../connections'
 import { Colors } from '../../styles'
 import { ScrollView } from 'react-native-gesture-handler'
 
+const barColor = Colors.primary
+
 export default function LoginPage({ route, navigation }) {
   const [ snackVisible, setSnackVisible ] = useState(false)
   const { isRegister } = route.params
@@ -24,7 +26,7 @@ export default function LoginPage({ route, navigation }) {
 
   return (
     <React.Fragment>
-      <StatusBar barStyle='default'/>
+      <StatusBar barStyle='default' animated backgroundColor={barColor}/>
       <KeyboardAvoidingView style={styles.container} behavior={Platform.OS == "ios" ? "padding" : "height"}>
         <ScrollView style={{flex: 1}} contentContainerStyle={styles.content}>
           <View style={{flex: 2, justifyContent: 'flex-end'}}>

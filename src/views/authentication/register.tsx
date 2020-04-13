@@ -7,6 +7,8 @@ import {
 } from 'react-native-paper'
 import { Colors } from '../../styles'
 
+const barColor = Colors.primary
+
 export default function RegisterPage({navigation}) {
   const [ fullname, setFullname ] = useState('')
   const [ dob, setDob ] = useState('')
@@ -20,7 +22,7 @@ export default function RegisterPage({navigation}) {
   
   return (
     <React.Fragment>
-      <StatusBar barStyle='default'/>
+      <StatusBar barStyle='default' animated backgroundColor={barColor}/>
       <KeyboardAvoidingView style={styles.container} behavior={Platform.OS == "ios" ? "padding" : "height"}>
         <ScrollView style={{flex: 1}} contentContainerStyle={styles.content}>
           <View style={{flex: 1}}>

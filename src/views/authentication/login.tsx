@@ -12,6 +12,8 @@ import Logo from '../../resources/logo/icon.svg'
 import Title from '../../resources/logo/title.svg'
 import Slogan from '../../resources/logo/slogan.svg'
 
+const barColor = Colors.primary
+
 export default function LoginPage({navigation}) {
   const proceed = (register?: boolean) => {
     navigation.navigate('OTP', {
@@ -21,7 +23,7 @@ export default function LoginPage({navigation}) {
 
   return (
     <React.Fragment>
-      <StatusBar barStyle='default'/>
+      <StatusBar barStyle='default' animated backgroundColor={barColor}/>
       <KeyboardAvoidingView style={styles.container} behavior={Platform.OS == "ios" ? "padding" : "height"}>
         <ScrollView style={{flex: 1}} contentContainerStyle={styles.content}>
           <View style={{flex: 5, justifyContent: 'flex-end', alignItems: 'center'}}>

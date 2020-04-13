@@ -18,7 +18,7 @@ class AppointmentConnection {
 
   public workingTimes: WorkingTime[] = [
     { 
-      id: 1, medicalStaff: 'Jone Leong', type: 'byTime', 
+      id: 1, medicalStaff: 'Dr Jone Leong', type: 'byTime', 
       timeslots: [
         { day: 'Sunday', slots: [1, 3, 5, 7, 9] },
         { day: 'Monday', slots: [2, 3, 4, 5] },
@@ -27,6 +27,18 @@ class AppointmentConnection {
         { day: 'Thursday', slots: [1, 3, 5, 7, 8, 10] },
         { day: 'Friday', slots: [1, 3, 5, 7, 8, 10] },
         { day: 'Saturday', slots: [1, 3, 5, 7, 9] }
+      ]
+    },
+    { 
+      id: 2, medicalStaff: 'Dr Jane', type: 'byNumber', 
+      timeslots: [
+        { day: 'Sunday', startTime: '10am', endTime: '3pm' },
+        { day: 'Monday', startTime: '9am', endTime: '5pm' },
+        { day: 'Tuesday', startTime: '9am', endTime: '5pm' },
+        { day: 'Wednesday', startTime: '9am', endTime: '5pm' },
+        { day: 'Thursday', startTime: '9am', endTime: '5pm' },
+        { day: 'Friday', startTime: '9am', endTime: '5pm' },
+        { day: 'Saturday', startTime: '10am', endTime: '8pm' }
       ]
     }
   ]

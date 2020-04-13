@@ -10,7 +10,9 @@ import { UserC } from './src/connections'
 
 import { LoginScreen, OTPScreen, RegisterScreen, HomeScreen, HealthRecordPage, 
   AnalysisPage, ProfilePage, HealthPrescriptionPage, LabTestResultPage, 
-  UpdateHealthRecordScreen, AuthenticationDialog, PermitUsersPage, UpdateProfilePage, } from './src/views'
+  UpdateHealthRecordScreen, AuthenticationDialog, PermitUsersPage, UpdateProfilePage,
+  AppointmentConfirmationPage, AppointmentHistoryPage, AppointmentPage, 
+  GetNumberPage, SelectMedicalStaffPage, SelectTimeslotPage } from './src/views'
 import { Colors } from './src/styles'
 
 const Stack = createStackNavigator()
@@ -68,6 +70,12 @@ export default function App() {
       { title: 'HealthCondition/Update', component: UpdateHealthRecordScreen },
       { title: 'Profile/Update', component: UpdateProfilePage },
       { title: 'Profile/PermitUsers', component: PermitUsersPage },
+      { title: 'Appointment', component: AppointmentPage },
+      { title: 'Appointment/History', component: AppointmentHistoryPage },
+      { title: 'Appointment/SearchMedicalStaff', component: SelectMedicalStaffPage },
+      { title: 'Appointment/SelectTimeslot', component: SelectTimeslotPage },
+      { title: 'Appointment/GetNumber', component: GetNumberPage },
+      { title: 'Appointment/Confirmation', component: AppointmentConfirmationPage },
     ]
   ]
 
