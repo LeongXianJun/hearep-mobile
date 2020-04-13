@@ -3,7 +3,7 @@ import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions, 
 } from 'react-native'
 import {
-  Text, Button
+  Text
 } from 'react-native-paper'
 import { Colors } from '../../styles'
 
@@ -14,7 +14,7 @@ export default function HomePage({navigation}) {
       <StatusBar barStyle='default'/>
       <SafeAreaView style={styles.container}>
         <ScrollView style={{flex: 1}} contentContainerStyle={styles.content}>
-          <View style={{flex: 5, justifyContent: 'center', alignItems: 'center'}}>
+          <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
             <Text>{'Home'}</Text>
           </View>
         </ScrollView>

@@ -1,31 +1,41 @@
 import React, { useState } from 'react'
 import {
-  StatusBar, Platform, KeyboardAvoidingView, View, StyleSheet, ScrollView, Dimensions
+  StatusBar, ScrollView, View, StyleSheet, Dimensions, 
+  KeyboardAvoidingView, Platform, 
 } from 'react-native'
 import {
-  Text, Button, TextInput, RadioButton
+  Text, RadioButton, TextInput, Button, Title, Subheading
 } from 'react-native-paper'
 import { Colors } from '../../styles'
+import { UserC } from '../../connections'
 
-export default function RegisterPage({navigation}) {
-  const [ fullname, setFullname ] = useState('')
-  const [ dob, setDob ] = useState('')
-  const [ gender, setGender ] = useState('M')
-  const [ email, setEmail ] = useState('')
-  const [ occupation, setOccupation ] = useState('')
+export default function UpdateProfilePage({navigation}) {
+  navigation.setOptions({
+    title: 'Update Profile',
+    headerStyle: {
+      backgroundColor: '#b7b8b6',
+    },
+    headerTintColor: '#ffffff'
+  })
+  const CurrentUser = UserC.currentUser
+  const [ fullname, setFullname ] = useState(CurrentUser.fullname)
+  const [ dob, setDob ] = useState(CurrentUser.dob.toDateString())
+  const [ gender, setGender ] = useState<string>(CurrentUser.gender)
+  const [ email, setEmail ] = useState(CurrentUser.contacts?.find(c => c.type === 'email').value ?? '')
+  const [ occupation, setOccupation ] = useState(CurrentUser.occupation)
 
-  const register = () => {
-    navigation.navigate('Home')
+  const updateProfile = () => {
+    navigation.goBack()
   }
-  
+
   return (
     <React.Fragment>
       <StatusBar barStyle='default'/>
       <KeyboardAvoidingView style={styles.container} behavior={Platform.OS == "ios" ? "padding" : "height"}>
         <ScrollView style={{flex: 1}} contentContainerStyle={styles.content}>
-          <View style={{flex: 1}}>
-            <Text style={styles.title}>{'Basic Information'}</Text>
-            <Text style={styles.subtitle}>{'Please fill in the following fields.'}</Text>
+          <View style={{flex: 1, marginTop: 25}}>
+            <Title>{'Basic Information'}</Title>
+            <Subheading>{'Please fill in the following fields.'}</Subheading>
           </View>
           <View style={{flex: 1, alignItems: 'center'}}>
             <TextInput
@@ -70,13 +80,13 @@ export default function RegisterPage({navigation}) {
             />
           </View>
           <View style={[styles.lastView, styles.buttons, {flex: 1, justifyContent: 'center', alignItems: 'center'}]}>
-            <Button mode='contained' style={styles.button} labelStyle={{color: Colors.text}} onPress={register}>{'Register'}</Button>
+            <Button mode='contained' style={styles.button} labelStyle={{color: Colors.text}} onPress={updateProfile}>{'Update Profile'}</Button>
           </View> 
         </ScrollView>
       </KeyboardAvoidingView>
     </React.Fragment>
   )
-} 
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -84,18 +94,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background 
   },
   content: {
-    minHeight: Dimensions.get('window').height - StatusBar.currentHeight,
-    paddingHorizontal: '10%'
-  },
-  title: {
-    fontWeight: 'bold',
-    marginTop: 25,
-    fontSize: 40
-  },
-  subtitle: {
-    fontWeight: '300',
-    marginVertical: 10,
-    fontSize: 20
+    minHeight: Dimensions.get('window').height - StatusBar.currentHeight - 60,
+    marginHorizontal: '10%'
   },
   buttons: {
     alignItems: 'center',
