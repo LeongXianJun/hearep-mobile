@@ -1,6 +1,6 @@
 import React from 'react'
 import {
-  StatusBar, Platform, SafeAreaView, ScrollView, View, StyleSheet, Dimensions
+  StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions
 } from 'react-native'
 import {
   Text, Card, Title, TouchableRipple
@@ -14,6 +14,8 @@ const imgs = {
   'medication record': require('../../resources/images/medicationRecord.jpg'),
   'lab test result': require('../../resources/images/labTestResult.jpg')
 }
+
+const barColor = '#4cb5f5'
 
 export default function HealthRecordPage({navigation}) {
   const groups = RecordC.allRecords()
@@ -33,7 +35,7 @@ export default function HealthRecordPage({navigation}) {
 
   const renderItem = (category) => ({item, index}) => 
     <TouchableRipple key={'c-' + index + '-' + Date.now()} style={{margin: 5, borderRadius: 5}} onPress={navigate(category)(item.id)} rippleColor="rgba(0, 0, 0, .32)">
-      <Card style={{backgroundColor: '#34675c'}}>
+      <Card style={{backgroundColor: barColor}}>
         <Card.Cover source={imgs[category]}/>
         <Card.Content>
           <Title>{item.date.toDateString()}</Title>

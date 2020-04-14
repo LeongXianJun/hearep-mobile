@@ -3,23 +3,18 @@ import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions, 
 } from 'react-native'
 import {
-  Text, Title, DataTable, Card, Button, Divider
+  Text, Card, Divider
 } from 'react-native-paper'
 import { Colors } from '../../../styles'
-import { RecordC, Record, isMedicationRecord, isHealthPrescription, AppointmentC, Appointment, MedicationRecord, isByTime, isLabTestResult, LabTestResult } from '../../../connections'
-import Carousel from 'react-native-snap-carousel'
+import { RecordC, Record, isLabTestResult, LabTestResult } from '../../../connections'
 
-type HealthPrescription = {
-  date: Date
-  illness: string
-  clinicalOpinion: string
-}
+const barColor = '#4cb5f5'
 
 export default function LabTestPage({route, navigation}) {
   navigation.setOptions({
     title: 'Lab Test Result',
     headerStyle: {
-      backgroundColor: '#34675c',
+      backgroundColor: barColor,
     },
     headerTintColor: '#ffffff'
   })
@@ -35,7 +30,7 @@ export default function LabTestPage({route, navigation}) {
 
   return (
     <React.Fragment>
-      <StatusBar barStyle='default'/>
+      <StatusBar barStyle='default' animated backgroundColor={barColor}/>
       <SafeAreaView style={styles.container}>
         <ScrollView style={{flex: 1}} contentContainerStyle={styles.content}>
           <View style={{flex: 1, marginTop: 10}}>
@@ -56,7 +51,7 @@ export default function LabTestPage({route, navigation}) {
   function RecordInformation(record: LabTestResult) {
     return (
       <Card style={{marginVertical: 10}}>
-        <Card.Title title={'Record Information'} titleStyle={{color: 'black'}}/>
+        <Card.Title title={'Record Information'} style={styles.cardStart}/>
         <Card.Content>
           <View style={{flex: 1, flexDirection: 'row', marginVertical: 10}}>
             <View style={{flex: 2}}>
@@ -83,6 +78,7 @@ export default function LabTestPage({route, navigation}) {
             </View>
           </View>
         </Card.Content>
+        <Card.Actions style={styles.cardEnd}>{}</Card.Actions>
       </Card>
     )
   }
@@ -90,7 +86,7 @@ export default function LabTestPage({route, navigation}) {
   function LabTestResult(record: LabTestResult) {
     return (
       <Card style={[{flex: 1}, styles.lastView]}>
-        <Card.Title title='Lab Test Result' titleStyle={{color: 'black'}}/>
+        <Card.Title title='Lab Test Result' style={styles.cardStart}/>
         <Card.Content style={{flex: 1}}>
           {
             record.data.map(({field, result, normalRange}, index) =>
@@ -113,6 +109,7 @@ export default function LabTestPage({route, navigation}) {
             )
           }
         </Card.Content>
+        <Card.Actions style={styles.cardEnd}>{}</Card.Actions>
       </Card>
     )
   }
@@ -126,6 +123,16 @@ const styles = StyleSheet.create({
   content: {
     minHeight: Dimensions.get('window').height - StatusBar.currentHeight - 60,
     marginHorizontal: '10%'
+  },
+  cardStart: {
+    backgroundColor: barColor, 
+    borderTopRightRadius: 5, 
+    borderTopLeftRadius: 5
+  },
+  cardEnd: {
+    backgroundColor: barColor, 
+    borderBottomRightRadius: 5, 
+    borderBottomLeftRadius: 5
   },
   header: {
     fontWeight: '500',

@@ -1,0 +1,6 @@
+export { default as AppointmentPage } from './appointment'
+export { default as AppointmentHistoryPage } from './history'
+export { default as SelectMedicalStaffPage } from './actions/selectMedicalStaff'
+export { default as GetNumberPage } from './actions/getNumber'
+export { default as SelectTimeslotPage } from './actions/selectTimeslot'
+export { default as AppointmentConfirmationPage } from './actions/confirmation'

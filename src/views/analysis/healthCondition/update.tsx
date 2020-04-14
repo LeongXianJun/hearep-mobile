@@ -8,15 +8,13 @@ import {
 } from 'react-native-paper'
 import { Colors } from '../../../styles'
 
-'Blood Sugar Level'
-'Blood Pressure'
-'BMI'
+const barColor = '#34675c'
 
 export default function UpdateHealthConditionPage({navigation}) {
   navigation.setOptions({
     title: 'Update Health Condition',
     headerStyle: {
-      backgroundColor: '#b3c100',
+      backgroundColor: barColor,
     },
     headerTintColor: '#ffffff'
   })
@@ -32,7 +30,7 @@ export default function UpdateHealthConditionPage({navigation}) {
 
   return (
     <React.Fragment>
-      <StatusBar barStyle='default'/>
+      <StatusBar barStyle='default' animated backgroundColor={barColor}/>
       <KeyboardAvoidingView style={styles.container} behavior={Platform.OS == "ios" ? "padding" : "height"}>
         <ScrollView style={{flex: 1}} contentContainerStyle={styles.content}>
           <View style={{flexDirection: 'row'}}>

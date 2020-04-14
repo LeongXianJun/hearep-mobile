@@ -13,7 +13,7 @@ export default function UpdateProfilePage({navigation}) {
   navigation.setOptions({
     title: 'Update Profile',
     headerStyle: {
-      backgroundColor: '#b7b8b6',
+      backgroundColor: '#b3c100',
     },
     headerTintColor: '#ffffff'
   })
@@ -30,7 +30,7 @@ export default function UpdateProfilePage({navigation}) {
 
   return (
     <React.Fragment>
-      <StatusBar barStyle='default'/>
+      <StatusBar barStyle='default' animated backgroundColor='#b3c100'/>
       <KeyboardAvoidingView style={styles.container} behavior={Platform.OS == "ios" ? "padding" : "height"}>
         <ScrollView style={{flex: 1}} contentContainerStyle={styles.content}>
           <View style={{flex: 1, marginTop: 25}}>
@@ -80,7 +80,7 @@ export default function UpdateProfilePage({navigation}) {
             />
           </View>
           <View style={[styles.lastView, styles.buttons, {flex: 1, justifyContent: 'center', alignItems: 'center'}]}>
-            <Button mode='contained' style={styles.button} labelStyle={{color: Colors.text}} onPress={updateProfile}>{'Update Profile'}</Button>
+            <Button mode='contained' style={styles.button} onPress={updateProfile}>{'Update Profile'}</Button>
           </View> 
         </ScrollView>
       </KeyboardAvoidingView>
