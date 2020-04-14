@@ -30,7 +30,7 @@ const theme = {
 
 
 export default function App() {
-  const currentRoute = 'Login'
+  const currentRoute = 'Home'
   const [ ADVisible, setADVisible ] = useState(false)
 
   useEffect(() => {
@@ -72,7 +72,7 @@ export default function App() {
       { title: 'Profile/PermitUsers', component: PermitUsersPage },
       { title: 'Appointment', component: AppointmentPage },
       { title: 'Appointment/History', component: AppointmentHistoryPage },
-      { title: 'Appointment/SearchMedicalStaff', component: SelectMedicalStaffPage },
+      { title: 'Appointment/SelectMedicalStaff', component: SelectMedicalStaffPage },
       { title: 'Appointment/SelectTimeslot', component: SelectTimeslotPage },
       { title: 'Appointment/GetNumber', component: GetNumberPage },
       { title: 'Appointment/Confirmation', component: AppointmentConfirmationPage },

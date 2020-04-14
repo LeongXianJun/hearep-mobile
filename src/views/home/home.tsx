@@ -3,7 +3,7 @@ import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions, 
 } from 'react-native'
 import {
-  Text, List, DefaultTheme, Button, Card
+  Text, List, DefaultTheme, Card
 } from 'react-native-paper'
 import { Colors } from '../../styles'
 import { AppointmentC, RecordC, isMedicationRecord, UserC } from '../../connections'
@@ -32,7 +32,6 @@ export default function HomePage({navigation}) {
                 <MaterialCommunityIcons name='chevron-right' color={Colors.text} size={24}/>
               </View>
             </Card.Content>
-              {/* <Button icon='book-multiple' mode='contained' style={{}} onPress={() => navigation.navigate('Appointment')}>{'Appointments'}</Button> */}
           </Card>
           <View style={styles.lastView}>
             <List.Section title={'Notification'} titleStyle={{fontSize: 25, color: Colors.text}}>
@@ -51,7 +50,7 @@ export default function HomePage({navigation}) {
   )
 
   function AppointmentNotification() {
-    const nearingAppointment = AppointmentC.nearing
+    const nearingAppointments = AppointmentC.nearing
 
     return (
       <List.Accordion id={1} title='Appointments'
@@ -60,7 +59,7 @@ export default function HomePage({navigation}) {
         style={styles.listStart}
       >
         {
-          nearingAppointment.map(({date, address, medicalStaff}, index) => 
+          nearingAppointments.map(({date, address, medicalStaff}, index) => 
             <List.Item key={'PU-' + index} 
               style={{backgroundColor: Colors.surface, marginBottom: 1}}
               title={ 'Appointment on ' + date.toDateString() }

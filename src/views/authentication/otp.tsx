@@ -20,7 +20,10 @@ export default function LoginPage({ route, navigation }) {
       navigation.navigate('Register')
     } else {
       UserC.login()
-      navigation.navigate('Home')
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home'}]
+      })
     }
   }
 

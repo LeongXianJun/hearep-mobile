@@ -21,7 +21,7 @@ class UserConnection {
 
   medicalStaffDB: MedicalStaff[] = [
     { 
-      id: 1, fullname: 'Jone Leong', dob: new Date(1999, 0, 16), gender: 'M', 
+      id: 1, fullname: 'Dr Jone Leong', dob: new Date(1999, 0, 16), gender: 'M', 
       contacts: [
         { type: 'email', value: 'joneleong@gmail.com' }, 
         { type: 'phone', value: '+60-165663878' }
@@ -33,7 +33,7 @@ class UserConnection {
         department: 'Common Illness'
       }
     }, { 
-      id: 2, fullname: 'Jane', dob: new Date(1980, 2, 15), gender: 'F', 
+      id: 2, fullname: 'Dr Jane', dob: new Date(1980, 2, 15), gender: 'F', 
       contacts: [
         { type: 'email', value: 'jane@gmail.com' }, 
         { type: 'phone', value: '+60-123456789' }
@@ -41,7 +41,7 @@ class UserConnection {
       medicalInstituition: {
         role: 'Doctor',
         name: 'Leong Hospital',
-        address: '40, Jalan Berjaya, Sungai Chua, 43000 Kajang, Selangor',
+        address: 'Jalan Cheras, Kampung Sungai Kantan, 43000 Kajang, Selangor',
         department: 'Specialist'
       }
     }
@@ -86,7 +86,7 @@ export class User {
   occupation?: string
 }
 
-class MedicalStaff extends User {
+export class MedicalStaff extends User {
   id: number
   medicalInstituition?: {
     role?: string

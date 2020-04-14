@@ -17,7 +17,10 @@ export default function RegisterPage({navigation}) {
   const [ occupation, setOccupation ] = useState('')
 
   const register = () => {
-    navigation.navigate('Home')
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Home'}]
+    })
   }
   
   return (

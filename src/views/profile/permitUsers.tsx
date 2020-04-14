@@ -107,7 +107,7 @@ export default function PermitUsersPage({navigation}) {
         >
           <Searchbar
             placeholder="Search"
-            iconColor={Colors.primary}
+            iconColor={Colors.primaryVariant}
             onChangeText={val => setFilter(val)}
             style={{ elevation: 0, borderRadius: 0, borderBottomWidth: 1, borderColor: Colors.primaryVariant }}
             inputStyle={{color: Colors.primaryVariant}}
