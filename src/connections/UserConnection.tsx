@@ -1,8 +1,8 @@
 class UserConnection {
-  currentUser: User = { 
+  currentUser: User = {
     fullname: 'Leong Xian Jun', dob: new Date(1999, 0, 16), gender: 'M', occupation: 'student',
     contacts: [
-      { type: 'email', value: 'joneleong@gmail.com' }, 
+      { type: 'email', value: 'joneleong@gmail.com' },
       { type: 'phone', value: '+60-165663878' }
     ]
   }
@@ -10,20 +10,20 @@ class UserConnection {
   isLogin = () => this.currentUser !== undefined
 
   login = () => {
-    this.currentUser = { 
+    this.currentUser = {
       fullname: 'Leong Xian Jun', dob: new Date(1999, 0, 16), gender: 'M', occupation: 'student',
       contacts: [
-        { type: 'email', value: 'joneleong@gmail.com' }, 
+        { type: 'email', value: 'joneleong@gmail.com' },
         { type: 'phone', value: '+60-165663878' }
       ]
     }
   }
 
   medicalStaffDB: MedicalStaff[] = [
-    { 
-      id: 1, fullname: 'Dr Jone Leong', dob: new Date(1999, 0, 16), gender: 'M', 
+    {
+      id: 1, fullname: 'Dr Jone Leong', dob: new Date(1999, 0, 16), gender: 'M',
       contacts: [
-        { type: 'email', value: 'joneleong@gmail.com' }, 
+        { type: 'email', value: 'joneleong@gmail.com' },
         { type: 'phone', value: '+60-165663878' }
       ],
       medicalInstituition: {
@@ -32,10 +32,10 @@ class UserConnection {
         address: '40, Jalan Berjaya, Sungai Chua, 43000 Kajang, Selangor',
         department: 'Common Illness'
       }
-    }, { 
-      id: 2, fullname: 'Dr Jane', dob: new Date(1980, 2, 15), gender: 'F', 
+    }, {
+      id: 2, fullname: 'Dr Jane', dob: new Date(1980, 2, 15), gender: 'F',
       contacts: [
-        { type: 'email', value: 'jane@gmail.com' }, 
+        { type: 'email', value: 'jane@gmail.com' },
         { type: 'phone', value: '+60-123456789' }
       ],
       medicalInstituition: {
@@ -68,25 +68,25 @@ class UserConnection {
 
   getRemainingUsers = () => this.users.filter(u => this.permittedUsers.includes(u) === false)
 
-  permitNewUsers = (newUsers: { id: number, name: string }[]) => this.permittedUsers = [...this.permittedUsers, ...newUsers]
+  permitNewUsers = (newUsers: { id: number, name: string }[]) => this.permittedUsers = [ ...this.permittedUsers, ...newUsers ]
 
   removePermittedUser = (id: number) => this.permittedUsers = this.permittedUsers.filter(u => u.id !== id)
 }
 
 export default new UserConnection()
 
-export class User {
+export type User = {
   fullname: string
   dob: Date
   gender: 'M' | 'F'
   contacts?: {
     type: 'email' | 'phone'
     value: string
-  } []
+  }[]
   occupation?: string
 }
 
-export class MedicalStaff extends User {
+export type MedicalStaff = User & {
   id: number
   medicalInstituition?: {
     role?: string

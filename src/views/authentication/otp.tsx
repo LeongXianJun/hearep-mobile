@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, FC } from 'react'
 import {
-  StatusBar, Platform, KeyboardAvoidingView, View, StyleSheet, Dimensions, 
+  StatusBar, Platform, KeyboardAvoidingView, View, StyleSheet, Dimensions,
 } from 'react-native'
 import {
   Text, Button, TextInput, Snackbar
@@ -9,65 +9,73 @@ import {
 import { UserC } from '../../connections'
 import { Colors } from '../../styles'
 import { ScrollView } from 'react-native-gesture-handler'
+import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
 const barColor = Colors.primary
 
-export default function LoginPage({ route, navigation }) {
+interface PageProp {
+  route: any
+  navigation: NavigationProp<ParamListBase>
+}
+
+const LoginPage: FC<PageProp> = ({ route, navigation }) => {
   const [ snackVisible, setSnackVisible ] = useState(false)
   const { isRegister } = route.params
   const proceed = () => {
-    if(isRegister === 'true') {
+    if (isRegister === 'true') {
       navigation.navigate('Register')
     } else {
       UserC.login()
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Home'}]
+        routes: [ { name: 'Home' } ]
       })
     }
   }
 
   return (
     <React.Fragment>
-      <StatusBar barStyle='default' animated backgroundColor={barColor}/>
-      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS == "ios" ? "padding" : "height"}>
-        <ScrollView style={{flex: 1}} contentContainerStyle={styles.content}>
-          <View style={{flex: 2, justifyContent: 'flex-end'}}>
-            <Text style={styles.title}>{'OTP Code'}</Text>
-            <Text style={styles.subtitle}>{'Please enter the OTP code'}</Text>
+      <StatusBar barStyle='default' animated backgroundColor={ barColor } />
+      <KeyboardAvoidingView style={ styles.container } behavior={ Platform.OS == "ios" ? "padding" : "height" }>
+        <ScrollView style={ { flex: 1 } } contentContainerStyle={ styles.content }>
+          <View style={ { flex: 2, justifyContent: 'flex-end' } }>
+            <Text style={ styles.title }>{ 'OTP Code' }</Text>
+            <Text style={ styles.subtitle }>{ 'Please enter the OTP code' }</Text>
           </View>
-          <View style={{flex: 3, alignItems: 'center'}}>
+          <View style={ { flex: 3, alignItems: 'center' } }>
             <TextInput
               label='OTP Code'
               placeholder='Please enter the OTP code.'
               mode='outlined'
-              style={styles.textInput}
+              style={ styles.textInput }
             />
-            <View style={[styles.lastView, styles.buttons]}>
-              <Button mode='contained' style={styles.button} onPress={proceed}>{isRegister === 'true'? 'Continue': 'Login'}</Button>
-              <Button style={{width: '60%'}} onPress={() => setSnackVisible(true)} loading={snackVisible} disabled={snackVisible}>{'Request OTP'}</Button>
+            <View style={ [ styles.lastView, styles.buttons ] }>
+              <Button mode='contained' style={ styles.button } onPress={ proceed }>{ isRegister === 'true' ? 'Continue' : 'Login' }</Button>
+              <Button style={ { width: '60%' } } onPress={ () => setSnackVisible(true) } loading={ snackVisible } disabled={ snackVisible }>{ 'Request OTP' }</Button>
             </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
       <Snackbar
-        visible={snackVisible}
-        duration={Snackbar.DURATION_MEDIUM}
-        onDismiss={() => setSnackVisible(false)}
+        visible={ snackVisible }
+        duration={ Snackbar.DURATION_MEDIUM }
+        onDismiss={ () => setSnackVisible(false) }
       >
-        {'OTP code is resent.'}
+        { 'OTP code is resent.' }
       </Snackbar>
     </React.Fragment>
   )
 }
 
+export default LoginPage
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1, 
-    backgroundColor: Colors.background 
+    flex: 1,
+    backgroundColor: Colors.background
   },
   content: {
-    minHeight: Dimensions.get('window').height - StatusBar.currentHeight,
+    minHeight: Dimensions.get('window').height - (StatusBar.currentHeight ?? 0),
     marginTop: '10%',
     marginHorizontal: '10%'
   },

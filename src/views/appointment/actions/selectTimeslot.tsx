@@ -1,42 +1,49 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, FC } from 'react'
 import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions, TouchableOpacity
 } from 'react-native'
 import {
-  Text, Button, Card, Title
+  Text, Card, Title
 } from 'react-native-paper'
 import { Colors } from '../../../styles'
-import { AppointmentC, FixedTime } from '../../../connections'
+import { AppointmentC, FixedTime, TimeslotByTime } from '../../../connections'
 import Carousel from 'react-native-snap-carousel'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { day, month } from '../../commons'
+import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
 const barColor = '#e982f6'
+
+interface PageProp {
+  route: any
+  navigation: NavigationProp<ParamListBase>
+}
+
 //  normal and reschedule version (just change some text)
-export default function SelectTimeslotPage({route, navigation}) {
+const SelectTimeslotPage: FC<PageProp> = ({ route, navigation }) => {
   const rescheduleId = route.params?.rescheduleId
   navigation.setOptions({
-    title: rescheduleId? 'Reschedule Appointment': 'Select Timeslot',
+    title: rescheduleId ? 'Reschedule Appointment' : 'Select Timeslot',
     headerStyle: {
       backgroundColor: barColor,
     },
     headerTintColor: '#ffffff'
   })
   const { width, height } = Dimensions.get('window')
-  const wt = AppointmentC.workingTimes[0]
-  const timeslots = wt.type === 'byTime'? wt.timeslots: undefined
+  const wt = AppointmentC.workingTimes[ 0 ]
+  const timeslots = wt.type === 'byTime' ? wt.timeslots : []
   const [ dayIndex, setDayIndex ] = useState(0)
-  const [ availableSlots, setAvailableSlots ] = useState(timeslots[0].slots)
-  const _carousel = useRef(null)
+  const [ availableSlots, setAvailableSlots ] = useState(timeslots[ 0 ].slots)
+  const _carousel = useRef<any>(null) // not sure the type
   const longScroll = height < 500
 
   useEffect(() => {
-    setAvailableSlots(timeslots[dayIndex].slots)
-  }, [dayIndex])
+    setAvailableSlots(timeslots[ dayIndex ].slots)
+  }, [ dayIndex ])
 
   const cont = (index: number) => () => {
     AppointmentC.setNewAppointmentDetail('date', nthDay(dayIndex))
-    AppointmentC.setNewAppointmentDetail('time', FixedTime[index])
+    AppointmentC.setNewAppointmentDetail('time', FixedTime[ index ])
     navigation.navigate('Appointment/Confirmation', {
       'rescheduleId': rescheduleId
     })
@@ -44,22 +51,22 @@ export default function SelectTimeslotPage({route, navigation}) {
 
   const nthDay = (num: number): Date => new Date(Date.now() + (num + 1) * 24 * 60 * 60000)
 
-  const onDayPress = (index) => {
+  const onDayPress = (index: number) => {
     _carousel.current.snapToItem(index)
   }
 
-  const renderItem = ({item, index}) => {
+  const renderItem = ({ item, index }: { item: TimeslotByTime, index: number }) => {
     const currentDay = nthDay(index)
     return (
-      <TouchableOpacity key={'d-' + index} style={{margin: 5}} onPress={() => onDayPress(index)} activeOpacity={0.8}>
+      <TouchableOpacity key={ 'd-' + index } style={ { margin: 5 } } onPress={ () => onDayPress(index) } activeOpacity={ 0.8 }>
         <Card>
-          <Card.Content style={styles.cardStart}>{}</Card.Content>
-          <Card.Content style={{alignItems: 'center', borderLeftWidth: 2.5, borderRightWidth: 2.5, borderColor: Colors.background}}>
-            <Title style={styles.text}>{day[currentDay.getDay()]}</Title>
-            <Title style={styles.text}>{currentDay.getDate()}</Title>
-            <Title style={styles.text}>{month[currentDay.getMonth()]}</Title>
+          <Card.Content style={ styles.cardStart }>{ }</Card.Content>
+          <Card.Content style={ { alignItems: 'center', borderLeftWidth: 2.5, borderRightWidth: 2.5, borderColor: Colors.background } }>
+            <Title style={ styles.text }>{ day[ currentDay.getDay() ] }</Title>
+            <Title style={ styles.text }>{ currentDay.getDate() }</Title>
+            <Title style={ styles.text }>{ month[ currentDay.getMonth() ] }</Title>
           </Card.Content>
-          <Card.Actions style={styles.cardEnd}>{}</Card.Actions>
+          <Card.Actions style={ styles.cardEnd }>{ }</Card.Actions>
         </Card>
       </TouchableOpacity>
     )
@@ -67,35 +74,35 @@ export default function SelectTimeslotPage({route, navigation}) {
 
   return (
     <React.Fragment>
-      <StatusBar barStyle='default' animated backgroundColor={barColor}/>
-      <SafeAreaView style={styles.container}>
-        <ScrollView scrollEnabled={longScroll} style={{flex: 1}} contentContainerStyle={longScroll? styles.content: styles.longScrollContent}>
-          <View style={[styles.firstView, {flex: 7}]}>
-            <Title>Select a {rescheduleId? 'new ': ''}Day</Title>
+      <StatusBar barStyle='default' animated backgroundColor={ barColor } />
+      <SafeAreaView style={ styles.container }>
+        <ScrollView scrollEnabled={ longScroll } style={ { flex: 1 } } contentContainerStyle={ longScroll ? styles.content : styles.longScrollContent }>
+          <View style={ [ styles.firstView, { flex: 7 } ] }>
+            <Title>Select a { rescheduleId ? 'new ' : '' }Day</Title>
             <View>
               <Carousel
-                ref={_carousel}
+                ref={ _carousel }
                 layout='default'
-                data={timeslots}
+                data={ timeslots }
                 enableSnap
                 snapToAlignment='center'
-                onSnapToItem={index => setDayIndex(index)}
-                renderItem={renderItem}
-                itemWidth={width * 0.25}
-                sliderWidth={width * 0.8}
+                onSnapToItem={ index => setDayIndex(index) }
+                renderItem={ renderItem }
+                itemWidth={ width * 0.25 }
+                sliderWidth={ width * 0.8 }
               />
             </View>
-            <Title>Pick a {rescheduleId? 'new ': ''}Time</Title>
-            <ScrollView scrollEnabled={!longScroll} style={[styles.lastView, { marginVertical: 10 }]}>
+            <Title>Pick a { rescheduleId ? 'new ' : '' }Time</Title>
+            <ScrollView scrollEnabled={ !longScroll } style={ [ styles.lastView, { marginVertical: 10 } ] }>
               <View>
                 {
                   availableSlots.map((as, index) =>
-                    <TouchableOpacity key={'slot-' + index} style={styles.bar} onPress={cont(as)}>
-                      <View style={styles.row}>
-                        <View style={{flex: 1, justifyContent: 'center'}}>
-                          <Text style={{fontSize: 20, color: 'black'}}>{FixedTime[as - 1]}</Text>
+                    <TouchableOpacity key={ 'slot-' + index } style={ styles.bar } onPress={ cont(as) }>
+                      <View style={ styles.row }>
+                        <View style={ { flex: 1, justifyContent: 'center' } }>
+                          <Text style={ { fontSize: 20, color: 'black' } }>{ FixedTime[ as - 1 ] }</Text>
                         </View>
-                        <MaterialCommunityIcons name='chevron-right' color='black' size={36}/>
+                        <MaterialCommunityIcons name='chevron-right' color='black' size={ 36 } />
                       </View>
                     </TouchableOpacity>
                   )
@@ -109,28 +116,30 @@ export default function SelectTimeslotPage({route, navigation}) {
   )
 }
 
+export default SelectTimeslotPage
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1, 
-    backgroundColor: Colors.background 
+    flex: 1,
+    backgroundColor: Colors.background
   },
   longScrollContent: {
     flex: 1,
-    maxHeight: Dimensions.get('window').height - StatusBar.currentHeight - 60,
+    maxHeight: Dimensions.get('window').height - (StatusBar.currentHeight ?? 0) - 60,
     marginHorizontal: '10%'
   },
   content: {
-    minHeight: Dimensions.get('window').height - StatusBar.currentHeight - 60,
+    minHeight: Dimensions.get('window').height - (StatusBar.currentHeight ?? 0) - 60,
     marginHorizontal: '10%'
   },
   cardStart: {
-    backgroundColor: barColor, 
-    borderTopRightRadius: 5, 
+    backgroundColor: barColor,
+    borderTopRightRadius: 5,
     borderTopLeftRadius: 5
   },
   cardEnd: {
-    backgroundColor: barColor, 
-    borderBottomRightRadius: 5, 
+    backgroundColor: barColor,
+    borderBottomRightRadius: 5,
     borderBottomLeftRadius: 5,
     borderColor: Colors.background
   },
@@ -143,7 +152,7 @@ const styles = StyleSheet.create({
     color: 'black'
   },
   bar: {
-    backgroundColor: barColor, 
+    backgroundColor: barColor,
     borderRadius: 5,
     marginVertical: 3,
     paddingHorizontal: 15

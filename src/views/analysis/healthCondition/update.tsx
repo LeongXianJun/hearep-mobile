@@ -1,16 +1,21 @@
-import React, { useState } from 'react'
+import React, { useState, FC } from 'react'
 import {
-  StatusBar, KeyboardAvoidingView, ScrollView, View, StyleSheet, 
+  StatusBar, KeyboardAvoidingView, ScrollView, View, StyleSheet,
   Dimensions, Platform, Picker
 } from 'react-native'
 import {
   TextInput, Text, Button
 } from 'react-native-paper'
 import { Colors } from '../../../styles'
+import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
 const barColor = '#34675c'
 
-export default function UpdateHealthConditionPage({navigation}) {
+interface PageProp {
+  navigation: NavigationProp<ParamListBase>
+}
+
+const UpdateHealthConditionPage: FC<PageProp> = ({ navigation }) => {
   navigation.setOptions({
     title: 'Update Health Condition',
     headerStyle: {
@@ -18,10 +23,15 @@ export default function UpdateHealthConditionPage({navigation}) {
     },
     headerTintColor: '#ffffff'
   })
-  const [ field, setfield ] = useState('Blood Sugar Level')
-  const [ val, setVal ] = useState({})
-  const onChange = (field) => (val) => {
-    setVal({ ...val, [field]: val})
+  const options = [
+    'Blood Sugar Level', 'Blood Pressure', 'BMI'
+  ]
+  const [ field, setfield ] = useState<'Blood Sugar Level' | 'Blood Pressure' | 'BMI'>('Blood Sugar Level')
+  const [ val, setVal ] = useState({
+    'Blood Sugar Level': '', 'Blood Pressure': '', 'BMI': ''
+  })
+  const onChange = (field: string) => (value: string) => {
+    setVal({ ...val, [ field ]: value })
   }
 
   const update = () => {
@@ -30,51 +40,51 @@ export default function UpdateHealthConditionPage({navigation}) {
 
   return (
     <React.Fragment>
-      <StatusBar barStyle='default' animated backgroundColor={barColor}/>
-      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS == "ios" ? "padding" : "height"}>
-        <ScrollView style={{flex: 1}} contentContainerStyle={styles.content}>
-          <View style={{flexDirection: 'row'}}>
-            <Text style={{ flex: 1, textAlignVertical: 'center'}}>{'Field'}</Text>
-            <View style={{ flex: 7, borderWidth: 1, borderColor: 'white', borderRadius: 3 }}>
+      <StatusBar barStyle='default' animated backgroundColor={ barColor } />
+      <KeyboardAvoidingView style={ styles.container } behavior={ Platform.OS == "ios" ? "padding" : "height" }>
+        <ScrollView style={ { flex: 1 } } contentContainerStyle={ styles.content }>
+          <View style={ { flexDirection: 'row' } }>
+            <Text style={ { flex: 1, textAlignVertical: 'center' } }>{ 'Field' }</Text>
+            <View style={ { flex: 7, borderWidth: 1, borderColor: 'white', borderRadius: 3 } }>
               <Picker
                 mode='dropdown'
-                selectedValue={field}
-                style={{width: '100%', color: 'white'}}
-                onValueChange={(itemValue, itemIndex) => setfield(itemValue)}
+                selectedValue={ field }
+                style={ { width: '100%' } }
+                onValueChange={ (itemValue, itemIndex) => setfield(itemValue) }
               >
                 {
-                  [
-                    'Blood Sugar Level', 'Blood Pressure', 'BMI'
-                  ].map((option, index) => <Picker.Item key={'o-' + index} label={option} value={option}/>)
+                  options.map((option, index) => <Picker.Item key={ 'o-' + index } label={ option } value={ option } />)
                 }
               </Picker>
             </View>
           </View>
           <View>
             <TextInput
-              label={'Amount'}
+              label={ 'Amount' }
               mode='outlined'
-              value={val[field] ?? ''}
-              onChangeText={text => onChange(field)(text)}
-              style={styles.textInput}
+              value={ val[ field ] ?? '' }
+              onChangeText={ text => onChange(field)(text) }
+              style={ styles.textInput }
             />
           </View>
         </ScrollView>
-        <View style={[styles.lastView, styles.buttons]}>
-          <Button mode='contained' style={styles.button} onPress={update}>{'Register'}</Button>
-        </View> 
+        <View style={ [ styles.lastView, styles.buttons ] }>
+          <Button mode='contained' style={ styles.button } onPress={ update }>{ 'Register' }</Button>
+        </View>
       </KeyboardAvoidingView>
     </React.Fragment>
   )
 }
 
+export default UpdateHealthConditionPage
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1, 
-    backgroundColor: Colors.background 
+    flex: 1,
+    backgroundColor: Colors.background
   },
   content: {
-    minHeight: Dimensions.get('window').height - StatusBar.currentHeight - 60,
+    minHeight: Dimensions.get('window').height - (StatusBar.currentHeight ?? 0) - 60,
     paddingTop: 25,
     paddingBottom: 100,
     marginHorizontal: '10%'
