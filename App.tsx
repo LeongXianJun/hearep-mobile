@@ -30,13 +30,13 @@ const theme = {
 
 
 export default function App() {
-  const currentRoute = 'Home'
+  const currentRoute = 'Login'
   const [ ADVisible, setADVisible ] = useState(false)
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       setADVisible(true)
-    }, 10000)
+    }, 120000)
 
     return () => {
       clearTimeout(timeout)
