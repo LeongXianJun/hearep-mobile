@@ -1,14 +1,17 @@
-import React, { useState, FC, ReactText } from 'react'
+import React, { useState, FC, ReactText, useEffect } from 'react'
 import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions,
 } from 'react-native'
 import {
   Text, List, DefaultTheme, Card
 } from 'react-native-paper'
-import { Colors } from '../../styles'
-import { AppointmentC, RecordC, isMedicationRecord, UserC } from '../../connections'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+
+import { Colors } from '../../styles'
+import { UserStore } from '../../stores'
+import { AppointmentC, RecordC, isMedicationRecord } from '../../connections'
 
 const barColor = Colors.primaryVariant
 
@@ -17,15 +20,19 @@ interface PageProp {
 }
 
 const HomePage: FC<PageProp> = ({ navigation }) => {
-  const currentUser = UserC.currentUser
+  const CurrentUser = UserStore.getUser()
   const [ expandId, setExpandId ] = useState(1)
+
+  useEffect(() => {
+    return UserStore.unsubscribe
+  }, [ CurrentUser ])
 
   return (
     <React.Fragment>
       <StatusBar barStyle='default' animated backgroundColor={ Colors.primaryVariant } />
       <SafeAreaView style={ styles.container }>
         <ScrollView style={ { flex: 1 } } contentContainerStyle={ styles.content }>
-          <Text style={ styles.title }>{ 'Welcome,\n' + currentUser.fullname }</Text>
+          <Text style={ styles.title }>{ 'Welcome,\n' + CurrentUser?.username }</Text>
           <Text style={ styles.subtitle }>{ 'Enhancing Life. Excelling in Care.' }</Text>
           <Card style={ { marginTop: 10 } } onPress={ () => navigation.navigate('Appointment') }>
             <Card.Cover source={ require('../../resources/images/appointment.jpg') } />
@@ -104,7 +111,7 @@ const HomePage: FC<PageProp> = ({ navigation }) => {
   }
 }
 
-export default HomePage
+export default withResubAutoSubscriptions(HomePage)
 
 const styles = StyleSheet.create({
   container: {

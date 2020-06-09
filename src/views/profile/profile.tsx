@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { FC, useEffect } from 'react'
 import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet,
   Dimensions, Image
@@ -6,9 +6,12 @@ import {
 import {
   Text, Card, FAB, Button
 } from 'react-native-paper'
-import { Colors } from '../../styles'
-import { UserC, User } from '../../connections'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
+import { withResubAutoSubscriptions } from 'resub'
+
+import { Colors } from '../../styles'
+import { isUndefined, AuthUtil } from '../../utils'
+import { UserStore, User } from '../../stores'
 
 const avatar = {
   M: () => require('../../resources/images/maleAvatar.png'),
@@ -22,7 +25,22 @@ interface PageProp {
 }
 
 const ProfilePage: FC<PageProp> = ({ navigation }) => {
-  const currentUser = UserC.currentUser
+  const CurrentUser = UserStore.getUser()
+
+  useEffect(() => {
+    if (isUndefined(CurrentUser)) {
+      UserStore.fetchUser()
+        .catch(err => console.log('profile', err))
+    }
+
+    return UserStore.unsubscribe
+  }, [ CurrentUser ])
+
+  const logout = () =>
+    AuthUtil.signOut()
+      .then(() => {
+        navigation.navigate('Login')
+      })
 
   return (
     <React.Fragment>
@@ -31,9 +49,15 @@ const ProfilePage: FC<PageProp> = ({ navigation }) => {
         <ScrollView style={ { flex: 1 } } contentContainerStyle={ styles.content }>
           <Text style={ styles.title }>{ 'Profile' }</Text>
           <View style={ { flex: 1 } }>
-            { BasicInformation(currentUser) }
-            { ContactInformation(currentUser) }
-            <Button mode='outlined' onPress={ () => navigation.navigate('Login') }>{ 'Logout' }</Button>
+            {
+              CurrentUser ?
+                <>
+                  { BasicInformation(CurrentUser) }
+                  { ContactInformation({ email: CurrentUser.email, phoneNumber: CurrentUser.phoneNumber }) }
+                </>
+                : null
+            }
+            <Button mode='outlined' onPress={ logout }>{ 'Logout' }</Button>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -51,7 +75,7 @@ const ProfilePage: FC<PageProp> = ({ navigation }) => {
         <Card.Content>
           {
             [
-              { field: 'Fullname', val: info.fullname },
+              { field: 'Fullname', val: info.username },
               { field: 'Gender', val: info.gender === 'F' ? 'Female' : 'Male' },
               { field: 'Age', val: (new Date()).getFullYear() - info.dob.getFullYear() },
               { field: 'Occupation', val: info.occupation }
@@ -72,13 +96,16 @@ const ProfilePage: FC<PageProp> = ({ navigation }) => {
     )
   }
 
-  function ContactInformation(info: User) {
+  function ContactInformation({ email, phoneNumber }: { email: string, phoneNumber: string }) {
     return (
       <Card style={ { marginVertical: 10 } }>
         <Card.Title title={ 'Contact Information' } style={ styles.cardStart } />
         <Card.Content>
           {
-            info.contacts?.map(({ type, value }, index) =>
+            [
+              { type: 'Email', value: email },
+              { type: 'Phone Number', value: phoneNumber }
+            ].filter(({ value }) => !isUndefined(value)).map(({ type, value }, index) =>
               <View key={ 'contact-' + index } style={ { flex: 1, flexDirection: 'row', marginVertical: 10 } }>
                 <View style={ { flex: 2 } }>
                   <Text style={ [ styles.text, { textTransform: 'capitalize' } ] }>{ type }</Text>
@@ -115,7 +142,7 @@ const ProfilePage: FC<PageProp> = ({ navigation }) => {
   }
 }
 
-export default ProfilePage
+export default withResubAutoSubscriptions(ProfilePage)
 
 const styles = StyleSheet.create({
   container: {

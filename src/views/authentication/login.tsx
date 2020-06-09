@@ -1,17 +1,16 @@
-import React, { FC } from 'react'
+import React, { FC, useState } from 'react'
 import {
   StatusBar, Platform, KeyboardAvoidingView, View, StyleSheet,
   ScrollView, Dimensions
 } from 'react-native'
 import {
-  Text, Button, TextInput
+  Text, Button, TextInput, HelperText
 } from 'react-native-paper'
-import { Colors } from '../../styles'
 import { NavigationHelpers, ParamListBase } from '@react-navigation/native'
 
-import Logo from '../../resources/logo/icon.svg'
-import Title from '../../resources/logo/title.svg'
-import Slogan from '../../resources/logo/slogan.svg'
+import { Colors } from '../../styles'
+import { AuthUtil } from '../../utils'
+import { Logo, Title, Slogan } from '../../resources/logo'
 
 const barColor = Colors.primary
 
@@ -20,10 +19,25 @@ interface LoginPageProp {
 }
 
 const LoginPage: FC<LoginPageProp> = ({ navigation }) => {
-  const proceed = (register?: boolean) => {
-    navigation.navigate('OTP', {
-      'isRegister': register === true ? 'true' : 'false'
-    })
+  const [ phoneNumber, setPN ] = useState('')
+  const [ err, setErr ] = useState('')
+
+  const proceed = (register?: boolean) =>
+    checkPN(phoneNumber)
+      ?
+      AuthUtil.signIn(phoneNumber)
+        .then(() => setErr(''))
+        .then(() =>
+          navigation.navigate('OTP', {
+            'isRegister': register === true ? 'true' : 'false'
+          })
+        )
+        .catch(err => err)
+      : setErr('Regex not match')
+
+  const checkPN = (PN: string) => {
+    const regex = /^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[0-9]*$/
+    return regex.test(PN)
   }
 
   return (
@@ -37,11 +51,25 @@ const LoginPage: FC<LoginPageProp> = ({ navigation }) => {
             <Slogan width={ 200 } height={ 20 } />
           </View>
           <View style={ { flex: 4, alignItems: 'center' } }>
-            <TextInput
-              label='Phone Number'
-              mode='outlined'
-              style={ styles.textInput }
-            />
+            <View style={ styles.textInput }>
+              <TextInput
+                label='Phone Number'
+                mode='outlined'
+                placeholder={ '+(60)123456789' }
+                value={ phoneNumber }
+                error={ err !== '' }
+                onChangeText={ text => {
+                  setErr('')
+                  setPN(text)
+                } }
+              />
+              <HelperText
+                type='error'
+                visible={ err !== '' }
+              >
+                { err }
+              </HelperText>
+            </View>
             <View style={ styles.buttons }>
               <Button mode='contained' style={ styles.button } onPress={ proceed }>{ 'Login' }</Button>
               <Button style={ styles.button } onPress={ () => proceed(true) }>{ 'Register' }</Button>
@@ -49,6 +77,7 @@ const LoginPage: FC<LoginPageProp> = ({ navigation }) => {
           </View>
           <View style={ [ styles.lastView, { flex: 1, justifyContent: 'center', alignItems: 'center' } ] }>
             <Text>{ 'Apply to Terms and Conditions' }</Text>
+            {/* nid to redirect to another new page which list all the terms and conditions */ }
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

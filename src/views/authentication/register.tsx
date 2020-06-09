@@ -5,8 +5,10 @@ import {
 import {
   Text, Button, TextInput, RadioButton
 } from 'react-native-paper'
-import { Colors } from '../../styles'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
+
+import { Colors } from '../../styles'
+import { UserStore } from '../../stores'
 
 const barColor = Colors.primary
 
@@ -17,15 +19,25 @@ interface PageProp {
 const RegisterPage: FC<PageProp> = ({ navigation }) => {
   const [ fullname, setFullname ] = useState('')
   const [ dob, setDob ] = useState('')
-  const [ gender, setGender ] = useState('M')
+  const [ gender, setGender ] = useState<'M' | 'F'>('M')
   const [ email, setEmail ] = useState('')
   const [ occupation, setOccupation ] = useState('')
+  const [ isSubmitting, setIsSubmitting ] = useState(false)
 
   const register = () => {
-    navigation.reset({
-      index: 0,
-      routes: [ { name: 'Home' } ]
-    })
+    setIsSubmitting(true)
+    UserStore.createUser({ username: fullname, dob, gender, email, occupation })
+      .then(() => {
+        UserStore.setRegister(false)
+        navigation.reset({
+          index: 0,
+          routes: [ { name: 'Home' } ]
+        })
+      })
+      .catch(err => {
+        setIsSubmitting(false)
+        throw new Error(err)
+      })
   }
 
   return (
@@ -58,9 +70,9 @@ const RegisterPage: FC<PageProp> = ({ navigation }) => {
                 <Text style={ { fontSize: 18, marginLeft: 3 } }>Gender</Text>
               </View>
               <View style={ { flex: 2, flexDirection: 'row', alignContent: 'center' } }>
-                <RadioButton.Group value={ gender } onValueChange={ val => setGender(val) }>
-                  <RadioButton.Item label='Male' value="M" />
-                  <RadioButton.Item label='Female' value="F" />
+                <RadioButton.Group value={ gender } onValueChange={ val => setGender(val as typeof gender) }>
+                  <RadioButton.Item label='Male' value='M' />
+                  <RadioButton.Item label='Female' value='F' />
                 </RadioButton.Group>
               </View>
             </View>
@@ -80,7 +92,7 @@ const RegisterPage: FC<PageProp> = ({ navigation }) => {
             />
           </View>
           <View style={ [ styles.lastView, styles.buttons, { flex: 1, justifyContent: 'center', alignItems: 'center' } ] }>
-            <Button mode='contained' style={ styles.button } labelStyle={ { color: Colors.text } } onPress={ register }>{ 'Register' }</Button>
+            <Button mode='contained' loading={ isSubmitting } style={ styles.button } labelStyle={ { color: Colors.text } } onPress={ register }>{ 'Register' }</Button>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

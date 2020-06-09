@@ -1,4 +1,4 @@
-import React, { useState, FC } from 'react'
+import React, { useState, FC, useEffect } from 'react'
 import {
   StatusBar, ScrollView, View, StyleSheet, Dimensions,
   KeyboardAvoidingView, Platform,
@@ -6,9 +6,12 @@ import {
 import {
   Text, RadioButton, TextInput, Button, Title, Subheading
 } from 'react-native-paper'
-import { Colors } from '../../styles'
-import { UserC } from '../../connections'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
+import { withResubAutoSubscriptions } from 'resub'
+
+import { Colors } from '../../styles'
+import { UserStore } from '../../stores'
+import { isUndefined } from '../../utils'
 
 interface PageProp {
   navigation: NavigationProp<ParamListBase>
@@ -22,17 +25,46 @@ const UpdateProfilePage: FC<PageProp> = ({ navigation }) => {
     },
     headerTintColor: '#ffffff'
   })
-  const CurrentUser = UserC.currentUser
-  const [ fullname, setFullname ] = useState(CurrentUser.fullname)
-  const [ dob, setDob ] = useState(CurrentUser.dob.toDateString())
-  const [ gender, setGender ] = useState<string>(CurrentUser.gender)
-  const [ email, setEmail ] = useState(CurrentUser.contacts?.find(c => c.type === 'email')?.value ?? '')
-  const [ occupation, setOccupation ] = useState(CurrentUser.occupation)
+
+  const CurrentUser = UserStore.getUser()
+
+  const [ info, setInfo ] = useState({
+    username: '',
+    dob: '',
+    gender: 'M' as 'M' | 'F',
+    email: '',
+    occupation: ''
+  })
+
+  useEffect(() => {
+    if (isUndefined(CurrentUser)) {
+      UserStore.fetchUser()
+        .catch(err => console.log('profile: Update', err))
+    } else {
+      const { username, dob, gender, email, occupation } = CurrentUser
+      setInfo({
+        username, gender, email,
+        dob: dob.toDateString(),
+        occupation: occupation ?? ''
+      })
+    }
+
+    return UserStore.unsubscribe
+  }, [ CurrentUser ])
 
   const updateProfile = () => {
-    navigation.goBack()
+    if (CurrentUser) {
+      const { id, phoneNumber } = CurrentUser
+      const { username, dob, gender, email, occupation } = info
+      UserStore.updateProfile({ id, username, dob: new Date(dob), gender, email, phoneNumber, occupation })
+        .then(() => {
+          navigation.goBack()
+        })
+        .catch(err => new Error(err))
+    }
   }
 
+  const { username, dob, gender, email, occupation } = info
   return (
     <React.Fragment>
       <StatusBar barStyle='default' animated backgroundColor='#b3c100' />
@@ -46,16 +78,16 @@ const UpdateProfilePage: FC<PageProp> = ({ navigation }) => {
             <TextInput
               label='Fullname'
               mode='outlined'
-              value={ fullname }
-              onChangeText={ text => setFullname(text) }
+              value={ info.username }
+              onChangeText={ text => setInfo({ ...info, username: text }) }
               style={ styles.textInput }
             />
             <TextInput
               label='Date of Birth'
               mode='outlined'
-              value={ dob }
+              value={ info.dob }
               placeholder='YYYY-MM-DD'
-              onChangeText={ text => setDob(text) }
+              onChangeText={ text => setInfo({ ...info, dob: text }) }
               style={ styles.textInput }
             />
             <View style={ [ styles.textInput, { flex: 1, flexDirection: 'row', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 3, borderColor: 'white', borderWidth: 1 } ] }>
@@ -63,7 +95,7 @@ const UpdateProfilePage: FC<PageProp> = ({ navigation }) => {
                 <Text style={ { fontSize: 18, marginLeft: 3 } }>Gender</Text>
               </View>
               <View style={ { flex: 2, flexDirection: 'row', alignContent: 'center' } }>
-                <RadioButton.Group value={ gender } onValueChange={ val => setGender(val) }>
+                <RadioButton.Group value={ info.gender } onValueChange={ val => setInfo({ ...info, gender: val as typeof info[ 'gender' ] }) }>
                   <RadioButton.Item label='Male' value="M" />
                   <RadioButton.Item label='Female' value="F" />
                 </RadioButton.Group>
@@ -72,15 +104,15 @@ const UpdateProfilePage: FC<PageProp> = ({ navigation }) => {
             <TextInput
               label='Email'
               mode='outlined'
-              value={ email }
-              onChangeText={ text => setEmail(text) }
+              value={ info.email }
+              onChangeText={ text => setInfo({ ...info, email: text }) }
               style={ styles.textInput }
             />
             <TextInput
               label='Occupation'
               mode='outlined'
-              value={ occupation }
-              onChangeText={ text => setOccupation(text) }
+              value={ info.occupation }
+              onChangeText={ text => setInfo({ ...info, occupation: text }) }
               style={ styles.textInput }
             />
           </View>
@@ -93,7 +125,7 @@ const UpdateProfilePage: FC<PageProp> = ({ navigation }) => {
   )
 }
 
-export default UpdateProfilePage
+export default withResubAutoSubscriptions(UpdateProfilePage)
 
 const styles = StyleSheet.create({
   container: {

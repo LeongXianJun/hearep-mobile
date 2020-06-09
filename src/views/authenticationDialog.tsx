@@ -2,6 +2,7 @@ import React, { useState, useEffect, FC } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { Title, Button, Paragraph, Divider } from 'react-native-paper'
 import Modal from 'react-native-modal'
+
 import { Colors } from '../styles'
 
 const AuthenticationDialog: FC<AuthenticationDialogProps> = (props) => {

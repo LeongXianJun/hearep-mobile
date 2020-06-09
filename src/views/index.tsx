@@ -8,3 +8,4 @@ export * from './profile'
 export * from './commons'
 
 export { default as AuthenticationDialog } from './authenticationDialog'
+export { default as AuthLoadingScreen } from './authLoading'

@@ -1,15 +1,16 @@
-import React, { useState, FC } from 'react'
+import React, { useState, FC, useEffect } from 'react'
 import {
   StatusBar, Platform, KeyboardAvoidingView, View, StyleSheet, Dimensions,
 } from 'react-native'
 import {
   Text, Button, TextInput, Snackbar
 } from 'react-native-paper'
-
-import { UserC } from '../../connections'
-import { Colors } from '../../styles'
 import { ScrollView } from 'react-native-gesture-handler'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
+
+import { Colors } from '../../styles'
+import { AuthUtil } from '../../utils'
+import { UserStore } from '../../stores'
 
 const barColor = Colors.primary
 
@@ -19,19 +20,27 @@ interface PageProp {
 }
 
 const LoginPage: FC<PageProp> = ({ route, navigation }) => {
-  const [ snackVisible, setSnackVisible ] = useState(false)
   const { isRegister } = route.params
-  const proceed = () => {
-    if (isRegister === 'true') {
-      navigation.navigate('Register')
-    } else {
-      UserC.login()
-      navigation.reset({
-        index: 0,
-        routes: [ { name: 'Home' } ]
+  const [ snackVisible, setSnackVisible ] = useState(false)
+  const [ code, setC ] = useState('')
+
+  useEffect(() => {
+    UserStore.setRegister(isRegister)
+  }, [ isRegister ])
+
+  const proceed = () =>
+    AuthUtil.verifyCode(code)
+      .then(() => {
+        if (isRegister === 'true') {
+          navigation.navigate('Register')
+        } else {
+          navigation.reset({
+            index: 0,
+            routes: [ { name: 'Home' } ]
+          })
+        }
       })
-    }
-  }
+      .catch(err => console.log(err))
 
   return (
     <React.Fragment>
@@ -48,6 +57,8 @@ const LoginPage: FC<PageProp> = ({ route, navigation }) => {
               placeholder='Please enter the OTP code.'
               mode='outlined'
               style={ styles.textInput }
+              value={ code }
+              onChangeText={ setC }
             />
             <View style={ [ styles.lastView, styles.buttons ] }>
               <Button mode='contained' style={ styles.button } onPress={ proceed }>{ isRegister === 'true' ? 'Continue' : 'Login' }</Button>
