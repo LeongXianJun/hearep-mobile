@@ -6,8 +6,9 @@ import {
 import {
   TextInput, Text, Button
 } from 'react-native-paper'
-import { Colors } from '../../../styles'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
+
+import { Colors } from '../../../styles'
 
 const barColor = '#34675c'
 

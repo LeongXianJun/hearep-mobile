@@ -10,8 +10,8 @@ import { NavigationProp, ParamListBase } from '@react-navigation/native'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import { Colors } from '../../styles'
-import { UserStore } from '../../stores'
-import { AppointmentC, RecordC, isMedicationRecord } from '../../connections'
+import { UserStore, HealthRecordStore, MedicationRecord } from '../../stores'
+import { AppointmentC } from '../../connections'
 
 const barColor = Colors.primaryVariant
 
@@ -21,6 +21,7 @@ interface PageProp {
 
 const HomePage: FC<PageProp> = ({ navigation }) => {
   const CurrentUser = UserStore.getUser()
+  const records = HealthRecordStore.getHealthRecords()
   const [ expandId, setExpandId ] = useState(1)
 
   useEffect(() => {
@@ -86,7 +87,8 @@ const HomePage: FC<PageProp> = ({ navigation }) => {
   }
 
   function MedicationNotification() {
-    const medications = RecordC.allMedicationRecords()
+    const { healthPrescriptions } = records
+    const medications = healthPrescriptions.reduce<MedicationRecord[]>((all, hp) => [ ...all, ...hp.medicationRecords ], [])
     return (
       <List.Accordion id={ 2 } title='Medications'
         titleStyle={ { color: Colors.text, fontWeight: 'bold' } }
@@ -95,15 +97,13 @@ const HomePage: FC<PageProp> = ({ navigation }) => {
       >
         {
           medications.map((m, index) =>
-            isMedicationRecord(m)
-              ? <List.Item key={ 'PU-' + index }
-                style={ { backgroundColor: Colors.surface, marginBottom: 1 } }
-                title={ 'Medication Refill on ' + m.date.toDateString() }
-                titleStyle={ [ styles.text, { textTransform: 'capitalize' } ] }
-                description={ m.medications.reduce<string[]>((a, { medicine }) => [ ...a, medicine ], []).join(', ') }
-                descriptionStyle={ [ styles.text ] }
-              />
-              : null
+            <List.Item key={ 'PU-' + index }
+              style={ { backgroundColor: Colors.surface, marginBottom: 1 } }
+              title={ 'Medication Refill on ' + m.refillDate.toDateString() }
+              titleStyle={ [ styles.text, { textTransform: 'capitalize' } ] }
+              description={ m.medications.reduce<string[]>((a, { medicine }) => [ ...a, medicine ], []).join(', ') }
+              descriptionStyle={ [ styles.text ] }
+            />
           )
         }
       </List.Accordion>

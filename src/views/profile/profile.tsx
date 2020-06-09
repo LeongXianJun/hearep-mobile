@@ -6,12 +6,12 @@ import {
 import {
   Text, Card, FAB, Button
 } from 'react-native-paper'
-import { NavigationProp, ParamListBase } from '@react-navigation/native'
 import { withResubAutoSubscriptions } from 'resub'
+import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
 import { Colors } from '../../styles'
 import { isUndefined, AuthUtil } from '../../utils'
-import { UserStore, User } from '../../stores'
+import { UserStore, Patient } from '../../stores'
 
 const avatar = {
   M: () => require('../../resources/images/maleAvatar.png'),
@@ -65,7 +65,7 @@ const ProfilePage: FC<PageProp> = ({ navigation }) => {
     </React.Fragment>
   )
 
-  function BasicInformation(info: User) {
+  function BasicInformation(info: Patient) {
     return (
       <Card style={ { marginTop: 70, marginBottom: 10 } }>
         <View style={ { position: 'absolute', top: -60, zIndex: 1, width: '100%', alignItems: 'center' } }>

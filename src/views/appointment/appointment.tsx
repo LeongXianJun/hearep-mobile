@@ -6,10 +6,14 @@ import {
   Text, List, Searchbar, Title, Divider, Button, Card
 } from 'react-native-paper'
 import Modal from 'react-native-modal'
-import { Colors } from '../../styles'
-import { AppointmentC, Appointment, UserC, isUndefined } from '../../connections'
-import { useNavigation, NavigationProp, ParamListBase } from '@react-navigation/native'
+import { withResubAutoSubscriptions } from 'resub'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import { useNavigation, NavigationProp, ParamListBase } from '@react-navigation/native'
+
+import { Colors } from '../../styles'
+import { UserStore } from '../../stores'
+import { isUndefined } from '../../utils'
+import { AppointmentC, Appointment } from '../../connections'
 
 const avatar = {
   M: () => require('../../resources/images/makeAppointmentFemale.jpg'),
@@ -30,7 +34,8 @@ const AppointmentPage: FC<PageProp> = ({ navigation }) => {
     },
     headerTintColor: '#ffffff'
   })
-  const { gender } = UserC.currentUser
+  const CurrentUser = UserStore.getUser()
+  const [ gender, setGender ] = useState<'M' | 'F'>('M')
   const [ expandId, setExpandId ] = useState(1)
   const [ filter, setFilter ] = useState('')
   const [ nearingAppointments, setNearingAppointments ] = useState(AppointmentC.nearing)
@@ -41,6 +46,14 @@ const AppointmentPage: FC<PageProp> = ({ navigation }) => {
     setNearingAppointments(AppointmentC.nearing)
     setAllAppointments(AppointmentC.appointmentDB)
   }
+
+  useEffect(() => {
+    if (CurrentUser) {
+      setGender(CurrentUser.gender)
+    }
+
+    return UserStore.unsubscribe
+  }, [ CurrentUser ])
 
   return (
     <React.Fragment>
@@ -225,7 +238,7 @@ function AppointmentDialog(props: AppointmentDialogProps) {
   )
 }
 
-export default AppointmentPage
+export default withResubAutoSubscriptions(AppointmentPage)
 
 interface AppointmentDialogProps {
   onClose: Function

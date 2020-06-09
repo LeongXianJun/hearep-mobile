@@ -1,22 +1,23 @@
-import React, { useEffect, useState, Fragment, FC } from 'react'
+import React, { FC } from 'react'
 import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions,
 } from 'react-native'
 import {
   Text, Card, Divider
 } from 'react-native-paper'
-import { Colors } from '../../../styles'
-import { RecordC, Record, isLabTestResult, LabTestResult } from '../../../connections'
+import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
+
+import { Colors } from '../../../styles'
+import { HealthRecordStore, LabTestResult } from '../../../stores'
 
 const barColor = '#4cb5f5'
 
 interface PageProp {
-  route: any
   navigation: NavigationProp<ParamListBase>
 }
 
-const LabTestPage: FC<PageProp> = ({ route, navigation }) => {
+const LabTestPage: FC<PageProp> = ({ navigation }) => {
   navigation.setOptions({
     title: 'Lab Test Result',
     headerStyle: {
@@ -24,15 +25,7 @@ const LabTestPage: FC<PageProp> = ({ route, navigation }) => {
     },
     headerTintColor: '#ffffff'
   })
-  const { id } = route.params
-  const [ record, setRecord ] = useState<Record>()
-
-  useEffect(() => {
-    const r = RecordC.getRecord(id)
-    if (r && isLabTestResult(r)) {
-      setRecord(r)
-    }
-  }, [ id ])
+  const labTestResult = HealthRecordStore.getSelectedLTRRecord()
 
   return (
     <React.Fragment>
@@ -41,10 +34,10 @@ const LabTestPage: FC<PageProp> = ({ route, navigation }) => {
         <ScrollView style={ { flex: 1 } } contentContainerStyle={ styles.content }>
           <View style={ { flex: 1, marginTop: 10 } }>
             {
-              record && isLabTestResult(record)
+              labTestResult
                 ? <>
-                  { RecordInformation(record) }
-                  { LabTestResult(record) }
+                  { RecordInformation(labTestResult) }
+                  { LabTestResult(labTestResult) }
                 </>
                 : undefined
             }
@@ -95,23 +88,23 @@ const LabTestPage: FC<PageProp> = ({ route, navigation }) => {
         <Card.Title title='Lab Test Result' style={ styles.cardStart } />
         <Card.Content style={ { flex: 1 } }>
           {
-            record.data.map(({ field, result, normalRange }, index) =>
-              <Fragment key={ 'r-' + index }>
+            record.data.map(({ field, value, normalRange }, index) =>
+              <React.Fragment key={ 'r-' + index }>
                 { index !== 0 ? <Divider style={ { marginVertical: 5 } } /> : undefined }
-                <View style={ { flex: 1, marginVertical: 5 } }>
-                  <View style={ { flex: 1 } }>
+                <View style={ { marginVertical: 5 } }>
+                  <View style={ { flex: 1, marginVertical: 5 } }>
                     <Text style={ styles.text }>{ field }</Text>
                   </View>
                   <View style={ { flex: 1, flexDirection: 'row' } }>
                     <View style={ { flex: 2 } }>
-                      <Text style={ styles.text }>{ result }</Text>
+                      <Text style={ styles.text }>{ value }</Text>
                     </View>
                     <View style={ { flex: 3 } }>
                       <Text style={ styles.text }>{ normalRange }</Text>
                     </View>
                   </View>
                 </View>
-              </Fragment>
+              </React.Fragment>
             )
           }
         </Card.Content>
@@ -121,7 +114,7 @@ const LabTestPage: FC<PageProp> = ({ route, navigation }) => {
   }
 }
 
-export default LabTestPage
+export default withResubAutoSubscriptions(LabTestPage)
 
 const styles = StyleSheet.create({
   container: {

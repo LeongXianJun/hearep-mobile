@@ -1,19 +1,21 @@
-import React, { FC } from 'react'
+import React, { FC, useEffect } from 'react'
 import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions
 } from 'react-native'
 import {
   Text, Card, Title, TouchableRipple
 } from 'react-native-paper'
-import { Colors } from '../../styles'
-import { RecordC, Record } from '../../connections'
 import Carousel from 'react-native-snap-carousel'
+import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
+import { Colors } from '../../styles'
+import { HealthRecordStore, HR } from '../../stores'
+
 const imgs = {
-  'health prescription': require('../../resources/images/healthPrescription.jpg'),
-  'medication record': require('../../resources/images/medicationRecord.jpg'),
-  'lab test result': require('../../resources/images/labTestResult.jpg')
+  'Health Prescription': require('../../resources/images/healthPrescription.jpg'),
+  'Medication Record': require('../../resources/images/medicationRecord.jpg'),
+  'Lab Test Result': require('../../resources/images/labTestResult.jpg')
 }
 
 const barColor = '#4cb5f5'
@@ -23,23 +25,30 @@ interface PageProp {
 }
 
 const HealthRecordPage: FC<PageProp> = ({ navigation }) => {
-  const groups = RecordC.allRecords()
   const { width } = Dimensions.get('window')
+  const records = HealthRecordStore.getHealthRecords()
 
-  const navigate = (category: Record[ 'type' ]) => (id: number) => () => {
+  const { healthPrescriptions, labTestResults } = records
+
+  useEffect(() => {
+    HealthRecordStore.fetchPatientRecords()
+  }, [])
+
+  const navigate = (category: HR[ 'type' ]) => (record: HR) => () => {
+    HealthRecordStore.setSelectedRecord(record)
     switch (category) {
-      case 'health prescription':
-        navigation.navigate('HealthRecord/HealthPrescription', { id })
+      case 'Health Prescription':
+        navigation.navigate('HealthRecord/HealthPrescription')
         break;
-      case 'lab test result':
-        navigation.navigate('HealthRecord/LabTestResult', { id })
+      case 'Lab Test Result':
+        navigation.navigate('HealthRecord/LabTestResult')
         break;
       default: break;
     }
   }
 
-  const renderItem = (category: Record[ 'type' ]) => ({ item, index }: { item: Data, index: number }) =>
-    <TouchableRipple key={ 'c-' + index + '-' + Date.now() } style={ { margin: 5, borderRadius: 5 } } onPress={ navigate(category)(item.id) } rippleColor="rgba(0, 0, 0, .32)">
+  const renderItem = (category: HR[ 'type' ]) => ({ item, index }: { item: HR, index: number }) =>
+    <TouchableRipple key={ 'c-' + index + '-' + Date.now() } style={ { margin: 5, borderRadius: 5 } } onPress={ navigate(category)(item) } rippleColor="rgba(0, 0, 0, .32)">
       <Card style={ { backgroundColor: barColor } }>
         <Card.Cover source={ imgs[ category ] } />
         <Card.Content>
@@ -55,7 +64,10 @@ const HealthRecordPage: FC<PageProp> = ({ navigation }) => {
         <ScrollView style={ { flex: 1 } } contentContainerStyle={ styles.content }>
           <Text style={ styles.title }>{ 'All Health Records' }</Text>
           {
-            groups.map(({ type, data }) =>
+            [
+              { type: 'Health Prescription' as HR[ 'type' ], data: healthPrescriptions },
+              { type: 'Lab Test Result' as HR[ 'type' ], data: labTestResults }
+            ].map(({ type, data }) =>
               <View key={ 'l-' + type } style={ { marginVertical: 5 } }>
                 <Text style={ [ styles.category, { textTransform: 'capitalize' } ] }>{ type }</Text>
                 <Carousel
@@ -74,12 +86,7 @@ const HealthRecordPage: FC<PageProp> = ({ navigation }) => {
   )
 }
 
-type Data = {
-  id: number
-  date: Date
-}
-
-export default HealthRecordPage
+export default withResubAutoSubscriptions(HealthRecordPage)
 
 const styles = StyleSheet.create({
   container: {

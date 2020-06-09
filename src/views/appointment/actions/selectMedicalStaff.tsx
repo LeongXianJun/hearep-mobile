@@ -1,14 +1,17 @@
-import React, { useState, FC } from 'react'
+import React, { useState, FC, useEffect } from 'react'
 import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions, TouchableOpacity
 } from 'react-native'
 import {
   Text, Searchbar
 } from 'react-native-paper'
-import { Colors } from '../../../styles'
-import { UserC, User, AppointmentC, MedicalStaff } from '../../../connections'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+
+import { Colors } from '../../../styles'
+import { AppointmentC } from '../../../connections'
+import { UserStore, MedicalStaff } from '../../../stores'
 
 const barColor = '#e982f6'
 
@@ -24,13 +27,17 @@ const SelectMedicalStaffPage: FC<PageProp> = ({ navigation }) => {
     },
     headerTintColor: '#ffffff'
   })
-  const medicalStaffs = UserC.medicalStaffDB
+  const medicalStaffs = UserStore.getMedicalStaff()
   const [ filter, setFilter ] = useState('')
+
+  useEffect(() => {
+    UserStore.fetchAllMedicalStaff()
+  }, [])
 
   const onPress = (m: MedicalStaff) => () => {
     const workingTime = AppointmentC.getWorkingTime(m.id)
     if (workingTime) {
-      AppointmentC.setNewAppointmentDetail('medicalStaff', m.fullname)
+      AppointmentC.setNewAppointmentDetail('medicalStaff', m.username)
       AppointmentC.setNewAppointmentDetail('address', m.medicalInstituition?.address ?? '')
       if (workingTime.type === 'byNumber') {
         AppointmentC.setNewAppointmentDetail('date', new Date())
@@ -61,11 +68,11 @@ const SelectMedicalStaffPage: FC<PageProp> = ({ navigation }) => {
           </View>
           <View style={ styles.lastView }>
             {
-              medicalStaffs.filter(u => u.fullname.toLowerCase().includes(filter.toLowerCase())).map((m, index) =>
+              medicalStaffs.filter(u => u.username.toLowerCase().includes(filter.toLowerCase())).map((m, index) =>
                 <TouchableOpacity key={ 'ms-' + index } onPress={ onPress(m) } activeOpacity={ 0.8 }>
                   <View style={ { flexDirection: 'row', padding: 10, justifyContent: 'center', backgroundColor: Colors.surface } }>
                     <View style={ { flex: 1, justifyContent: 'center' } }>
-                      <Text style={ { fontSize: 20, color: Colors.primaryVariant } }>{ m.fullname }</Text>
+                      <Text style={ { fontSize: 20, color: Colors.primaryVariant } }>{ m.username }</Text>
                     </View>
                     <MaterialCommunityIcons name='chevron-right' color={ Colors.primaryVariant } size={ 36 } />
                   </View>
@@ -79,7 +86,7 @@ const SelectMedicalStaffPage: FC<PageProp> = ({ navigation }) => {
   )
 }
 
-export default SelectMedicalStaffPage
+export default withResubAutoSubscriptions(SelectMedicalStaffPage)
 
 const styles = StyleSheet.create({
   container: {
