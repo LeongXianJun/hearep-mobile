@@ -27,20 +27,20 @@ class AppointmentConnection {
   ]
 
   public workingTimes: WorkingTime[] = [
-    { 
-      id: 1, medicalStaffID: 1, type: 'byTime', 
+    {
+      id: 1, medicalStaffID: 1, type: 'byTime',
       timeslots: [
-        { day: 'Sunday', slots: [1, 3, 5, 7, 9] },
-        { day: 'Monday', slots: [2, 3, 4, 5] },
-        { day: 'Tuesday', slots: [6, 7, 8] },
-        { day: 'Wednesday', slots: [1, 2, 3, 6, 7, 8] },
-        { day: 'Thursday', slots: [1, 3, 5, 7, 8, 10] },
-        { day: 'Friday', slots: [1, 3, 5, 7, 8, 10] },
-        { day: 'Saturday', slots: [1, 3, 5, 7, 9] }
+        { day: 'Sunday', slots: [ 1, 3, 5, 7, 9 ] },
+        { day: 'Monday', slots: [ 2, 3, 4, 5 ] },
+        { day: 'Tuesday', slots: [ 6, 7, 8 ] },
+        { day: 'Wednesday', slots: [ 1, 2, 3, 6, 7, 8 ] },
+        { day: 'Thursday', slots: [ 1, 3, 5, 7, 8, 10 ] },
+        { day: 'Friday', slots: [ 1, 3, 5, 7, 8, 10 ] },
+        { day: 'Saturday', slots: [ 1, 3, 5, 7, 9 ] }
       ]
     },
-    { 
-      id: 2, medicalStaffID: 2, type: 'byNumber', 
+    {
+      id: 2, medicalStaffID: 2, type: 'byNumber',
       timeslots: [
         { day: 'Sunday', startTime: '10am', endTime: '3pm' },
         { day: 'Monday', startTime: '9am', endTime: '5pm' },
@@ -53,19 +53,17 @@ class AppointmentConnection {
     }
   ]
 
-  newAppointment: {
-    date?: Date
-    medicalStaff?: string
-    address?: string
-    time?: string
-    turn?: number
-  } = {
+  newAppointment: newA = {
     date: new Date(),
     medicalStaff: '',
-    address: ''
+    address: '',
+    time: '',
+    turn: 0
   }
 
-  setNewAppointmentDetail = (field: string, val: string | number | Date) => this.newAppointment[field] = val
+  setNewAppointmentDetail = (field: keyof newA, input: Date | string | number) =>
+    this.newAppointment = { ...this.newAppointment, [ field ]: input }
+
   createNewAppointment = () => {
     this.newAppointment = {
       date: new Date(),
@@ -81,7 +79,7 @@ class AppointmentConnection {
   }
 
   public getAppointment = (id: number) => this.appointmentDB.find(a => a.id === id)
-  public cancelAppointment = (remA: Appointment) => this.appointmentDB = this.appointmentDB.filter(({id}) => id !== remA.id)
+  public cancelAppointment = (remA: Appointment) => this.appointmentDB = this.appointmentDB.filter(({ id }) => id !== remA.id)
   public getWorkingTime = (id: number) => this.workingTimes.find(w => w.medicalStaffID === id)
 }
 
@@ -123,21 +121,25 @@ export type WorkingTime = {
   id: number
   medicalStaffID: number
 } & (
-  {
-    type: 'byTime'
-    timeslots: {
-      day: 'Sunday' | 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday'
-      slots: number[]
-    }[]
-  } | {
-    type: 'byNumber'
-    timeslots: {
-      day: 'Sunday' | 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday'
-      startTime: string
-      endTime: string
-    }[]
-  }
-)
+    {
+      type: 'byTime'
+      timeslots: TimeslotByTime[]
+    } | {
+      type: 'byNumber'
+      timeslots: TimeslotByNum[]
+    }
+  )
+
+export type TimeslotByTime = {
+  day: 'Sunday' | 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday'
+  slots: number[]
+}
+
+export type TimeslotByNum = {
+  day: 'Sunday' | 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday'
+  startTime: string
+  endTime: string
+}
 
 export const isByTime = (r: Appointment): r is ByTimeAppointment => {
   return r.type === 'byTime'
@@ -146,4 +148,13 @@ export const isByTime = (r: Appointment): r is ByTimeAppointment => {
 
 export const isByNumber = (r: Appointment): r is ByNumberAppointment => {
   return r.type === 'byNumber'
+}
+
+
+type newA = {
+  date?: Date
+  medicalStaff?: string
+  address?: string
+  time?: string
+  turn?: number
 }

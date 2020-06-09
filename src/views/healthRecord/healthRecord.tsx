@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FC } from 'react'
 import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions
 } from 'react-native'
@@ -6,8 +6,9 @@ import {
   Text, Card, Title, TouchableRipple
 } from 'react-native-paper'
 import { Colors } from '../../styles'
-import { RecordC } from '../../connections'
+import { RecordC, Record } from '../../connections'
 import Carousel from 'react-native-snap-carousel'
+import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
 const imgs = {
   'health prescription': require('../../resources/images/healthPrescription.jpg'),
@@ -17,12 +18,16 @@ const imgs = {
 
 const barColor = '#4cb5f5'
 
-export default function HealthRecordPage({navigation}) {
+interface PageProp {
+  navigation: NavigationProp<ParamListBase>
+}
+
+const HealthRecordPage: FC<PageProp> = ({ navigation }) => {
   const groups = RecordC.allRecords()
   const { width } = Dimensions.get('window')
 
-  const navigate = (category) => (id) => () => {
-    switch(category) {
+  const navigate = (category: Record[ 'type' ]) => (id: number) => () => {
+    switch (category) {
       case 'health prescription':
         navigation.navigate('HealthRecord/HealthPrescription', { id })
         break;
@@ -33,32 +38,32 @@ export default function HealthRecordPage({navigation}) {
     }
   }
 
-  const renderItem = (category) => ({item, index}) => 
-    <TouchableRipple key={'c-' + index + '-' + Date.now()} style={{margin: 5, borderRadius: 5}} onPress={navigate(category)(item.id)} rippleColor="rgba(0, 0, 0, .32)">
-      <Card style={{backgroundColor: barColor}}>
-        <Card.Cover source={imgs[category]}/>
+  const renderItem = (category: Record[ 'type' ]) => ({ item, index }: { item: Data, index: number }) =>
+    <TouchableRipple key={ 'c-' + index + '-' + Date.now() } style={ { margin: 5, borderRadius: 5 } } onPress={ navigate(category)(item.id) } rippleColor="rgba(0, 0, 0, .32)">
+      <Card style={ { backgroundColor: barColor } }>
+        <Card.Cover source={ imgs[ category ] } />
         <Card.Content>
-          <Title>{item.date.toDateString()}</Title>
+          <Title>{ item.date.toDateString() }</Title>
         </Card.Content>
       </Card>
     </TouchableRipple>
 
   return (
     <React.Fragment>
-      <StatusBar barStyle='default'/>
-      <SafeAreaView style={styles.container}>
-        <ScrollView style={{flex: 1}} contentContainerStyle={styles.content}>
-          <Text style={styles.title}>{'All Health Records'}</Text>
+      <StatusBar barStyle='default' />
+      <SafeAreaView style={ styles.container }>
+        <ScrollView style={ { flex: 1 } } contentContainerStyle={ styles.content }>
+          <Text style={ styles.title }>{ 'All Health Records' }</Text>
           {
-            groups.map(({type, data}) => 
-              <View key={'l-' + type} style={{marginVertical: 5}}>
-                <Text style={[styles.category, {textTransform: 'capitalize'}]}>{type}</Text>
+            groups.map(({ type, data }) =>
+              <View key={ 'l-' + type } style={ { marginVertical: 5 } }>
+                <Text style={ [ styles.category, { textTransform: 'capitalize' } ] }>{ type }</Text>
                 <Carousel
                   layout='default'
-                  data={data}
-                  renderItem={renderItem(type)}
-                  itemWidth={width * 0.64} // 0.8 * 0.8
-                  sliderWidth={width * 0.8}
+                  data={ data }
+                  renderItem={ renderItem(type) }
+                  itemWidth={ width * 0.64 } // 0.8 * 0.8
+                  sliderWidth={ width * 0.8 }
                 />
               </View>
             )
@@ -69,13 +74,20 @@ export default function HealthRecordPage({navigation}) {
   )
 }
 
+type Data = {
+  id: number
+  date: Date
+}
+
+export default HealthRecordPage
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1, 
-    backgroundColor: Colors.background 
+    flex: 1,
+    backgroundColor: Colors.background
   },
   content: {
-    minHeight: Dimensions.get('window').height - StatusBar.currentHeight - 60,
+    minHeight: Dimensions.get('window').height - (StatusBar.currentHeight ?? 0) - 60,
     marginHorizontal: '10%'
   },
   title: {

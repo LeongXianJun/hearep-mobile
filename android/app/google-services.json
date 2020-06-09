@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "803146768068",
+    "firebase_url": "https://hearep-b2cdb.firebaseio.com",
+    "project_id": "hearep-b2cdb",
+    "storage_bucket": "hearep-b2cdb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:803146768068:android:869ba91132b0a4b5a57391",
+        "android_client_info": {
+          "package_name": "com.hearep_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "803146768068-vpetklbrro5avoqmt8nlgsmhtba646nh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJFRkLxLhKne-4ZDSOq6723E51zpG1UFc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "803146768068-vpetklbrro5avoqmt8nlgsmhtba646nh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

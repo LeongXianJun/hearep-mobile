@@ -1,52 +1,55 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, FC } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { Title, Button, Paragraph, Divider } from 'react-native-paper'
 import Modal from 'react-native-modal'
+
 import { Colors } from '../styles'
 
-export default function AuthenticationDialog(props: AuthenticationDialogProps) {
+const AuthenticationDialog: FC<AuthenticationDialogProps> = (props) => {
   const [ visible, setVisible ] = useState(false)
   const [ show, setShow ] = useState(false)
 
   useEffect(() => {
     setVisible(props.visible)
-    if(props.visible) {
+    if (props.visible) {
       setShow(true)
     }
-  }, [props.visible])
-  
+  }, [ props.visible ])
+
   const hideDialog = () => {
     props.onClose()
   }
 
-  return(
+  return (
     show
-    ? <View style={styles.dialog}>
+      ? <View style={ styles.dialog }>
         <Modal
           backdropColor='rgba(211, 211, 211, 0.4)'
-          isVisible={visible}
-          onModalHide={() => setShow(false)}
+          isVisible={ visible }
+          onModalHide={ () => setShow(false) }
           useNativeDriver
-          onBackdropPress={hideDialog}
+          onBackdropPress={ hideDialog }
         >
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
+          <View style={ styles.centeredView }>
+            <View style={ styles.modalView }>
               <View>
-                <Title style={{color: 'black'}}>Authorize the Access to Your Health Records</Title>
-                <Paragraph style={{color: 'black'}}>{'Medical staff, Dr Jone want to acceess your health record. Do you authorize him to view your records?'}</Paragraph>
+                <Title style={ { color: 'black' } }>Authorize the Access to Your Health Records</Title>
+                <Paragraph style={ { color: 'black' } }>{ 'Medical staff, Dr Jone want to acceess your health record. Do you authorize him to view your records?' }</Paragraph>
               </View>
-              <Divider style={{marginVertical: 5}}/>
-              <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-                <Button onPress={hideDialog} mode='contained' style={[styles.button, { backgroundColor: 'red' }]} labelStyle={{color: Colors.text}}>Reject</Button>
-                <Button onPress={hideDialog} mode='contained' style={[styles.button, { backgroundColor: 'green' }]} labelStyle={{color: Colors.text}}>Permit</Button>
+              <Divider style={ { marginVertical: 5 } } />
+              <View style={ { flexDirection: 'row', justifyContent: 'flex-end' } }>
+                <Button onPress={ hideDialog } mode='contained' style={ [ styles.button, { backgroundColor: 'red' } ] } labelStyle={ { color: Colors.text } }>Reject</Button>
+                <Button onPress={ hideDialog } mode='contained' style={ [ styles.button, { backgroundColor: 'green' } ] } labelStyle={ { color: Colors.text } }>Permit</Button>
               </View>
             </View>
           </View>
         </Modal>
       </View>
-    : null
+      : null
   )
 }
+
+export default AuthenticationDialog
 
 interface AuthenticationDialogProps {
   visible: boolean
