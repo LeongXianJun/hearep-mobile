@@ -3,7 +3,7 @@ import {
   StatusBar, Platform, KeyboardAvoidingView, View, StyleSheet, Dimensions,
 } from 'react-native'
 import {
-  Text, Button, TextInput, Snackbar
+  Text, Button, TextInput, Snackbar, HelperText
 } from 'react-native-paper'
 import { ScrollView } from 'react-native-gesture-handler'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
@@ -23,6 +23,7 @@ const LoginPage: FC<PageProp> = ({ route, navigation }) => {
   const { isRegister } = route.params
   const [ snackVisible, setSnackVisible ] = useState(false)
   const [ code, setC ] = useState('')
+  const [ err, setErr ] = useState('')
 
   useEffect(() => {
     UserStore.setRegister(isRegister)
@@ -40,7 +41,7 @@ const LoginPage: FC<PageProp> = ({ route, navigation }) => {
           })
         }
       })
-      .catch(err => console.log(err))
+      .catch(err => setErr(err.message))
 
   return (
     <React.Fragment>
@@ -58,8 +59,18 @@ const LoginPage: FC<PageProp> = ({ route, navigation }) => {
               mode='outlined'
               style={ styles.textInput }
               value={ code }
-              onChangeText={ setC }
+              error={ err !== '' }
+              onChangeText={ text => {
+                setErr('')
+                setC(text)
+              } }
             />
+            <HelperText
+              type='error'
+              visible={ err !== '' }
+            >
+              { err }
+            </HelperText>
             <View style={ [ styles.lastView, styles.buttons ] }>
               <Button mode='contained' style={ styles.button } onPress={ proceed }>{ isRegister === 'true' ? 'Continue' : 'Login' }</Button>
               <Button style={ { width: '60%' } } onPress={ () => setSnackVisible(true) } loading={ snackVisible } disabled={ snackVisible }>{ 'Request OTP' }</Button>

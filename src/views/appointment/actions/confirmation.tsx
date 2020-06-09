@@ -5,10 +5,11 @@ import {
 import {
   Text, Card, Button
 } from 'react-native-paper'
+import { NavigationProp, ParamListBase } from '@react-navigation/native'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+
 import { Colors } from '../../../styles'
 import { AppointmentC } from '../../../connections'
-import { NavigationProp, ParamListBase, Route } from '@react-navigation/native'
 
 const barColor = '#e982f6'
 

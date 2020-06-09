@@ -6,8 +6,8 @@ import {
 import {
   Text, RadioButton, TextInput, Button, Title, Subheading
 } from 'react-native-paper'
-import { NavigationProp, ParamListBase } from '@react-navigation/native'
 import { withResubAutoSubscriptions } from 'resub'
+import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
 import { Colors } from '../../styles'
 import { UserStore } from '../../stores'
@@ -36,10 +36,11 @@ const UpdateProfilePage: FC<PageProp> = ({ navigation }) => {
     occupation: ''
   })
 
+  const { username, dob, gender, email, occupation } = info
+
   useEffect(() => {
     if (isUndefined(CurrentUser)) {
       UserStore.fetchUser()
-        .catch(err => console.log('profile: Update', err))
     } else {
       const { username, dob, gender, email, occupation } = CurrentUser
       setInfo({
@@ -54,17 +55,13 @@ const UpdateProfilePage: FC<PageProp> = ({ navigation }) => {
 
   const updateProfile = () => {
     if (CurrentUser) {
-      const { id, phoneNumber } = CurrentUser
-      const { username, dob, gender, email, occupation } = info
-      UserStore.updateProfile({ id, username, dob: new Date(dob), gender, email, phoneNumber, occupation })
+      UserStore.updateProfile({ username, dob: dob, gender, email, occupation })
         .then(() => {
           navigation.goBack()
         })
-        .catch(err => new Error(err))
     }
   }
 
-  const { username, dob, gender, email, occupation } = info
   return (
     <React.Fragment>
       <StatusBar barStyle='default' animated backgroundColor='#b3c100' />
@@ -78,14 +75,14 @@ const UpdateProfilePage: FC<PageProp> = ({ navigation }) => {
             <TextInput
               label='Fullname'
               mode='outlined'
-              value={ info.username }
+              value={ username }
               onChangeText={ text => setInfo({ ...info, username: text }) }
               style={ styles.textInput }
             />
             <TextInput
               label='Date of Birth'
               mode='outlined'
-              value={ info.dob }
+              value={ dob }
               placeholder='YYYY-MM-DD'
               onChangeText={ text => setInfo({ ...info, dob: text }) }
               style={ styles.textInput }
@@ -95,7 +92,7 @@ const UpdateProfilePage: FC<PageProp> = ({ navigation }) => {
                 <Text style={ { fontSize: 18, marginLeft: 3 } }>Gender</Text>
               </View>
               <View style={ { flex: 2, flexDirection: 'row', alignContent: 'center' } }>
-                <RadioButton.Group value={ info.gender } onValueChange={ val => setInfo({ ...info, gender: val as typeof info[ 'gender' ] }) }>
+                <RadioButton.Group value={ gender } onValueChange={ val => setInfo({ ...info, gender: val as typeof info[ 'gender' ] }) }>
                   <RadioButton.Item label='Male' value="M" />
                   <RadioButton.Item label='Female' value="F" />
                 </RadioButton.Group>
@@ -104,14 +101,14 @@ const UpdateProfilePage: FC<PageProp> = ({ navigation }) => {
             <TextInput
               label='Email'
               mode='outlined'
-              value={ info.email }
+              value={ email }
               onChangeText={ text => setInfo({ ...info, email: text }) }
               style={ styles.textInput }
             />
             <TextInput
               label='Occupation'
               mode='outlined'
-              value={ info.occupation }
+              value={ occupation }
               onChangeText={ text => setInfo({ ...info, occupation: text }) }
               style={ styles.textInput }
             />

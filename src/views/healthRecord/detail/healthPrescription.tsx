@@ -1,29 +1,25 @@
-import React, { useEffect, useState, Fragment, FC } from 'react'
+import React, { useEffect, useState, FC } from 'react'
 import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions,
 } from 'react-native'
 import {
   Text, Title, Card, Button, Divider, Snackbar, Paragraph
 } from 'react-native-paper'
-import { Colors } from '../../../styles'
-import { RecordC, Record, isMedicationRecord, isHealthPrescription, AppointmentC, Appointment, isByTime } from '../../../connections'
 import Carousel from 'react-native-snap-carousel'
+import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
-type HealthPrescription = {
-  date: Date
-  illness: string
-  clinicalOpinion: string
-}
+import { Colors } from '../../../styles'
+import { AppointmentC, Appointment, isByTime } from '../../../connections'
+import { HealthRecordStore, HealthPrescription, MedicationRecord } from '../../../stores'
 
 const barColor = '#4cb5f5'
 
 interface PageProp {
-  route: any
   navigation: NavigationProp<ParamListBase>
 }
 
-const HealthPrescriptionPage: FC<PageProp> = ({ route, navigation }) => {
+const HealthPrescriptionPage: FC<PageProp> = ({ navigation }) => {
   navigation.setOptions({
     title: 'Health Prescription',
     headerStyle: {
@@ -31,20 +27,15 @@ const HealthPrescriptionPage: FC<PageProp> = ({ route, navigation }) => {
     },
     headerTintColor: '#ffffff'
   })
-  const { id } = route.params
-  const [ record, setRecord ] = useState<Record>()
+  const healthPrescription = HealthRecordStore.getSelectedHPRecord()
   const [ appointment, setAppointment ] = useState<Appointment>()
-  const [ medicationRecords, setMedicationRecords ] = useState<Record[]>()
   const [ snackVisible, setSnackVisible ] = useState(false)
 
   useEffect(() => {
-    const r = RecordC.getRecord(id)
-    if (r && isHealthPrescription(r)) {
-      setRecord(r)
-      r.appID && setAppointment(AppointmentC.getAppointment(r.appID))
-      setMedicationRecords(RecordC.getMedicationRecords(r.id))
+    if (healthPrescription && healthPrescription instanceof HealthPrescription) {
+      healthPrescription.appId && setAppointment(AppointmentC.getAppointment(healthPrescription.appId))
     }
-  }, [ id ])
+  }, [ healthPrescription ])
 
   return (
     <React.Fragment>
@@ -53,17 +44,17 @@ const HealthPrescriptionPage: FC<PageProp> = ({ route, navigation }) => {
         <ScrollView style={ { flex: 1 } } contentContainerStyle={ styles.content }>
           <View style={ { flex: 1, marginTop: 10 } }>
             {
-              record && isHealthPrescription(record)
+              healthPrescription
                 ? <>
-                  { RecordInformation(record) }
+                  { RecordInformation(healthPrescription) }
                   {
                     appointment
                       ? AppointmentDetail(appointment)
                       : undefined
                   }
                   {
-                    medicationRecords
-                      ? MedicationRecords(medicationRecords)
+                    healthPrescription.medicationRecords.length > 0
+                      ? MedicationRecords(healthPrescription.medicationRecords)
                       : undefined
                   }
                 </>
@@ -162,33 +153,31 @@ const HealthPrescriptionPage: FC<PageProp> = ({ route, navigation }) => {
     )
   }
 
-  function MedicationRecords(mrs: Record[]) {
+  function MedicationRecords(mrs: MedicationRecord[]) {
     const width = Dimensions.get('window').width
-    const renderItem = ({ item, index }: { item: Record, index: number }) =>
+    const renderItem = ({ item, index }: { item: MedicationRecord, index: number }) =>
       <Card key={ 'mr-' + index } style={ { flex: 1 } }>
-        <Card.Content style={ styles.cardStart }>{ }</Card.Content>
+        <Card.Title title={ 'Refill by ' + item.refillDate.toDateString() } style={ styles.cardStart } />
         <Card.Content style={ { flex: 1 } }>
           {
-            isMedicationRecord(item)
-              ? item.medications.map((m, index) =>
-                <Fragment key={ 'm-' + index }>
-                  { index !== 0 ? <Divider style={ { marginVertical: 5 } } /> : undefined }
+            item.medications.map((m, index) =>
+              <React.Fragment key={ 'm-' + index }>
+                { index !== 0 ? <Divider style={ { marginVertical: 5 } } /> : undefined }
+                <View style={ { marginVertical: 5 } }>
                   <View style={ { flex: 1, marginVertical: 5 } }>
-                    <View style={ { flex: 1 } }>
-                      <Text style={ styles.text }>{ m.medicine }</Text>
+                    <Text style={ styles.text }>{ m.medicine }</Text>
+                  </View>
+                  <View style={ { flex: 1, flexDirection: 'row' } }>
+                    <View style={ { flex: 2 } }>
+                      <Text style={ styles.text }>{ m.dosage }</Text>
                     </View>
-                    <View style={ { flex: 1, flexDirection: 'row' } }>
-                      <View style={ { flex: 2 } }>
-                        <Text style={ styles.text }>{ m.dosage }</Text>
-                      </View>
-                      <View style={ { flex: 3 } }>
-                        <Text style={ styles.text }>{ m.usage }</Text>
-                      </View>
+                    <View style={ { flex: 3 } }>
+                      <Text style={ styles.text }>{ m.usage }</Text>
                     </View>
                   </View>
-                </Fragment>
-              )
-              : undefined
+                </View>
+              </React.Fragment>
+            )
           }
         </Card.Content>
         <Card.Actions>
@@ -212,7 +201,7 @@ const HealthPrescriptionPage: FC<PageProp> = ({ route, navigation }) => {
   }
 }
 
-export default HealthPrescriptionPage
+export default withResubAutoSubscriptions(HealthPrescriptionPage)
 
 const styles = StyleSheet.create({
   container: {

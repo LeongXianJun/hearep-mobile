@@ -5,12 +5,13 @@ import {
 import {
   Text, Card, Title
 } from 'react-native-paper'
-import { Colors } from '../../../styles'
-import { AppointmentC, FixedTime, TimeslotByTime } from '../../../connections'
 import Carousel from 'react-native-snap-carousel'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import { day, month } from '../../commons'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+
+import { Colors } from '../../../styles'
+import { day, month } from '../../commons'
+import { AppointmentC, FixedTime, TimeslotByTime } from '../../../connections'
 
 const barColor = '#e982f6'
 

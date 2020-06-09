@@ -78,9 +78,9 @@ class AppointmentConnection {
     // ]
   }
 
-  public getAppointment = (id: number) => this.appointmentDB.find(a => a.id === id)
+  public getAppointment = (id: string) => this.appointmentDB.find(a => a.id.toString() === id)
   public cancelAppointment = (remA: Appointment) => this.appointmentDB = this.appointmentDB.filter(({ id }) => id !== remA.id)
-  public getWorkingTime = (id: number) => this.workingTimes.find(w => w.medicalStaffID === id)
+  public getWorkingTime = (id: string) => this.workingTimes.find(w => w.medicalStaffID.toString() === id)
 }
 
 export default new AppointmentConnection()

@@ -5,9 +5,10 @@ import {
 import {
   Text, Card, Searchbar
 } from 'react-native-paper'
+import { NavigationProp, ParamListBase } from '@react-navigation/native'
+
 import { Colors } from '../../styles'
 import { AppointmentC } from '../../connections'
-import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
 const barColor = '#e982f6'
 
