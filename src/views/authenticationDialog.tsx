@@ -5,27 +5,30 @@ import Modal from 'react-native-modal'
 
 import { Colors } from '../styles'
 
-const AuthenticationDialog: FC<AuthenticationDialogProps> = (props) => {
-  const [ visible, setVisible ] = useState(false)
+interface AuthenticationDialogProps {
+  visible: boolean
+  onClose: Function
+}
+
+const AuthenticationDialog: FC<AuthenticationDialogProps> = ({ visible, onClose }) => {
+  const [ isVisible, setIsVisible ] = useState(false)
   const [ show, setShow ] = useState(false)
 
   useEffect(() => {
-    setVisible(props.visible)
-    if (props.visible) {
+    setIsVisible(visible)
+    if (visible) {
       setShow(true)
     }
-  }, [ props.visible ])
+  }, [ visible ])
 
-  const hideDialog = () => {
-    props.onClose()
-  }
+  const hideDialog = () => onClose()
 
   return (
     show
       ? <View style={ styles.dialog }>
         <Modal
           backdropColor='rgba(211, 211, 211, 0.4)'
-          isVisible={ visible }
+          isVisible={ isVisible }
           onModalHide={ () => setShow(false) }
           useNativeDriver
           onBackdropPress={ hideDialog }
@@ -50,11 +53,6 @@ const AuthenticationDialog: FC<AuthenticationDialogProps> = (props) => {
 }
 
 export default AuthenticationDialog
-
-interface AuthenticationDialogProps {
-  visible: boolean
-  onClose: Function
-}
 
 const styles = StyleSheet.create({
   dialog: {
