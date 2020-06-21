@@ -10,10 +10,10 @@ import { withResubAutoSubscriptions } from 'resub'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { useNavigation, NavigationProp, ParamListBase } from '@react-navigation/native'
 
+import { hour12 } from '../commons'
 import { Colors } from '../../styles'
-import { UserStore } from '../../stores'
 import { isUndefined } from '../../utils'
-import { AppointmentC, Appointment } from '../../connections'
+import { UserStore, AppointmentStore, Appointment, MedicalStaff } from '../../stores'
 
 const avatar = {
   M: () => require('../../resources/images/makeAppointmentFemale.jpg'),
@@ -35,17 +35,18 @@ const AppointmentPage: FC<PageProp> = ({ navigation }) => {
     headerTintColor: '#ffffff'
   })
   const CurrentUser = UserStore.getUser()
+  const medicalStaff = UserStore.getMedicalStaff()
+  const appointments = AppointmentStore.getGroupedAppointments()
+  const { Pending, Rejected } = appointments
+
   const [ gender, setGender ] = useState<'M' | 'F'>('M')
   const [ expandId, setExpandId ] = useState(1)
   const [ filter, setFilter ] = useState('')
-  const [ nearingAppointments, setNearingAppointments ] = useState(AppointmentC.nearing)
-  const [ allAppointments, setAllAppointments ] = useState(AppointmentC.appointmentDB)
   const [ selectedAppointment, setSelectedAppointment ] = useState<Appointment>()
 
-  const refreshData = () => {
-    setNearingAppointments(AppointmentC.nearing)
-    setAllAppointments(AppointmentC.appointmentDB)
-  }
+  useEffect(() => {
+    UserStore.fetchAllMedicalStaff()
+  }, [])
 
   useEffect(() => {
     if (CurrentUser) {
@@ -58,7 +59,7 @@ const AppointmentPage: FC<PageProp> = ({ navigation }) => {
   return (
     <React.Fragment>
       <StatusBar barStyle='default' animated backgroundColor={ barColor } />
-      <AppointmentDialog onClose={ () => setSelectedAppointment(undefined) } refresh={ refreshData } appointment={ selectedAppointment } />
+      <AppointmentDialog onClose={ () => setSelectedAppointment(undefined) } appointment={ selectedAppointment } />
       <SafeAreaView style={ styles.container }>
         <ScrollView style={ { flex: 1 } } contentContainerStyle={ styles.content }>
           <View style={ { marginTop: 25, flexDirection: 'row-reverse' } }>
@@ -92,25 +93,33 @@ const AppointmentPage: FC<PageProp> = ({ navigation }) => {
   )
 
   function NearingAppointments() {
-    const count = nearingAppointments.length
+    const app = [ ...appointments[ 'Waiting' ], ...appointments[ 'Accepted' ] ]
 
     return (
-      count > 0
-        ? <List.Accordion id={ 1 } title={ count + ' Nearing Appointment' + (count > 1 ? 's' : '') }
+      app.length > 0
+        ? <List.Accordion id={ 1 } title={ app.length + ' Nearing Appointment' + (app.length > 1 ? 's' : '') }
           titleStyle={ { color: Colors.text, fontWeight: 'bold' } }
           style={ styles.listStart }
         >
           {
-            nearingAppointments.map(({ date, address, medicalStaff }, index) =>
-              <List.Item key={ 'PU-' + index }
-                style={ { backgroundColor: Colors.surface, marginBottom: 1 } }
-                title={ 'Appointment on ' + date.toDateString() }
-                titleStyle={ [ styles.text, { textTransform: 'capitalize' } ] }
-                description={ medicalStaff + '\n' + address }
-                descriptionNumberOfLines={ 5 }
-                descriptionStyle={ [ styles.text ] }
-              />
-            )
+            app.map(a => ({ ...a, medicalStaff: medicalStaff.find(ms => ms.id === a.medicalStaffId) }))
+              .filter(u => u.medicalStaff?.username.toLowerCase().includes(filter.toLowerCase()))
+              .map((app, index) =>
+                <List.Item key={ 'PU-' + index }
+                  style={ { backgroundColor: Colors.surface, marginBottom: 1 } }
+                  title={ 'Appointment on ' + (app.type === 'byTime' ? app.time : app.date).toDateString() }
+                  titleStyle={ [ styles.text, { textTransform: 'capitalize' } ] }
+                  description={ (app.medicalStaff ? app.medicalStaff.username + '\n' : '') + app.address }
+                  descriptionNumberOfLines={ 5 }
+                  descriptionStyle={ [ styles.text ] }
+                  right={ props =>
+                    <View style={ { justifyContent: 'center' } }>
+                      <MaterialCommunityIcons { ...props } color={ barColor } name='details' size={ 24 } />
+                    </View>
+                  }
+                  onPress={ () => setSelectedAppointment(app) }
+                />
+              )
           }
         </List.Accordion>
         : null
@@ -118,15 +127,14 @@ const AppointmentPage: FC<PageProp> = ({ navigation }) => {
   }
 
   function AllAppointments() {
-    const count = allAppointments.length
-
     return (
-      <List.Accordion id={ 2 } title={ 'All Appointment' + (count > 1 ? 's' : '') }
+      <List.Accordion id={ 2 } title={ 'All Appointments' }
         titleStyle={ { color: Colors.text, fontWeight: 'bold' } }
         style={ styles.listStart }
       >
         <Searchbar
-          placeholder="Search"
+          placeholder={ 'Enter Doctor\'s Name' }
+          placeholderTextColor={ barColor }
           iconColor={ barColor }
           onChangeText={ val => setFilter(val) }
           style={ { elevation: 0, borderRadius: 0, borderBottomWidth: 1, borderColor: barColor } }
@@ -134,115 +142,139 @@ const AppointmentPage: FC<PageProp> = ({ navigation }) => {
           value={ filter }
         />
         {
-          allAppointments.filter(u => u.medicalStaff.toLowerCase().includes(filter.toLowerCase())).map((app, index) =>
-            <List.Item key={ 'PU-' + index }
-              style={ { backgroundColor: Colors.surface, marginBottom: 1 } }
-              title={ 'Appointment on ' + app.date.toDateString() }
-              titleStyle={ [ styles.text, { textTransform: 'capitalize' } ] }
-              description={ app.medicalStaff + '\n' + app.address }
-              descriptionStyle={ [ styles.text ] }
-              descriptionNumberOfLines={ 5 }
-              right={ props =>
-                <View style={ { justifyContent: 'center' } }>
-                  <MaterialCommunityIcons { ...props } color={ barColor } name='details' size={ 24 } />
-                </View>
-              }
-              onPress={ () => setSelectedAppointment(app) }
-            />
-          )
+          [
+            {
+              section: 'Pending',
+              app: Pending.map(a => ({ ...a, medicalStaff: medicalStaff.find(ms => ms.id === a.medicalStaffId) }))
+                .filter(u => u.medicalStaff?.username.toLowerCase().includes(filter.toLowerCase()))
+            },
+            {
+              section: 'Rejected',
+              app: Rejected.map(a => ({ ...a, medicalStaff: medicalStaff.find(ms => ms.id === a.medicalStaffId) }))
+                .filter(u => u.medicalStaff?.username.toLowerCase().includes(filter.toLowerCase()))
+            }
+          ].filter(({ app }) => app.length > 0)
+            .map(({ section, app }, index) =>
+              <List.Section key={ 'Section-' + index } style={ { backgroundColor: Colors.surface } }>
+                <List.Subheader style={ [ styles.text, { textTransform: 'capitalize' } ] }>{ section }</List.Subheader>
+                {
+                  app.map(a =>
+                    <List.Item key={ 'PU-' + index }
+                      style={ { backgroundColor: Colors.surface, marginBottom: 1 } }
+                      title={ 'Appointment on ' + (a.type === 'byTime' ? a.time : a.date).toDateString() }
+                      titleStyle={ [ styles.text, { textTransform: 'capitalize' } ] }
+                      description={ a.medicalStaff?.username + '\n' + a.address }
+                      descriptionStyle={ [ styles.text ] }
+                      descriptionNumberOfLines={ 5 }
+                      right={ props =>
+                        <View style={ { justifyContent: 'center' } }>
+                          <MaterialCommunityIcons { ...props } color={ barColor } name='details' size={ 24 } />
+                        </View>
+                      }
+                      onPress={ () => setSelectedAppointment(a) }
+                    />
+                  )
+                }
+              </List.Section>
+            )
         }
       </List.Accordion>
     )
   }
-}
 
-function AppointmentDialog(props: AppointmentDialogProps) {
-  const { appointment, onClose } = props
-  const navigation = useNavigation()
-  const [ show, setShow ] = useState(false)
+  function AppointmentDialog(props: AppointmentDialogProps) {
+    const { appointment, onClose } = props
+    const navigation = useNavigation()
+    const [ show, setShow ] = useState(false)
+    const [ ms, setMS ] = useState<MedicalStaff>()
 
-  useEffect(() => {
-    if (appointment !== undefined) {
-      setShow(true)
-    }
-  }, [ props.appointment ])
+    useEffect(() => {
+      if (appointment) {
+        setMS(medicalStaff.find(ms => ms.id === appointment.medicalStaffId))
+        setShow(true)
+      }
+    }, [ props.appointment ])
 
-  const close = (path?: string) => () => {
-    onClose()
-    if (path) {
-      navigation.navigate(path, {
-        'rescheduleId': appointment?.id
+    const reschedule = () =>
+      Promise.all([
+        ...appointment
+          ? [
+            AppointmentStore.setNewAppDetail({ medicalStaffId: appointment.medicalStaffId, address: appointment.address, type: 'byTime' }),
+            AppointmentStore.setSelectedAppointment(appointment)
+          ]
+          : []
+      ]
+      ).then(() => {
+        onClose()
+        navigation.navigate('Appointment/SelectTimeslot')
       })
-    }
-  }
 
-  const cancel = () => {
-    const { refresh } = props
-    if (appointment) {
-      AppointmentC.cancelAppointment(appointment)
-      refresh()
-      close()()
-    }
-  }
+    const cancel = () =>
+      appointment
+        ? AppointmentStore.cancelAppointment(appointment.id)
+          .then(() => onClose())
+          .catch(err => console.log(err))
+        : undefined
 
-  return (
-    show
-      ? <View style={ dialogStyles.dialog }>
-        <Modal
-          backdropColor='rgba(211, 211, 211, 0.4)'
-          isVisible={ appointment !== undefined }
-          onModalHide={ () => setShow(false) }
-          useNativeDriver
-          onBackdropPress={ () => onClose() }
-        >
-          <View style={ dialogStyles.centeredView }>
-            <View style={ dialogStyles.modalView }>
-              <Title style={ { color: 'black' } }>{ 'Appointment Detail' }</Title>
-              {
-                appointment
-                  ? [
-                    { field: 'Date', val: appointment.date.toDateString() },
-                    { field: 'Medical Staff', val: appointment.medicalStaff },
-                    { field: 'Address', val: appointment.address },
-                    appointment.type === 'byTime'
-                      ? { field: 'Time', val: appointment.time, isNormalText: true }
-                      : appointment.type === 'byNumber'
-                        ? { field: 'Turn Number', val: appointment.turn, isNormalText: true }
-                        : { field: undefined }
-                  ].filter(({ field }) => !isUndefined(field)).map(({ field, val, isNormalText }, index) =>
-                    <View key={ 'bi-' + index } style={ { flexDirection: 'row', marginVertical: 10 } }>
-                      <View style={ { flex: 2 } }>
-                        <Text style={ styles.text }>{ field }:</Text>
-                      </View>
-                      <View style={ { flex: 3 } }>
-                        <Text style={ [ styles.text, isNormalText ? {} : { textTransform: 'capitalize' } ] }>{ val }</Text>
-                      </View>
-                    </View>
-                  )
-                  : null
-              }
-              <Divider style={ { marginVertical: 5 } } />
-              <View style={ styles.buttons }>
+    return (
+      show
+        ? <View style={ dialogStyles.dialog }>
+          <Modal
+            backdropColor='rgba(211, 211, 211, 0.4)'
+            isVisible={ appointment !== undefined }
+            onModalHide={ () => setShow(false) }
+            useNativeDriver
+            onBackdropPress={ () => onClose() }
+          >
+            <View style={ dialogStyles.centeredView }>
+              <View style={ dialogStyles.modalView }>
+                <Title style={ { color: 'black' } }>{ 'Appointment Detail' }</Title>
                 {
-                  appointment?.type === 'byTime'
-                    ? <Button onPress={ close('Appointment/SelectTimeslot') } mode='contained' style={ [ styles.button, { backgroundColor: 'blue' } ] } labelStyle={ { color: Colors.text } }>{ 'Reschedule Appointment' }</Button>
+                  appointment
+                    ? [
+                      { field: 'Date', val: (appointment.type === 'byTime' ? appointment.time : appointment.date).toDateString() },
+                      { field: 'Medical Staff', val: ms?.username },
+                      { field: 'Address', val: appointment.address },
+                      appointment.type === 'byTime'
+                        ? { field: 'Time', val: hour12(appointment.time), isNormalText: true }
+                        : appointment.type === 'byNumber'
+                          ? { field: 'Turn Number', val: appointment.turn + 1, isNormalText: true }
+                          : { field: undefined }
+                    ].filter(({ field }) => !isUndefined(field))
+                      .map(({ field, val, isNormalText }, index) =>
+                        <View key={ 'bi-' + index } style={ { flexDirection: 'row', marginVertical: 10 } }>
+                          <View style={ { flex: 2 } }>
+                            <Text style={ styles.text }>{ field }:</Text>
+                          </View>
+                          <View style={ { flex: 3 } }>
+                            <Text style={ [ styles.text, isNormalText ? {} : { textTransform: 'capitalize' } ] }>{ val }</Text>
+                          </View>
+                        </View>
+                      )
                     : null
                 }
-                <Button onPress={ cancel } labelStyle={ { color: 'red' } }>{ 'Cancel Appointment' }</Button>
+                <Divider style={ { marginVertical: 5 } } />
+                <View style={ styles.buttons }>
+                  {
+                    appointment?.type === 'byTime'
+                      ? <Button onPress={ reschedule } mode='contained' style={ [ styles.button, { backgroundColor: 'blue' } ] } labelStyle={ { color: Colors.text } }>{ 'Reschedule Appointment' }</Button>
+                      : undefined
+                  }
+                  <Button onPress={ cancel } labelStyle={ { color: 'red' } }>{ 'Cancel Appointment' }</Button>
+                </View>
               </View>
             </View>
-          </View>
-        </Modal>
-      </View>
-      : null
-  )
+          </Modal>
+        </View>
+        : null
+    )
+  }
 }
 
 export default withResubAutoSubscriptions(AppointmentPage)
 
 interface AppointmentDialogProps {
   onClose: Function
-  refresh: Function
   appointment: Appointment | undefined
 }
 

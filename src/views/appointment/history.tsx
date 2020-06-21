@@ -1,14 +1,15 @@
-import React, { useState, FC } from 'react'
+import React, { FC, useState, useEffect } from 'react'
 import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions,
 } from 'react-native'
 import {
   Text, Card, Searchbar
 } from 'react-native-paper'
+import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
 import { Colors } from '../../styles'
-import { AppointmentC } from '../../connections'
+import { UserStore, AppointmentStore, Appointment, MedicalStaff } from '../../stores'
 
 const barColor = '#e982f6'
 
@@ -24,8 +25,21 @@ const HistoryPage: FC<PageProp> = ({ navigation }) => {
     },
     headerTintColor: '#ffffff'
   })
-  const oldAppointment = AppointmentC.oldDB
+  const medicalStaff = UserStore.getMedicalStaff()
+  const appointments = AppointmentStore.getGroupedAppointments()
+  const { Completed, Cancelled } = appointments
+
   const [ filter, setFilter ] = useState('')
+  const [ oldAppointments, setOldAppointments ] = useState<(Appointment & { medicalStaff: MedicalStaff | undefined })[]>([])
+
+  useEffect(() => {
+    if (medicalStaff.length === 0)
+      UserStore.fetchAllMedicalStaff()
+  }, [ medicalStaff ])
+
+  useEffect(() => {
+    setOldAppointments([ ...Completed, ...Cancelled ].map(app => ({ ...app, medicalStaff: medicalStaff.find(ms => ms.id === app.medicalStaffId) })))
+  }, [ Completed, Cancelled ])
 
   return (
     <React.Fragment>
@@ -36,7 +50,7 @@ const HistoryPage: FC<PageProp> = ({ navigation }) => {
             <Card.Title title={ 'History' } style={ styles.cardStart } />
             <Card.Content>
               <Searchbar
-                placeholder="Enter Doctor Name"
+                placeholder={ 'Enter Doctor\'s Name' }
                 placeholderTextColor={ barColor }
                 iconColor={ barColor }
                 onChangeText={ val => setFilter(val) }
@@ -45,21 +59,22 @@ const HistoryPage: FC<PageProp> = ({ navigation }) => {
                 value={ filter }
               />
               {
-                oldAppointment.filter(u => u.medicalStaff.toLowerCase().includes(filter.toLowerCase())).map(({ date, medicalStaff, address }, index) =>
-                  <View key={ 'bi-' + index } style={ { borderTopWidth: 1, borderTopColor: barColor, paddingVertical: 10 } }>
-                    <View style={ { flexDirection: 'row', marginVertical: 5 } }>
-                      <View style={ { flex: 1 } }>
-                        <Text style={ styles.text }>{ date.toDateString() }</Text>
+                oldAppointments.filter(u => u.medicalStaff?.username.toLowerCase().includes(filter.toLowerCase()))
+                  .map((app, index) =>
+                    <View key={ 'bi-' + index } style={ { borderTopWidth: 1, borderTopColor: barColor, paddingVertical: 10 } }>
+                      <View style={ { flexDirection: 'row', marginVertical: 5 } }>
+                        <View style={ { flex: 1 } }>
+                          <Text style={ styles.text }>{ (app.type === 'byTime' ? app.time : app.date).toDateString() }</Text>
+                        </View>
+                        <View style={ { flex: 1 } }>
+                          <Text style={ [ styles.text, { textTransform: 'capitalize' } ] }>{ app.medicalStaff?.username }</Text>
+                        </View>
                       </View>
-                      <View style={ { flex: 1 } }>
-                        <Text style={ [ styles.text, { textTransform: 'capitalize' } ] }>{ medicalStaff }</Text>
+                      <View style={ { marginBottom: 5 } }>
+                        <Text style={ [ styles.text, { textTransform: 'capitalize' } ] }>{ `Address: ${app.address}` }</Text>
                       </View>
                     </View>
-                    <View style={ { marginBottom: 5 } }>
-                      <Text style={ [ styles.text, { textTransform: 'capitalize' } ] }>Address: { address }</Text>
-                    </View>
-                  </View>
-                )
+                  )
               }
             </Card.Content>
             <Card.Actions style={ styles.cardEnd }>{ }</Card.Actions>
@@ -69,7 +84,7 @@ const HistoryPage: FC<PageProp> = ({ navigation }) => {
     </React.Fragment>
   )
 }
-export default HistoryPage
+export default withResubAutoSubscriptions(HistoryPage)
 
 const styles = StyleSheet.create({
   container: {

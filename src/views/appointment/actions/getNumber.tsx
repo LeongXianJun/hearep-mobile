@@ -1,14 +1,16 @@
-import React, { FC } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import {
   StatusBar, SafeAreaView, ScrollView, StyleSheet, Dimensions, TouchableOpacity
 } from 'react-native'
 import {
-  Text
+  Text, ActivityIndicator
 } from 'react-native-paper'
+import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
+import { hour12 } from '../../commons'
 import { Colors } from '../../../styles'
-import { AppointmentC } from '../../../connections'
+import { AppointmentStore } from '../../../stores'
 
 const barColor = '#e982f6'
 
@@ -16,7 +18,6 @@ interface PageProp {
   navigation: NavigationProp<ParamListBase>
 }
 
-// add close layout -- optional
 const GetNumberPage: FC<PageProp> = ({ navigation }) => {
   navigation.setOptions({
     title: 'Get a Number',
@@ -25,30 +26,59 @@ const GetNumberPage: FC<PageProp> = ({ navigation }) => {
     },
     headerTintColor: '#ffffff'
   })
-  const turn = Math.round(Math.random() * 50)
+  const turnDetail = AppointmentStore.getByNumberDetail()
+  const newAppDetail = AppointmentStore.getNewAppDetail()
   const width = Dimensions.get('window').width * 0.5
 
-  const process = () => {
-    AppointmentC.setNewAppointmentDetail('turn', turn)
-    navigation.navigate('Appointment/Confirmation')
-  }
+  const [ isReady, setIsReady ] = useState(false)
+  const [ isOffDay, setIsOffDay ] = useState(false)
+
+  useEffect(() => {
+    if (isReady === false && newAppDetail?.medicalStaffId)
+      AppointmentStore.getTurn(newAppDetail.medicalStaffId)
+        .then(() => setIsReady(true))
+        .catch(err => {
+          if (err.message.includes('This medical staff does not operate')) {
+            setIsReady(true)
+            setIsOffDay(true)
+          } else {
+            Promise.reject(err)
+          }
+        })
+  }, [ isReady, newAppDetail ])
+
+  const process = () =>
+    turnDetail?.turn !== undefined
+      ? Promise.resolve(
+        AppointmentStore.setNewAppDetail({ turn: turnDetail.turn })
+      ).then(() => navigation.navigate('Appointment/Confirmation'))
+      : undefined
 
   return (
     <React.Fragment>
       <StatusBar barStyle='default' animated backgroundColor={ barColor } />
       <SafeAreaView style={ styles.container }>
         <ScrollView style={ { flex: 1 } } contentContainerStyle={ styles.content }>
-          <Text style={ styles.instruction }>{ 'Click this to get this number and queue up' }</Text>
-          <TouchableOpacity style={ [ styles.circle, { width: width, height: width, borderRadius: width / 2 } ] } onPress={ process } activeOpacity={ 0.75 }>
-            <Text style={ styles.num }>{ turn }</Text>
-          </TouchableOpacity>
+          {
+            isReady
+              ? isOffDay
+                ? <Text style={ styles.instruction }>{ 'This doctor does not operate today. Please kindly choose another doctor.' }</Text>
+                : <>
+                  <Text style={ { textAlign: 'center' } }>{ hour12(turnDetail?.startTime) + ' - ' + hour12(turnDetail?.endTime) }</Text>
+                  <Text style={ styles.instruction }>{ 'Click this to get this number and queue up' }</Text>
+                  <TouchableOpacity style={ [ styles.circle, { width: width, height: width, borderRadius: width / 2 } ] } onPress={ process } activeOpacity={ 0.75 }>
+                    <Text style={ styles.num }>{ turnDetail?.turn ?? 0 + 1 }</Text>
+                  </TouchableOpacity>
+                </>
+              : <ActivityIndicator size='large' style={ styles.indicator } />
+          }
         </ScrollView>
       </SafeAreaView>
     </React.Fragment>
   )
 }
 
-export default GetNumberPage
+export default withResubAutoSubscriptions(GetNumberPage)
 
 const styles = StyleSheet.create({
   container: {
@@ -60,6 +90,9 @@ const styles = StyleSheet.create({
     marginHorizontal: '10%',
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  indicator: {
+    marginVertical: 50
   },
   instruction: {
     fontSize: 26,

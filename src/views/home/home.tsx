@@ -10,8 +10,7 @@ import { NavigationProp, ParamListBase } from '@react-navigation/native'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import { Colors } from '../../styles'
-import { UserStore, HealthRecordStore, MedicationRecord } from '../../stores'
-import { AppointmentC } from '../../connections'
+import { UserStore, HealthRecordStore, MedicationRecord, AppointmentStore } from '../../stores'
 
 const barColor = Colors.primaryVariant
 
@@ -20,13 +19,28 @@ interface PageProp {
 }
 
 const HomePage: FC<PageProp> = ({ navigation }) => {
+  const isReady = UserStore.ready()
   const CurrentUser = UserStore.getUser()
   const records = HealthRecordStore.getHealthRecords()
+  const isAppStoreReady = AppointmentStore.ready()
+  const appointments = AppointmentStore.getGroupedAppointments()
+
   const [ expandId, setExpandId ] = useState(1)
 
   useEffect(() => {
     return UserStore.unsubscribe
   }, [ CurrentUser ])
+
+  useEffect(() => {
+    if (isReady)
+      HealthRecordStore.fetchPatientRecords()
+  }, [ isReady ])
+
+  useEffect(() => {
+    if (isReady && isAppStoreReady === false)
+      AppointmentStore.fetchAllAppointments()
+        .catch(err => console.log(err))
+  }, [ isReady, isAppStoreReady ])
 
   return (
     <React.Fragment>
@@ -63,7 +77,7 @@ const HomePage: FC<PageProp> = ({ navigation }) => {
   )
 
   function AppointmentNotification() {
-    const nearingAppointments = AppointmentC.nearing
+    const nearingAppointments = [ ...appointments[ 'Waiting' ], ...appointments[ 'Accepted' ] ]
 
     return (
       <List.Accordion id={ 1 } title='Appointments'
@@ -72,12 +86,12 @@ const HomePage: FC<PageProp> = ({ navigation }) => {
         style={ styles.listStart }
       >
         {
-          nearingAppointments.map(({ date, address, medicalStaff }, index) =>
+          nearingAppointments.map((app, index) =>
             <List.Item key={ 'PU-' + index }
               style={ { backgroundColor: Colors.surface, marginBottom: 1 } }
-              title={ 'Appointment on ' + date.toDateString() }
+              title={ 'Appointment on ' + (app.type === 'byTime' ? app.time : app.date).toDateString() }
               titleStyle={ [ styles.text, { textTransform: 'capitalize' } ] }
-              description={ address + '\n' + medicalStaff }
+              description={ app.address + '\n' }
               descriptionStyle={ [ styles.text ] }
             />
           )
