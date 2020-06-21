@@ -1,5 +1,5 @@
 import qs from 'qs'
-import { UserStore } from '.'
+import UserStore from './UserStore'
 import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
 
 @AutoSubscribeStore
@@ -30,11 +30,11 @@ class HealthRecordStore extends StoreBase {
           if (response.ok) {
             return response.json()
           } else {
-            throw new Error(response.status + ': (' + response.statusText + ')')
+            throw response.status + ': (' + response.statusText + ')'
           }
         }).then(data => {
           if (data.errors) {
-            throw new Error(data.errors)
+            throw data.errors
           } else {
             this.healthPrescriptions = data[ 'Health Prescription' ].map((hr: any) => new HealthPrescription(hr))
             this.labTestResults = data[ 'Lab Test Result' ].map((hr: any) => new LabTestResult(hr))
@@ -42,7 +42,7 @@ class HealthRecordStore extends StoreBase {
           }
         }).catch(err => Promise.reject(new Error('Fetch Health Records: ' + err)))
       } else {
-        throw new Error('No Token Found')
+        Promise.reject(new Error('No Token Found'))
       }
     })
 

@@ -10,8 +10,7 @@ import { NavigationProp, ParamListBase } from '@react-navigation/native'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import { Colors } from '../../../styles'
-import { AppointmentC } from '../../../connections'
-import { UserStore, MedicalStaff } from '../../../stores'
+import { UserStore, MedicalStaff, AppointmentStore } from '../../../stores'
 
 const barColor = '#e982f6'
 
@@ -27,26 +26,24 @@ const SelectMedicalStaffPage: FC<PageProp> = ({ navigation }) => {
     },
     headerTintColor: '#ffffff'
   })
-  const medicalStaffs = UserStore.getMedicalStaff()
+  const medicalStaff = UserStore.getMedicalStaff()
+
   const [ filter, setFilter ] = useState('')
 
   useEffect(() => {
-    UserStore.fetchAllMedicalStaff()
-  }, [])
+    if (medicalStaff.length === 0)
+      UserStore.fetchAllMedicalStaff()
+  }, [ medicalStaff ])
 
   const onPress = (m: MedicalStaff) => () => {
-    const workingTime = AppointmentC.getWorkingTime(m.id)
+    const workingTime = m.workingTime
+    // undefined mean the working time is byNumber
     if (workingTime) {
-      AppointmentC.setNewAppointmentDetail('medicalStaff', m.username)
-      AppointmentC.setNewAppointmentDetail('address', m.medicalInstituition?.address ?? '')
-      if (workingTime.type === 'byNumber') {
-        AppointmentC.setNewAppointmentDetail('date', new Date())
-        navigation.navigate('Appointment/GetNumber')
-      } else {
-        navigation.navigate('Appointment/SelectTimeslot')
-      }
+      AppointmentStore.setNewAppDetail({ medicalStaffId: m.id, address: m.medicalInstituition.address, type: 'byTime' })
+      navigation.navigate('Appointment/SelectTimeslot')
     } else {
-      throw new Error('No working time')
+      AppointmentStore.setNewAppDetail({ medicalStaffId: m.id, address: m.medicalInstituition.address, type: 'byNumber' })
+      navigation.navigate('Appointment/GetNumber')
     }
   }
 
@@ -68,16 +65,17 @@ const SelectMedicalStaffPage: FC<PageProp> = ({ navigation }) => {
           </View>
           <View style={ styles.lastView }>
             {
-              medicalStaffs.filter(u => u.username.toLowerCase().includes(filter.toLowerCase())).map((m, index) =>
-                <TouchableOpacity key={ 'ms-' + index } onPress={ onPress(m) } activeOpacity={ 0.8 }>
-                  <View style={ { flexDirection: 'row', padding: 10, justifyContent: 'center', backgroundColor: Colors.surface } }>
-                    <View style={ { flex: 1, justifyContent: 'center' } }>
-                      <Text style={ { fontSize: 20, color: Colors.primaryVariant } }>{ m.username }</Text>
+              medicalStaff.filter(u => u.username.toLowerCase().includes(filter.toLowerCase()))
+                .map((m, index) =>
+                  <TouchableOpacity key={ 'ms-' + index } onPress={ onPress(m) } activeOpacity={ 0.8 }>
+                    <View style={ { flexDirection: 'row', padding: 10, justifyContent: 'center', backgroundColor: Colors.surface } }>
+                      <View style={ { flex: 1, justifyContent: 'center' } }>
+                        <Text style={ { fontSize: 20, color: Colors.primaryVariant } }>{ m.username }</Text>
+                      </View>
+                      <MaterialCommunityIcons name='chevron-right' color={ Colors.primaryVariant } size={ 36 } />
                     </View>
-                    <MaterialCommunityIcons name='chevron-right' color={ Colors.primaryVariant } size={ 36 } />
-                  </View>
-                </TouchableOpacity>
-              )
+                  </TouchableOpacity>
+                )
             }
           </View>
         </ScrollView>

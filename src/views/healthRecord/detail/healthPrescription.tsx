@@ -9,9 +9,12 @@ import Carousel from 'react-native-snap-carousel'
 import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
+import { hour12 } from '../../commons'
 import { Colors } from '../../../styles'
-import { AppointmentC, Appointment, isByTime } from '../../../connections'
-import { HealthRecordStore, HealthPrescription, MedicationRecord } from '../../../stores'
+import {
+  UserStore, HealthRecordStore, HealthPrescription, MedicationRecord, AppointmentStore,
+  Appointment
+} from '../../../stores'
 
 const barColor = '#4cb5f5'
 
@@ -27,15 +30,24 @@ const HealthPrescriptionPage: FC<PageProp> = ({ navigation }) => {
     },
     headerTintColor: '#ffffff'
   })
+  const medicalStaff = UserStore.getMedicalStaff()
   const healthPrescription = HealthRecordStore.getSelectedHPRecord()
-  const [ appointment, setAppointment ] = useState<Appointment>()
+  const appointments = AppointmentStore.getGroupedAppointments()
+  const { Completed } = appointments
+
   const [ snackVisible, setSnackVisible ] = useState(false)
+  const [ appointment, setAppointment ] = useState<Appointment>()
 
   useEffect(() => {
-    if (healthPrescription && healthPrescription instanceof HealthPrescription) {
-      healthPrescription.appId && setAppointment(AppointmentC.getAppointment(healthPrescription.appId))
+    if (healthPrescription && healthPrescription.type === 'Health Prescription' && healthPrescription.appId) {
+      setAppointment(Completed.find(app => app.id === healthPrescription.appId))
     }
   }, [ healthPrescription ])
+
+  useEffect(() => {
+    if (medicalStaff.length === 0)
+      UserStore.fetchAllMedicalStaff()
+  }, [ medicalStaff ])
 
   return (
     <React.Fragment>
@@ -109,6 +121,7 @@ const HealthPrescriptionPage: FC<PageProp> = ({ navigation }) => {
   }
 
   function AppointmentDetail(app: Appointment) {
+    const ms = medicalStaff.find(({ id }) => id === app.medicalStaffId)
     return (
       <Card style={ { marginVertical: 10 } }>
         <Card.Title title={ 'Appointment Detail' } style={ styles.cardStart } />
@@ -118,7 +131,7 @@ const HealthPrescriptionPage: FC<PageProp> = ({ navigation }) => {
               <Text style={ styles.text }>{ 'Medical Staff' }</Text>
             </View>
             <View style={ { flex: 3 } }>
-              <Text style={ styles.text }>{ app.medicalStaff }</Text>
+              <Text style={ styles.text }>{ ms?.username }</Text>
             </View>
           </View>
           <View style={ { flex: 1, flexDirection: 'row', marginVertical: 10 } }>
@@ -129,13 +142,13 @@ const HealthPrescriptionPage: FC<PageProp> = ({ navigation }) => {
               <Paragraph style={ styles.text }>{ app.address }</Paragraph>
             </View>
           </View>
-          { isByTime(app)
+          { app.type === 'byTime'
             ? <View style={ { flex: 1, flexDirection: 'row', marginVertical: 10 } }>
               <View style={ { flex: 2 } }>
                 <Text style={ styles.text }>{ 'Time' }</Text>
               </View>
               <View style={ { flex: 3 } }>
-                <Text style={ styles.text }>{ app.time }</Text>
+                <Text style={ styles.text }>{ hour12(app.time) }</Text>
               </View>
             </View>
             : <View style={ { flex: 1, flexDirection: 'row', marginVertical: 10 } }>

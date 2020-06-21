@@ -5,37 +5,45 @@ import {
 import {
   Text, Card, Button
 } from 'react-native-paper'
+import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
+import { hour12 } from '../../commons'
 import { Colors } from '../../../styles'
-import { AppointmentC } from '../../../connections'
+import { AppointmentStore, UserStore } from '../../../stores'
 
 const barColor = '#e982f6'
 
 interface PageProp {
-  route: any
   navigation: NavigationProp<ParamListBase>
 }
 
-const AppointmentConfirmationPage: FC<PageProp> = ({ route, navigation }) => {
-  const rescheduleId = route.params?.rescheduleId
-  const oldAppointment = AppointmentC.getAppointment(rescheduleId)
+const AppointmentConfirmationPage: FC<PageProp> = ({ navigation }) => {
+  const medicalStaff = UserStore.getMedicalStaff()
+  const selectedApp = AppointmentStore.getSelectedAppointment() // if got selected, mean it is a rescheduling
+  const newAppDetail = AppointmentStore.getNewAppDetail()
+
   navigation.setOptions({
-    title: 'Confirmation' + (oldAppointment ? ' on Reschedule' : ''),
+    title: 'Confirmation' + (selectedApp !== undefined ? ' on Reschedule' : ''),
     headerStyle: {
       backgroundColor: barColor,
     },
     headerTintColor: '#ffffff'
   })
-  const detail = AppointmentC.newAppointment
-  const createNewAppointment = () => {
-    AppointmentC.createNewAppointment()
-    navigation.reset({
-      index: 0,
-      routes: [ { name: 'Home' }, { name: 'Appointment' } ]
-    })
-  }
+  const createNewAppointment = () =>
+    Promise.resolve(
+      selectedApp
+        ? AppointmentStore.rescheduleAppointment(selectedApp.id)
+        : AppointmentStore.insertAppointment()
+    )
+      .then(() =>
+        navigation.reset({
+          index: 0,
+          routes: [ { name: 'Home' }, { name: 'Appointment' } ]
+        })
+      )
+      .catch(err => console.log(err))
 
   return (
     <React.Fragment>
@@ -44,18 +52,18 @@ const AppointmentConfirmationPage: FC<PageProp> = ({ route, navigation }) => {
         <ScrollView style={ { flex: 1 } } contentContainerStyle={ styles.content }>
           <View style={ { flex: 7, marginTop: 70, marginBottom: 10 } }>
             <Card>
-              <Card.Title title={ (oldAppointment ? ' New ' : '') + 'Appointment Detail' } style={ styles.cardStart } />
+              <Card.Title title={ (selectedApp ? ' New ' : '') + 'Appointment Detail' } style={ styles.cardStart } />
               <Card.Content>
                 {
                   [
-                    { field: 'Medical Staff', val: (oldAppointment ?? detail)?.medicalStaff },
-                    { field: 'Address', val: (oldAppointment ?? detail)?.address },
-                    { field: oldAppointment?.date.toDateString() ?? 'Date', val: detail.date?.toDateString(), isChange: oldAppointment !== undefined },
-                    { field: (oldAppointment?.type === 'byTime' && oldAppointment.time) ?? 'Time', val: detail.time, isNormalText: true, isChange: oldAppointment !== undefined },
-                    { field: 'Turn', val: detail.turn, isNormalText: true }
+                    { field: 'Medical Staff', val: medicalStaff.find(ms => ms.id === (selectedApp ?? newAppDetail)?.medicalStaffId)?.username },
+                    { field: 'Address', val: (selectedApp ?? newAppDetail)?.address },
+                    { field: (selectedApp?.type === 'byTime' ? selectedApp.time.toDateString() : undefined) ?? 'Date', val: newAppDetail?.time?.toDateString(), isChange: selectedApp !== undefined },
+                    { field: (selectedApp?.type === 'byTime' ? hour12(selectedApp.time) : undefined) ?? 'Time', val: newAppDetail?.time && hour12(newAppDetail.time), isNormalText: true, isChange: selectedApp !== undefined },
+                    { field: 'Turn', val: newAppDetail?.turn, isNormalText: true }
                   ].filter(({ val }) => val !== undefined && val !== '').map(({ field, val, isNormalText, isChange }, index) =>
                     <View key={ 'bi-' + index } style={ { flexDirection: 'row', marginVertical: 10 } }>
-                      <View style={ { flex: isChange && oldAppointment ? 3 : 2 } }>
+                      <View style={ { flex: isChange && selectedApp ? 3 : 2 } }>
                         <Text style={ styles.text }>{ field }</Text>
                       </View>
                       {
@@ -85,7 +93,7 @@ const AppointmentConfirmationPage: FC<PageProp> = ({ route, navigation }) => {
   )
 }
 
-export default AppointmentConfirmationPage
+export default withResubAutoSubscriptions(AppointmentConfirmationPage)
 
 const styles = StyleSheet.create({
   container: {
