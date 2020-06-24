@@ -11,7 +11,7 @@ import { NavigationProp, ParamListBase } from '@react-navigation/native'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import { Colors } from '../../../styles'
-import { day, month, hour12 } from '../../commons'
+import { DateUtil } from '../../../utils'
 import { AppointmentStore, AvailableTimeSlotStore } from '../../../stores'
 
 const barColor = '#e982f6'
@@ -77,9 +77,9 @@ const SelectTimeslotPage: FC<PageProp> = ({ route, navigation }) => {
         <Card>
           <Card.Content style={ styles.cardStart }>{ }</Card.Content>
           <Card.Content style={ { alignItems: 'center', borderLeftWidth: 2.5, borderRightWidth: 2.5, borderColor: Colors.background } }>
-            <Title style={ styles.text }>{ day[ item.day.getDay() ] }</Title>
+            <Title style={ styles.text }>{ DateUtil.day[ item.day.getDay() ] }</Title>
             <Title style={ styles.text }>{ item.day.getDate() }</Title>
-            <Title style={ styles.text }>{ month[ item.day.getMonth() ] }</Title>
+            <Title style={ styles.text }>{ DateUtil.month[ item.day.getMonth() ] }</Title>
           </Card.Content>
           <Card.Actions style={ styles.cardEnd }>{ }</Card.Actions>
         </Card>
@@ -117,7 +117,7 @@ const SelectTimeslotPage: FC<PageProp> = ({ route, navigation }) => {
                         <TouchableOpacity key={ 'slot-' + index } style={ styles.bar } onPress={ cont(as) }>
                           <View style={ styles.row }>
                             <View style={ { flex: 1, justifyContent: 'center' } }>
-                              <Text style={ { fontSize: 20, color: 'black' } }>{ hour12(as) }</Text>
+                              <Text style={ { fontSize: 20, color: 'black' } }>{ DateUtil.hour12(as) }</Text>
                             </View>
                             <MaterialCommunityIcons name='chevron-right' color='black' size={ 36 } />
                           </View>

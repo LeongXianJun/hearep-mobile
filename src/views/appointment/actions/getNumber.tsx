@@ -8,7 +8,7 @@ import {
 import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
-import { hour12 } from '../../commons'
+import { DateUtil } from '../../../utils'
 import { Colors } from '../../../styles'
 import { AppointmentStore } from '../../../stores'
 
@@ -64,7 +64,7 @@ const GetNumberPage: FC<PageProp> = ({ navigation }) => {
               ? isOffDay
                 ? <Text style={ styles.instruction }>{ 'This doctor does not operate today. Please kindly choose another doctor.' }</Text>
                 : <>
-                  <Text style={ { textAlign: 'center' } }>{ hour12(turnDetail?.startTime) + ' - ' + hour12(turnDetail?.endTime) }</Text>
+                  <Text style={ { textAlign: 'center' } }>{ DateUtil.hour12(turnDetail?.startTime) + ' - ' + DateUtil.hour12(turnDetail?.endTime) }</Text>
                   <Text style={ styles.instruction }>{ 'Click this to get this number and queue up' }</Text>
                   <TouchableOpacity style={ [ styles.circle, { width: width, height: width, borderRadius: width / 2 } ] } onPress={ process } activeOpacity={ 0.75 }>
                     <Text style={ styles.num }>{ turnDetail?.turn ?? 0 + 1 }</Text>
