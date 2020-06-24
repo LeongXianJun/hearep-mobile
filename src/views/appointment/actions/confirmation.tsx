@@ -9,7 +9,7 @@ import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
-import { hour12 } from '../../commons'
+import { DateUtil } from '../../../utils'
 import { Colors } from '../../../styles'
 import { AppointmentStore, UserStore } from '../../../stores'
 
@@ -59,7 +59,7 @@ const AppointmentConfirmationPage: FC<PageProp> = ({ navigation }) => {
                     { field: 'Medical Staff', val: medicalStaff.find(ms => ms.id === (selectedApp ?? newAppDetail)?.medicalStaffId)?.username },
                     { field: 'Address', val: (selectedApp ?? newAppDetail)?.address },
                     { field: (selectedApp?.type === 'byTime' ? selectedApp.time.toDateString() : undefined) ?? 'Date', val: newAppDetail?.time?.toDateString(), isChange: selectedApp !== undefined },
-                    { field: (selectedApp?.type === 'byTime' ? hour12(selectedApp.time) : undefined) ?? 'Time', val: newAppDetail?.time && hour12(newAppDetail.time), isNormalText: true, isChange: selectedApp !== undefined },
+                    { field: (selectedApp?.type === 'byTime' ? DateUtil.hour12(selectedApp.time) : undefined) ?? 'Time', val: newAppDetail?.time && DateUtil.hour12(newAppDetail.time), isNormalText: true, isChange: selectedApp !== undefined },
                     { field: 'Turn', val: newAppDetail?.turn, isNormalText: true }
                   ].filter(({ val }) => val !== undefined && val !== '').map(({ field, val, isNormalText, isChange }, index) =>
                     <View key={ 'bi-' + index } style={ { flexDirection: 'row', marginVertical: 10 } }>

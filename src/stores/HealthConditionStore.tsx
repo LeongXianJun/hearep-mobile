@@ -25,7 +25,7 @@ class HealthConditionStore extends StoreBase {
 
   private getToken = () => UserStore.getToken()
 
-  fetchHealthCondition = (patientId: string) =>
+  fetchHealthCondition = () =>
     this.getToken().then(async userToken => {
       if (userToken) {
         if (userToken) {
@@ -35,7 +35,7 @@ class HealthConditionStore extends StoreBase {
               Accept: 'application/json',
               'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: qs.stringify({ userToken, date: new Date(), patientId })
+            body: qs.stringify({ userToken, date: new Date() })
           }).then(response => {
             if (response.ok) {
               return response.json()

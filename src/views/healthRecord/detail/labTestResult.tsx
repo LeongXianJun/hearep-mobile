@@ -8,7 +8,7 @@ import {
 import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
-import { hour12 } from '../../commons'
+import { DateUtil } from '../../../utils'
 import { Colors } from '../../../styles'
 import {
   UserStore, HealthRecordStore, LabTestResult, AppointmentStore, Appointment
@@ -134,7 +134,7 @@ const LabTestPage: FC<PageProp> = ({ navigation }) => {
                 <Text style={ styles.text }>{ 'Time' }</Text>
               </View>
               <View style={ { flex: 3 } }>
-                <Text style={ styles.text }>{ hour12(app.time) }</Text>
+                <Text style={ styles.text }>{ DateUtil.hour12(app.time) }</Text>
               </View>
             </View>
             : <View style={ { flex: 1, flexDirection: 'row', marginVertical: 10 } }>

@@ -9,3 +9,6 @@ export * from './AppointmentStore'
 
 export { default as AvailableTimeSlotStore } from './AvailableTimeSlotStore'
 export * from './AvailableTimeSlotStore'
+
+export { default as HealthConditionStore } from './HealthConditionStore'
+export * from './HealthConditionStore'

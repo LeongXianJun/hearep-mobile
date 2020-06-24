@@ -10,7 +10,7 @@ import { withResubAutoSubscriptions } from 'resub'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { useNavigation, NavigationProp, ParamListBase } from '@react-navigation/native'
 
-import { hour12 } from '../commons'
+import { DateUtil } from '../../utils'
 import { Colors } from '../../styles'
 import { isUndefined } from '../../utils'
 import { UserStore, AppointmentStore, Appointment, MedicalStaff } from '../../stores'
@@ -236,7 +236,7 @@ const AppointmentPage: FC<PageProp> = ({ navigation }) => {
                       { field: 'Medical Staff', val: ms?.username },
                       { field: 'Address', val: appointment.address },
                       appointment.type === 'byTime'
-                        ? { field: 'Time', val: hour12(appointment.time), isNormalText: true }
+                        ? { field: 'Time', val: DateUtil.hour12(appointment.time), isNormalText: true }
                         : appointment.type === 'byNumber'
                           ? { field: 'Turn Number', val: appointment.turn + 1, isNormalText: true }
                           : { field: undefined }
