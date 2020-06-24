@@ -1,44 +1,66 @@
-import React, { FC } from 'react'
+import React, { FC, useEffect } from 'react'
 import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions,
 } from 'react-native'
 import {
-  Text, Card, FAB
+  Text, Card, FAB, ActivityIndicator
 } from 'react-native-paper'
+import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
 import { Colors } from '../../styles'
-
-const AmountGraph = require('../../resources/images/AmountGraph.png')
-
-const barColor = '#34675c'
+import { LineGraph } from '../common'
+import { HealthConditionStore } from '../../stores'
 
 interface PageProp {
   navigation: NavigationProp<ParamListBase>
 }
 
 const AnalysisPage: FC<PageProp> = ({ navigation }) => {
+  const isHCReady = HealthConditionStore.ready()
+  const healthConditions = HealthConditionStore.getHealthCondition()
+
+  useEffect(() => {
+    HealthConditionStore.fetchHealthCondition()
+  }, [])
 
   return (
     <React.Fragment>
       <StatusBar barStyle='default' />
       <SafeAreaView style={ styles.container }>
-        <ScrollView style={ { flex: 1 } } contentContainerStyle={ styles.content }>
-          <Text style={ styles.title }>{ 'Health Analysis' }</Text>
+        <ScrollView style={ { flex: 1 } } contentContainerStyle={ [ styles.content, { paddingBottom: 50 } ] }>
           {
-            [
-              { title: 'Blood Sugar Level', graph: <Card.Cover style={ styles.img } source={ AmountGraph } /> },
-              { title: 'Blood Pressure', graph: <Card.Cover style={ styles.img } source={ AmountGraph } /> },
-              { title: 'BMI', graph: <Card.Cover style={ styles.img } source={ AmountGraph } /> }
-            ].map(({ title, graph }, index, arr) =>
-              <View key={ 'graph-' + index } style={ [ { marginVertical: 10 }, index === arr.length - 1 ? styles.lastView : undefined ] }>
-                <Card style={ { backgroundColor: barColor } }>
-                  <Card.Title title={ title } />
-                  { graph }
-                  <Card.Content>{ }</Card.Content>
-                </Card>
+            isHCReady
+              ? <>
+                <Text style={ styles.title }>{ 'Health Analysis' }</Text>
+                {
+                  [
+                    {
+                      title: 'Blood Sugar Level',
+                      graph: <LineGraph data={ healthConditions[ 'Blood Sugar Level' ].map(a => ({ x: a.day, y: a.length > 0 ? a.count / a.length : 0 })) } showSymbol yLabel='Count' />
+                    },
+                    {
+                      title: 'Blood Pressure',
+                      graph: <LineGraph data={ healthConditions[ 'Blood Pressure Level' ].map(a => ({ x: a.day, y: a.length > 0 ? a.count / a.length : 0 })) } showSymbol yLabel='Count' />
+                    },
+                    {
+                      title: 'BMI',
+                      graph: <LineGraph data={ healthConditions[ 'BMI' ].map(a => ({ x: a.day, y: a.length > 0 ? a.count / a.length : 0 })) } showSymbol yLabel='Count' />
+                    }
+                  ].map(({ title, graph }, index, arr) =>
+                    <View key={ 'graph-' + index } style={ [ { marginVertical: 10 }, index === arr.length - 1 ? styles.lastView : undefined ] }>
+                      <Card style={ { flex: 1 } }>
+                        <Card.Title title={ title } titleStyle={ { color: '#000000' } } />
+                        { graph }
+                        <Card.Content>{ }</Card.Content>
+                      </Card>
+                    </View>
+                  )
+                }
+              </>
+              : <View style={ { flex: 1, justifyContent: 'center', alignItems: 'center' } }>
+                <ActivityIndicator size='large' style={ styles.indicator } />
               </View>
-            )
           }
         </ScrollView>
       </SafeAreaView>
@@ -52,7 +74,7 @@ const AnalysisPage: FC<PageProp> = ({ navigation }) => {
   )
 }
 
-export default AnalysisPage
+export default withResubAutoSubscriptions(AnalysisPage)
 
 const styles = StyleSheet.create({
   container: {
@@ -63,15 +85,13 @@ const styles = StyleSheet.create({
     minHeight: Dimensions.get('window').height - (StatusBar.currentHeight ?? 0) - 60,
     marginHorizontal: '10%'
   },
+  indicator: {
+    marginVertical: 50
+  },
   title: {
     fontWeight: 'bold',
     marginTop: 25,
     fontSize: 35
-  },
-  img: {
-    margin: 'auto',
-    maxWidth: '100%',
-    maxHeight: '100%',
   },
   lastView: {
     marginTop: 10,
