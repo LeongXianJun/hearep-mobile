@@ -1,10 +1,11 @@
 import React, { useEffect, useState, FC } from 'react'
 import {
-  StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions,
+  StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions, AsyncStorage,
 } from 'react-native'
 import {
   Text, Title, Card, Button, Divider, Snackbar, Paragraph
 } from 'react-native-paper'
+import CalendarEvents from 'react-native-calendar-events'
 import Carousel from 'react-native-snap-carousel'
 import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
@@ -30,6 +31,7 @@ const HealthPrescriptionPage: FC<PageProp> = ({ navigation }) => {
     },
     headerTintColor: '#ffffff'
   })
+  const width = Dimensions.get('window').width
   const medicalStaff = UserStore.getMedicalStaff()
   const healthPrescription = HealthRecordStore.getSelectedHPRecord()
   const appointments = AppointmentStore.getGroupedAppointments()
@@ -167,7 +169,45 @@ const HealthPrescriptionPage: FC<PageProp> = ({ navigation }) => {
   }
 
   function MedicationRecords(mrs: MedicationRecord[]) {
-    const width = Dimensions.get('window').width
+    const addEvent = (mr: MedicationRecord) => () =>
+      CalendarEvents.authorizationStatus()
+        .then(async status =>
+          status !== 'authorized'
+            ? await CalendarEvents.authorizeEventStore()
+            : status
+        ).then(status => {
+          if (status === 'authorized') {
+            CalendarEvents.findCalendars().then(allC => {
+              const primaryC = allC.find(c => c.isPrimary)
+              if (primaryC) {
+                CalendarEvents.saveEvent('Medication Refill', {
+                  startDate: mr.refillDate.toISOString(), endDate: mr.refillDate.toISOString(),
+                  allDay: true, location: appointment?.address, calendarId: primaryC.id
+                }).then(eventId => {
+                  AsyncStorage.setItem(mr.id, eventId)
+                    .then(() => setSnackVisible(true))
+                })
+              }
+            }).catch(err => console.log(err))
+          }
+        })
+
+    const RefillButton: FC<{ item: MedicationRecord }> = ({ item }) => {
+      const [ eventId, setEventId ] = useState('')
+      useEffect(() => {
+        AsyncStorage.getItem(item.id).then(id => {
+          if (id !== null) {
+            setEventId(id)
+          }
+        })
+      }, [])
+      return eventId === ''
+        ? < Card.Actions >
+          <Button mode='contained' labelStyle={ { color: 'white', paddingHorizontal: 10 } } style={ styles.button } onPress={ addEvent(item) }>{ 'Add Reminder for Refill' }</Button>
+        </Card.Actions>
+        : null
+    }
+
     const renderItem = ({ item, index }: { item: MedicationRecord, index: number }) =>
       <Card key={ 'mr-' + index } style={ { flex: 1 } }>
         <Card.Title title={ 'Refill by ' + item.refillDate.toDateString() } style={ styles.cardStart } />
@@ -193,9 +233,7 @@ const HealthPrescriptionPage: FC<PageProp> = ({ navigation }) => {
             )
           }
         </Card.Content>
-        <Card.Actions>
-          <Button mode='contained' labelStyle={ { color: 'white', paddingHorizontal: 10 } } style={ styles.button } onPress={ () => setSnackVisible(true) }>{ 'Add Reminder' }</Button>
-        </Card.Actions>
+        <RefillButton item={ item } />
         <Card.Actions style={ styles.cardEnd }>{ }</Card.Actions>
       </Card>
 
@@ -204,7 +242,7 @@ const HealthPrescriptionPage: FC<PageProp> = ({ navigation }) => {
         <Title style={ { marginVertical: 5 } }>{ 'Medication Records' }</Title>
         <Carousel
           layout='default'
-          data={ mrs }
+          data={ mrs.map(m => ({ ...m })) }
           renderItem={ renderItem }
           itemWidth={ width * 0.64 } // 0.8 * 0.8
           sliderWidth={ width * 0.8 }

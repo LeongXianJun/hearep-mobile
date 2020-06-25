@@ -3,8 +3,9 @@ import {
   StatusBar, Platform, KeyboardAvoidingView, View, StyleSheet, ScrollView, Dimensions
 } from 'react-native'
 import {
-  Text, Button, TextInput, RadioButton
+  Text, Button, TextInput, RadioButton, TouchableRipple
 } from 'react-native-paper'
+import DateTimePicker from 'react-native-modal-datetime-picker'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
 import { Colors } from '../../styles'
@@ -17,12 +18,18 @@ interface PageProp {
 }
 
 const RegisterPage: FC<PageProp> = ({ navigation }) => {
+  const [ isDPVisible, setIsDPVisible ] = useState(false)
   const [ fullname, setFullname ] = useState('')
-  const [ dob, setDob ] = useState('')
+  const [ dob, setDob ] = useState(new Date())
   const [ gender, setGender ] = useState<'M' | 'F'>('M')
   const [ email, setEmail ] = useState('')
   const [ occupation, setOccupation ] = useState('')
   const [ isSubmitting, setIsSubmitting ] = useState(false)
+
+  const updateDob = (date: Date) => {
+    setIsDPVisible(false)
+    setDob(date)
+  }
 
   const register = () => {
     setIsSubmitting(true)
@@ -57,14 +64,15 @@ const RegisterPage: FC<PageProp> = ({ navigation }) => {
               onChangeText={ text => setFullname(text) }
               style={ styles.textInput }
             />
-            <TextInput
-              label='Date of Birth'
-              mode='outlined'
-              value={ dob }
-              placeholder='YYYY-MM-DD'
-              onChangeText={ text => setDob(text) }
-              style={ styles.textInput }
-            />
+            <TouchableRipple onPress={ () => setIsDPVisible(true) } style={ styles.textInput }>
+              <TextInput
+                label='Date of Birth'
+                mode='outlined'
+                value={ dob.toDateString() }
+                disabled
+                style={ { width: '100%' } }
+              />
+            </TouchableRipple>
             <View style={ [ styles.textInput, { flex: 1, flexDirection: 'row', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 3, borderColor: 'white', borderWidth: 1 } ] }>
               <View style={ { flex: 1, justifyContent: 'center' } }>
                 <Text style={ { fontSize: 18, marginLeft: 3 } }>Gender</Text>
@@ -96,6 +104,12 @@ const RegisterPage: FC<PageProp> = ({ navigation }) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <DateTimePicker
+        isVisible={ isDPVisible }
+        date={ dob }
+        onConfirm={ date => updateDob(date) }
+        onCancel={ () => setIsDPVisible(false) }
+      />
     </React.Fragment>
   )
 }
