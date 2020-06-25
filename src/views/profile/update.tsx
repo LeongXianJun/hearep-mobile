@@ -4,9 +4,10 @@ import {
   KeyboardAvoidingView, Platform,
 } from 'react-native'
 import {
-  Text, RadioButton, TextInput, Button, Title, Subheading
+  Text, RadioButton, TextInput, Button, Title, Subheading, TouchableRipple
 } from 'react-native-paper'
 import { withResubAutoSubscriptions } from 'resub'
+import DateTimePicker from 'react-native-modal-datetime-picker'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
 import { Colors } from '../../styles'
@@ -28,9 +29,10 @@ const UpdateProfilePage: FC<PageProp> = ({ navigation }) => {
 
   const CurrentUser = UserStore.getUser()
 
+  const [ isDPVisible, setIsDPVisible ] = useState(false)
   const [ info, setInfo ] = useState({
     username: '',
-    dob: '',
+    dob: new Date(),
     gender: 'M' as 'M' | 'F',
     email: '',
     occupation: ''
@@ -44,8 +46,7 @@ const UpdateProfilePage: FC<PageProp> = ({ navigation }) => {
     } else {
       const { username, dob, gender, email, occupation } = CurrentUser
       setInfo({
-        username, gender, email,
-        dob: dob.toDateString(),
+        username, gender, email, dob,
         occupation: occupation ?? ''
       })
     }
@@ -53,9 +54,14 @@ const UpdateProfilePage: FC<PageProp> = ({ navigation }) => {
     return UserStore.unsubscribe
   }, [ CurrentUser ])
 
+  const updateDob = (date: Date) => {
+    setIsDPVisible(false)
+    setInfo({ ...info, dob: date })
+  }
+
   const updateProfile = () => {
     if (CurrentUser) {
-      UserStore.updateProfile({ username, dob: dob, gender, email, occupation })
+      UserStore.updateProfile({ username, dob, gender, email, occupation })
         .then(() => {
           navigation.goBack()
         })
@@ -79,14 +85,15 @@ const UpdateProfilePage: FC<PageProp> = ({ navigation }) => {
               onChangeText={ text => setInfo({ ...info, username: text }) }
               style={ styles.textInput }
             />
-            <TextInput
-              label='Date of Birth'
-              mode='outlined'
-              value={ dob }
-              placeholder='YYYY-MM-DD'
-              onChangeText={ text => setInfo({ ...info, dob: text }) }
-              style={ styles.textInput }
-            />
+            <TouchableRipple onPress={ () => setIsDPVisible(true) } style={ styles.textInput }>
+              <TextInput
+                label='Date of Birth'
+                mode='outlined'
+                value={ dob.toDateString() }
+                disabled
+                style={ { width: '100%' } }
+              />
+            </TouchableRipple>
             <View style={ [ styles.textInput, { flex: 1, flexDirection: 'row', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 3, borderColor: 'white', borderWidth: 1 } ] }>
               <View style={ { flex: 1, justifyContent: 'center' } }>
                 <Text style={ { fontSize: 18, marginLeft: 3 } }>Gender</Text>
@@ -118,6 +125,12 @@ const UpdateProfilePage: FC<PageProp> = ({ navigation }) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <DateTimePicker
+        isVisible={ isDPVisible }
+        date={ dob }
+        onConfirm={ date => updateDob(date) }
+        onCancel={ () => setIsDPVisible(false) }
+      />
     </React.Fragment>
   )
 }

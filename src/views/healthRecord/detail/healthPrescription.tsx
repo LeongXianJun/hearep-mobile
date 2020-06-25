@@ -1,6 +1,6 @@
 import React, { useEffect, useState, FC } from 'react'
 import {
-  StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions,
+  StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions, AsyncStorage,
 } from 'react-native'
 import {
   Text, Title, Card, Button, Divider, Snackbar, Paragraph
@@ -30,6 +30,7 @@ const HealthPrescriptionPage: FC<PageProp> = ({ navigation }) => {
     },
     headerTintColor: '#ffffff'
   })
+  const width = Dimensions.get('window').width
   const medicalStaff = UserStore.getMedicalStaff()
   const healthPrescription = HealthRecordStore.getSelectedHPRecord()
   const appointments = AppointmentStore.getGroupedAppointments()
@@ -167,9 +168,14 @@ const HealthPrescriptionPage: FC<PageProp> = ({ navigation }) => {
   }
 
   function MedicationRecords(mrs: MedicationRecord[]) {
-    const width = Dimensions.get('window').width
-    const renderItem = ({ item, index }: { item: MedicationRecord, index: number }) =>
-      <Card key={ 'mr-' + index } style={ { flex: 1 } }>
+    const addEvent = (mrId: string) => () => {
+      AsyncStorage.setItem(mrId, 'true')
+        .then(() => setSnackVisible(true))
+    }
+
+    const renderItem = async ({ item, index }: { item: MedicationRecord, index: number }) => {
+      const isEventAdded = await AsyncStorage.getItem(item.id)
+      return <Card key={ 'mr-' + index } style={ { flex: 1 } }>
         <Card.Title title={ 'Refill by ' + item.refillDate.toDateString() } style={ styles.cardStart } />
         <Card.Content style={ { flex: 1 } }>
           {
@@ -193,11 +199,16 @@ const HealthPrescriptionPage: FC<PageProp> = ({ navigation }) => {
             )
           }
         </Card.Content>
-        <Card.Actions>
-          <Button mode='contained' labelStyle={ { color: 'white', paddingHorizontal: 10 } } style={ styles.button } onPress={ () => setSnackVisible(true) }>{ 'Add Reminder' }</Button>
-        </Card.Actions>
+        {
+          isEventAdded !== 'true'
+            ? < Card.Actions >
+              <Button mode='contained' labelStyle={ { color: 'white', paddingHorizontal: 10 } } style={ styles.button } onPress={ addEvent(item.id) }>{ 'Add Reminder' }</Button>
+            </Card.Actions>
+            : null
+        }
         <Card.Actions style={ styles.cardEnd }>{ }</Card.Actions>
       </Card>
+    }
 
     return (
       <View style={ styles.lastView }>

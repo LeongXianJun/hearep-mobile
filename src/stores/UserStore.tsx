@@ -97,7 +97,7 @@ class UserStore extends StoreBase {
       }
     })
 
-  createUser = (info: { username: string, dob: string, gender: 'M' | 'F', email: string, occupation?: string }) =>
+  createUser = (info: { username: string, dob: Date, gender: 'M' | 'F', email: string, occupation?: string }) =>
     this.getToken().then(async userToken => {
       if (userToken) {
         await fetch('http://10.0.2.2:8001/user/create', {
@@ -133,7 +133,7 @@ class UserStore extends StoreBase {
       }
     })
 
-  updateProfile = (latest: { username: string, dob: string, gender: 'M' | 'F', email: string, occupation?: string }) =>
+  updateProfile = (latest: { username: string, dob: Date, gender: 'M' | 'F', email: string, occupation?: string }) =>
     this.getToken().then(async userToken => {
       if (userToken) {
         await fetch('http://10.0.2.2:8001/user/update', {
