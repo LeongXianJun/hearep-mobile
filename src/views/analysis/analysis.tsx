@@ -10,18 +10,18 @@ import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
 import { Colors } from '../../styles'
 import { LineGraph } from '../common'
-import { HealthConditionStore } from '../../stores'
+import { HealthAnalysisStore } from '../../stores'
 
 interface PageProp {
   navigation: NavigationProp<ParamListBase>
 }
 
 const AnalysisPage: FC<PageProp> = ({ navigation }) => {
-  const isHCReady = HealthConditionStore.ready()
-  const healthConditions = HealthConditionStore.getHealthCondition()
+  const isHCReady = HealthAnalysisStore.ready()
+  const healthConditions = HealthAnalysisStore.getHealthCondition()
 
   useEffect(() => {
-    HealthConditionStore.fetchHealthCondition()
+    HealthAnalysisStore.fetchHealthAnalysis()
   }, [])
 
   return (
@@ -35,6 +35,10 @@ const AnalysisPage: FC<PageProp> = ({ navigation }) => {
                 <Text style={ styles.title }>{ 'Health Analysis' }</Text>
                 {
                   [
+                    {
+                      title: 'Sickness Frequency',
+                      graph: <LineGraph data={ healthConditions[ 'Sickness Frequency' ].map(a => ({ x: a.month, y: a.count })) } showSymbol yLabel='Count' showMonth />
+                    },
                     {
                       title: 'Blood Sugar Level',
                       graph: <LineGraph data={ healthConditions[ 'Blood Sugar Level' ].map(a => ({ x: a.day, y: a.length > 0 ? a.count / a.length : 0 })) } showSymbol yLabel='Count' />

@@ -10,7 +10,7 @@ import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
 import { Colors } from '../../../styles'
-import { HealthConditionStore } from '../../../stores'
+import { HealthAnalysisStore } from '../../../stores'
 
 const barColor = '#34675c'
 
@@ -26,7 +26,7 @@ const UpdateHealthConditionPage: FC<PageProp> = ({ navigation }) => {
     },
     headerTintColor: '#ffffff'
   })
-  const options = HealthConditionStore.getHealthConditionOptions()
+  const options = HealthAnalysisStore.getHealthConditionOptions()
 
   const [ isLoading, setIsLoading ] = useState(false)
   const [ field, setfield ] = useState('Blood Sugar Level')
@@ -34,12 +34,12 @@ const UpdateHealthConditionPage: FC<PageProp> = ({ navigation }) => {
 
   useEffect(() => {
     if (isLoading === false)
-      HealthConditionStore.fetchOptions()
+      HealthAnalysisStore.fetchOptions()
         .then(() => setIsLoading(true))
   }, [ isLoading ])
 
   const update = () =>
-    HealthConditionStore.insertHealthCondition({ date: new Date(), option: field, value: val })
+    HealthAnalysisStore.insertHealthCondition({ date: new Date(), option: field, value: val })
       .then(() =>
         navigation.goBack()
       )

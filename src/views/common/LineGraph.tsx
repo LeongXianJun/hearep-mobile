@@ -7,10 +7,11 @@ interface PageProp {
   data: Array<{ x: any, y: any }>
   color?: string
   showSymbol?: boolean
+  showMonth?: boolean
   yLabel?: string
 }
 
-const LineGraph: FC<PageProp> = ({ data, color = 'tomato', showSymbol, yLabel }) => {
+const LineGraph: FC<PageProp> = ({ data, color = 'tomato', showSymbol, showMonth, yLabel }) => {
   return (
     <VictoryChart
       style={ {
@@ -21,7 +22,7 @@ const LineGraph: FC<PageProp> = ({ data, color = 'tomato', showSymbol, yLabel })
       width={ 325 }
       minDomain={ { y: 0 } }
       scale={ { x: data[ 0 ]?.x instanceof Date ? "time" : 'linear' } }
-      padding={ { top: 30, left: 50, right: 30, bottom: 50 } }
+      padding={ { top: 40, left: 50, right: 30, bottom: 50 } }
       domainPadding={ { y: 5 } }
       containerComponent={
         <VictoryVoronoiContainer />
@@ -33,7 +34,7 @@ const LineGraph: FC<PageProp> = ({ data, color = 'tomato', showSymbol, yLabel })
       />
       <VictoryAxis
         tickValues={ data.map(d => d.x) }
-        tickFormat={ x => DateUtil.day[ x.getDay() ] + '\n' + x.getDate() }
+        tickFormat={ x => showMonth ? DateUtil.month[ x.getMonth() ] : DateUtil.day[ x.getDay() ] + '\n' + x.getDate() }
       />
       <VictoryGroup
         style={ {
