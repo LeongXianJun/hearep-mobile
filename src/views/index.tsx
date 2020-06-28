@@ -7,3 +7,4 @@ export * from './profile'
 
 export { default as AuthenticationDialog } from './authenticationDialog'
 export { default as AuthLoadingScreen } from './authLoading'
+export { default as NotificationManager } from './NotificationManager'
