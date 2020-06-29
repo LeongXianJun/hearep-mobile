@@ -12,7 +12,7 @@ import {
   AnalysisPage, ProfilePage, HealthPrescriptionPage, LabTestResultPage,
   UpdateHealthRecordScreen, AuthenticationDialog, PermitUsersPage, UpdateProfilePage,
   AppointmentConfirmationPage, AppointmentHistoryPage, AppointmentPage,
-  GetNumberPage, SelectMedicalStaffPage, SelectTimeslotPage, NotificationManager
+  GetNumberPage, SelectMedicalStaffPage, SelectTimeslotPage, NotificationManager, RemoveAuthorizedUsersPage
 } from './src/views'
 import { Colors } from './src/styles'
 
@@ -51,6 +51,7 @@ const App: FC<{}> = () => {
       { title: 'HealthCondition/Update', component: UpdateHealthRecordScreen },
       { title: 'Profile/Update', component: UpdateProfilePage },
       { title: 'Profile/PermitUsers', component: PermitUsersPage },
+      { title: 'Profile/RemoveUsers', component: RemoveAuthorizedUsersPage },
       { title: 'Appointment', component: AppointmentPage },
       { title: 'Appointment/History', component: AppointmentHistoryPage },
       { title: 'Appointment/SelectMedicalStaff', component: SelectMedicalStaffPage },

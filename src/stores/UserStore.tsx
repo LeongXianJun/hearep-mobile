@@ -11,12 +11,20 @@ class UserStore extends StoreBase {
   private user: Patient | undefined
   private firebaseUser: FirebaseAuthTypes.User | undefined
   private medicalStaff: MedicalStaff[]
+  private patients: {
+    authorized: Patient[],
+    notAuthorized: Patient[]
+  }
   private isRegistering: boolean
   private isReady: boolean
 
   constructor() {
     super()
     this.medicalStaff = []
+    this.patients = {
+      authorized: [],
+      notAuthorized: []
+    }
     this.isRegistering = false
     this.isReady = false
   }
@@ -121,6 +129,41 @@ class UserStore extends StoreBase {
       }
     })
 
+  fetchAllPatients = () =>
+    this.getToken().then(async userToken => {
+      if (userToken) {
+        await fetch('http://10.0.2.2:8001/patient/all', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: qs.stringify({ userToken })
+        }).then(response => {
+          if (response.ok) {
+            return response.json()
+          } else {
+            throw response.status + ': (' + response.statusText + ')'
+          }
+        }).then(data => {
+          if (data.errors) {
+            throw data.errors
+          } else {
+            const allPatients = (data as Array<any>).map(p => new Patient(p)).filter(p => p.id !== this.user?.id)
+            const authorizedList = this.user?.authorizedUsers
+            if (authorizedList) {
+              this.patients = allPatients.reduce<{ authorized: Patient[], notAuthorized: Patient[] }>((all, p) => all, { authorized: [], notAuthorized: [] })
+            } else {
+              this.patients = { authorized: [], notAuthorized: allPatients }
+            }
+            this.trigger(UserStore.PatientKey)
+          }
+        }).catch(err => Promise.reject(new Error('Fetch Medical Staff: ' + err)))
+      } else {
+        Promise.reject(new Error('No Token Found'))
+      }
+    })
+
   createUser = (info: { username: string, dob: Date, gender: 'M' | 'F', email: string, occupation?: string }) =>
     this.getToken().then(async userToken => {
       if (userToken) {
@@ -192,6 +235,86 @@ class UserStore extends StoreBase {
       }
     })
 
+  updateAuthorizedUsers = (userIds: string[]) =>
+    this.getToken().then(async userToken => {
+      if (userToken) {
+        await fetch('http://10.0.2.2:8001/user/authorized/update', {
+          method: 'PUT',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: qs.stringify({ userToken, userIds })
+        }).then(response => {
+          if (response.ok) {
+            return response.json()
+          } else {
+            throw response.status + ': (' + response.statusText + ')'
+          }
+        }).then(result => {
+          if (result.errors) {
+            throw result.errors
+          } else {
+            const result = this.patients.notAuthorized.reduce<{
+              target: Patient[], remaining: Patient[]
+            }>((all, p) => userIds.includes(p.id)
+              ? { ...all, target: [ ...all.target, p ] }
+              : { ...all, remaining: [ ...all.remaining, p ] }
+              , {
+                target: [], remaining: []
+              })
+            this.patients = {
+              authorized: [ ...this.patients.authorized, ...result.target ],
+              notAuthorized: result.remaining
+            }
+            this.trigger(UserStore.PatientKey)
+          }
+        }).catch(err => Promise.reject(new Error(err)))
+      } else {
+        Promise.reject(new Error('No Token Found'))
+      }
+    })
+
+  removeAuthorizedUsers = (userIds: string[]) =>
+    this.getToken().then(async userToken => {
+      if (userToken) {
+        await fetch('http://10.0.2.2:8001/user/authorized/remove', {
+          method: 'PUT',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: qs.stringify({ userToken, userIds })
+        }).then(response => {
+          if (response.ok) {
+            return response.json()
+          } else {
+            throw response.status + ': (' + response.statusText + ')'
+          }
+        }).then(result => {
+          if (result.errors) {
+            throw result.errors
+          } else {
+            const result = this.patients.notAuthorized.reduce<{
+              target: Patient[], remaining: Patient[]
+            }>((all, p) => userIds.includes(p.id)
+              ? { ...all, target: [ ...all.target, p ] }
+              : { ...all, remaining: [ ...all.remaining, p ] }
+              , {
+                target: [], remaining: []
+              })
+            this.patients = {
+              authorized: result.remaining,
+              notAuthorized: [ ...this.patients.authorized, ...result.target ]
+            }
+            this.trigger(UserStore.PatientKey)
+          }
+        }).catch(err => Promise.reject(new Error(err)))
+      } else {
+        Promise.reject(new Error('No Token Found'))
+      }
+    })
+
   removeAccount = () =>
     this.getToken().then(async userToken => {
       if (userToken) {
@@ -231,6 +354,12 @@ class UserStore extends StoreBase {
   @autoSubscribeWithKey('MedicalStaffKey')
   getMedicalStaff() {
     return this.medicalStaff
+  }
+
+  static PatientKey = 'PatientKey'
+  @autoSubscribeWithKey('PatientKey')
+  getPatients() {
+    return this.patients
   }
 
   static IsReadyKey = 'IsReadyKey'
@@ -283,12 +412,15 @@ class Patient extends UR {
   type: 'Patient' = 'Patient'
   phoneNumber: string
   occupation: string
+  authorizedUsers: string[]
 
   constructor(input: any) {
     super({ ...input })
-    const { phoneNumber, occupation } = input
+    const { phoneNumber, occupation, authorizedUsers } = input
     this.phoneNumber = phoneNumber
     this.occupation = occupation
+    this.authorizedUsers = authorizedUsers as Array<any>
+
   }
 }
 

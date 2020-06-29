@@ -1,13 +1,15 @@
-import React, { useState, FC } from 'react'
+import React, { useState, FC, useLayoutEffect, useEffect } from 'react'
 import {
   StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions,
 } from 'react-native'
 import {
-  Title, IconButton, Checkbox, Searchbar, FAB, List, DefaultTheme
+  Title, Checkbox, Searchbar, FAB, List, DefaultTheme, IconButton
 } from 'react-native-paper'
-import { Colors } from '../../styles'
-import { UserC } from '../../connections'
+import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
+
+import { Colors } from '../../styles'
+import { UserStore } from '../../stores'
 
 const barColor = '#b3c100'
 
@@ -16,30 +18,43 @@ interface PageProp {
 }
 
 const PermitUsersPage: FC<PageProp> = ({ navigation }) => {
-  navigation.setOptions({
-    title: 'Permit User for Emergency',
-    headerStyle: {
-      backgroundColor: barColor,
-    },
-    headerTintColor: '#ffffff'
-  })
-  const [ remainingUsers, setRemainingUsers ] = useState(UserC.getRemainingUsers())
-  const [ permittedUsers, setPermittedUsers ] = useState(UserC.permittedUsers)
+  const patients = UserStore.getPatients()
+  const { authorized, notAuthorized } = patients
   const [ checked, setChecked ] = useState<boolean[]>([])
   const [ filter, setFilter ] = useState('')
   const [ permittedVis, setPermittedVis ] = useState(true)
   const [ otherVis, setOtherVis ] = useState(true)
 
-  const refreshData = () => {
-    setPermittedUsers(UserC.permittedUsers)
-    setRemainingUsers(UserC.getRemainingUsers())
-  }
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: 'Permit User for Emergency',
+      headerStyle: {
+        backgroundColor: barColor,
+      },
+      headerTintColor: '#ffffff',
+      headerRight: () =>
+        <IconButton
+          icon='account-edit'
+          onPress={ () => navigation.navigate('Profile/RemoveUsers') }
+        />
+    })
+  }, [ navigation ])
+
+  useEffect(() => {
+    if (authorized.length === 0 && notAuthorized.length === 0)
+      UserStore.fetchAllPatients()
+  }, [ authorized, notAuthorized ])
 
   const permitNewUsers = () => {
-    const newUsers = remainingUsers.filter(r => checked[ r.id ])
-    UserC.permitNewUsers(newUsers)
-    setChecked([])
-    refreshData()
+    const newUsers = notAuthorized.reduce<string[]>((all, r, index) =>
+      checked[ index ]
+        ? [ ...all, r.id ]
+        : all
+      , [])
+    if (newUsers.length > 0) {
+      UserStore.updateAuthorizedUsers(newUsers)
+        .then(() => setChecked([]))
+    }
   }
 
   return (
@@ -65,11 +80,6 @@ const PermitUsersPage: FC<PageProp> = ({ navigation }) => {
   )
 
   function PermittedUsers() {
-    const removeUser = (id: number) => () => {
-      UserC.removePermittedUser(id)
-      refreshData()
-    }
-
     return (
       <View style={ { marginTop: 10 } }>
         <List.Accordion
@@ -81,12 +91,11 @@ const PermitUsersPage: FC<PageProp> = ({ navigation }) => {
           onPress={ () => setPermittedVis(!permittedVis) }
         >
           {
-            permittedUsers.map(({ id, name }, index) =>
+            authorized.map(({ id, username }, index) =>
               <List.Item key={ 'PU-' + index }
                 style={ { backgroundColor: Colors.surface } }
-                title={ name }
+                title={ username }
                 titleStyle={ [ styles.text, { textTransform: 'capitalize' } ] }
-                right={ props => <IconButton { ...props } icon='delete' color={ Colors.primary } onPress={ removeUser(id) } /> }
               />
             )
           }
@@ -96,8 +105,8 @@ const PermitUsersPage: FC<PageProp> = ({ navigation }) => {
   }
 
   function PermitNewUsers() {
-    const check = (id: number) => () => {
-      setChecked({ ...checked, [ id ]: !checked[ id ] })
+    const check = (index: number) => () => {
+      setChecked({ ...checked, [ index ]: !checked[ index ] })
     }
 
     return (
@@ -119,15 +128,15 @@ const PermitUsersPage: FC<PageProp> = ({ navigation }) => {
             value={ filter }
           />
           {
-            remainingUsers.filter(u => u.name.toLowerCase().includes(filter.toLowerCase())).slice(0, 10).map(({ id, name }, index) =>
+            notAuthorized.filter(u => u.username.toLowerCase().includes(filter.toLowerCase())).slice(0, 10).map(({ id, username }, index) =>
               <List.Item key={ 'OU-' + index }
                 style={ { backgroundColor: Colors.surface } }
-                title={ name }
+                title={ username }
                 titleStyle={ [ styles.text, { textTransform: 'capitalize' } ] }
                 right={ props =>
                   <Checkbox { ...props } color={ Colors.primaryVariant } uncheckedColor={ Colors.primary }
-                    status={ checked[ id ] ? 'checked' : 'unchecked' }
-                    onPress={ check(id) }
+                    status={ checked[ index ] ? 'checked' : 'unchecked' }
+                    onPress={ check(index) }
                   />
                 }
               />
@@ -139,7 +148,7 @@ const PermitUsersPage: FC<PageProp> = ({ navigation }) => {
   }
 }
 
-export default PermitUsersPage
+export default withResubAutoSubscriptions(PermitUsersPage)
 
 const styles = StyleSheet.create({
   container: {
