@@ -12,7 +12,7 @@ import {
   AnalysisPage, ProfilePage, HealthPrescriptionPage, LabTestResultPage,
   UpdateHealthRecordScreen, AuthenticationDialog, PermitUsersPage, UpdateProfilePage,
   AppointmentConfirmationPage, AppointmentHistoryPage, AppointmentPage,
-  GetNumberPage, SelectMedicalStaffPage, SelectTimeslotPage
+  GetNumberPage, SelectMedicalStaffPage, SelectTimeslotPage, NotificationManager
 } from './src/views'
 import { Colors } from './src/styles'
 
@@ -63,6 +63,7 @@ const App: FC<{}> = () => {
   return (
     <PaperProvider theme={ theme }>
       <AuthenticationDialog visible={ ADVisible } onClose={ () => setADVisible(false) } />
+      <NotificationManager />
       <NavigationContainer>
         <Stack.Navigator initialRouteName={ 'AuthLoading' }>
           { paths.map(({ title, component, options }) => <Stack.Screen key={ title } name={ title } component={ component } options={ options } />) }

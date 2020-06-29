@@ -1,6 +1,10 @@
 import qs from 'qs'
+import { AsyncStorage, Platform } from 'react-native'
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth'
 import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
+import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
+
+import { NotificationStore } from '.'
 
 @AutoSubscribeStore
 class UserStore extends StoreBase {
@@ -22,10 +26,30 @@ class UserStore extends StoreBase {
     if (firebaseUser) {
       // console.log('login', firebaseUser.phoneNumber)
       this.setFirebaseUser(firebaseUser)
-      this.isRegistering ? null : this.fetchUser().then(() => {
-        this.isReady = true
-        this.trigger(UserStore.IsReadyKey)
-      })
+
+      // Get Instance ID token. Initially this makes a network call, once retrieved subsequent calls to getToken will return from cache.
+      messaging().getToken().then((currentToken) => {
+        if (currentToken) {
+          NotificationStore.sendTokenToServer(currentToken)
+
+          if (Platform.OS === 'ios')
+            messaging().hasPermission().then(async status => {
+              if (status !== FirebaseMessagingTypes.AuthorizationStatus.AUTHORIZED && status !== FirebaseMessagingTypes.AuthorizationStatus.PROVISIONAL)
+                return await messaging().requestPermission()
+            })
+        } else {
+          throw new Error('No Instance ID token available. Request permission to generate one.')
+        }
+      }).catch(err =>
+        AsyncStorage.setItem('sentToServer', '0')
+      )
+
+      if (this.isRegistering == false) {
+        this.fetchUser().then(() => {
+          this.isReady = true
+          this.trigger(UserStore.IsReadyKey)
+        })
+      }
     } else {
       this.user = undefined
       this.firebaseUser = undefined
