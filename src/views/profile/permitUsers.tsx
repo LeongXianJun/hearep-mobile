@@ -20,6 +20,8 @@ interface PageProp {
 const PermitUsersPage: FC<PageProp> = ({ navigation }) => {
   const patients = UserStore.getPatients()
   const { authorized, notAuthorized } = patients
+
+  const [ isFetched, setIsFetch ] = useState(false)
   const [ checked, setChecked ] = useState<boolean[]>([])
   const [ filter, setFilter ] = useState('')
   const [ permittedVis, setPermittedVis ] = useState(true)
@@ -41,9 +43,10 @@ const PermitUsersPage: FC<PageProp> = ({ navigation }) => {
   }, [ navigation ])
 
   useEffect(() => {
-    if (authorized.length === 0 && notAuthorized.length === 0)
+    if (!isFetched && authorized.length === 0 && notAuthorized.length === 0)
       UserStore.fetchAllPatients()
-  }, [ authorized, notAuthorized ])
+        .then(() => setIsFetch(true))
+  }, [ isFetched, authorized, notAuthorized ])
 
   const permitNewUsers = () => {
     const newUsers = notAuthorized.reduce<string[]>((all, r, index) =>

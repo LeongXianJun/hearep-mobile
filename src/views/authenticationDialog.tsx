@@ -4,6 +4,7 @@ import { Title, Button, Paragraph, Divider } from 'react-native-paper'
 import Modal from 'react-native-modal'
 
 import { Colors } from '../styles'
+import { AccessPermissionStore } from '../stores'
 
 interface AuthenticationDialogProps {
   visible: boolean
@@ -22,6 +23,12 @@ const AuthenticationDialog: FC<AuthenticationDialogProps> = ({ visible, onClose 
   }, [ visible ])
 
   const hideDialog = () => onClose()
+  const permit = () => AccessPermissionStore.respondRequest('Permitted')
+    .then(response => {
+      if (response.includes('Send Successfully') === false) {
+        hideDialog()
+      }
+    })
 
   return (
     show
@@ -42,7 +49,7 @@ const AuthenticationDialog: FC<AuthenticationDialogProps> = ({ visible, onClose 
               <Divider style={ { marginVertical: 5 } } />
               <View style={ { flexDirection: 'row', justifyContent: 'flex-end' } }>
                 <Button onPress={ hideDialog } mode='contained' style={ [ styles.button, { backgroundColor: 'red' } ] } labelStyle={ { color: Colors.text } }>Reject</Button>
-                <Button onPress={ hideDialog } mode='contained' style={ [ styles.button, { backgroundColor: 'green' } ] } labelStyle={ { color: Colors.text } }>Permit</Button>
+                <Button onPress={ permit } mode='contained' style={ [ styles.button, { backgroundColor: 'green' } ] } labelStyle={ { color: Colors.text } }>Permit</Button>
               </View>
             </View>
           </View>

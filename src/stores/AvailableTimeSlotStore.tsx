@@ -12,7 +12,7 @@ class AvailableTimeSlotStore extends StoreBase {
     this.isReady = false
   }
 
-  getToken = () => UserStore.getToken()
+  private getToken = () => UserStore.getToken()
 
   // get available timeslots
   fetchAvailableTimeslots = (medicalStaffId: string, date: Date) => this.getToken().then(async userToken => {

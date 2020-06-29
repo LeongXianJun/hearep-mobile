@@ -152,7 +152,14 @@ class UserStore extends StoreBase {
             const allPatients = (data as Array<any>).map(p => new Patient(p)).filter(p => p.id !== this.user?.id)
             const authorizedList = this.user?.authorizedUsers
             if (authorizedList) {
-              this.patients = allPatients.reduce<{ authorized: Patient[], notAuthorized: Patient[] }>((all, p) => all, { authorized: [], notAuthorized: [] })
+              this.patients = allPatients.reduce<{
+                authorized: Patient[], notAuthorized: Patient[]
+              }>((all, p) => authorizedList.includes(p.id)
+                ? { ...all, authorized: [ ...all.authorized, p ] }
+                : { ...all, notAuthorized: [ ...all.notAuthorized, p ] }
+                , {
+                  authorized: [], notAuthorized: []
+                })
             } else {
               this.patients = { authorized: [], notAuthorized: allPatients }
             }
