@@ -211,7 +211,7 @@ const AppointmentPage: FC<PageProp> = ({ navigation }) => {
 
     const cancel = () =>
       appointment
-        ? AppointmentStore.cancelAppointment(appointment.id)
+        ? AppointmentStore.cancelAppointment(appointment.id, appointment.medicalStaffId)
           .then(() => onClose())
           .catch(err => console.log(err))
         : undefined

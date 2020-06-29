@@ -11,7 +11,7 @@ interface ManagerProps {
 const NotificationManager: FC<ManagerProps> = ({ children }) => {
   const notifications = NotificationStore.getNotifications()
 
-  const [ message, setMessage ] = useState('')
+  const [ message, setMessage ] = useState<{ title: string, description: string }>({ title: '', description: '' })
   const [ snackVisible, setSnackVisible ] = useState(false)
 
   useEffect(() => {
@@ -20,7 +20,7 @@ const NotificationManager: FC<ManagerProps> = ({ children }) => {
 
   useEffect(() => {
     notifications.forEach(n => {
-      setMessage(n.title)
+      setMessage(n)
       setSnackVisible(true)
     })
   }, [ notifications ])
@@ -32,7 +32,7 @@ const NotificationManager: FC<ManagerProps> = ({ children }) => {
       duration={ Snackbar.DURATION_MEDIUM }
       onDismiss={ () => setSnackVisible(false) }
     >
-      { message }
+      { message.title + '\n' + message.description }
     </Snackbar>
   </>
 }

@@ -238,7 +238,7 @@ class AppointmentStore extends StoreBase {
     })
 
   // cancel appointments
-  cancelAppointment = (appId: string) =>
+  cancelAppointment = (appId: string, medicalStaffId: string) =>
     this.getToken().then(async userToken => {
       if (userToken) {
         await fetch('http://10.0.2.2:8001/appointment/cancel', {
@@ -247,7 +247,7 @@ class AppointmentStore extends StoreBase {
             Accept: 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded'
           },
-          body: qs.stringify({ userToken, appId })
+          body: qs.stringify({ userToken, appId, medicalStaffId })
         }).then(response => {
           if (response.ok) {
             return response.json()
