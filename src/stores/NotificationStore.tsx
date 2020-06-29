@@ -1,8 +1,9 @@
-import qs from 'qs'
-import messaging from '@react-native-firebase/messaging'
-import UserStore from './UserStore'
-import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
 import { AsyncStorage } from 'react-native'
+import qs from 'qs'
+import UserStore from './UserStore'
+import messaging from '@react-native-firebase/messaging'
+import AccessPermissionStore from './AccessPermissionStore'
+import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
 
 @AutoSubscribeStore
 class NotificationStore extends StoreBase {
@@ -29,10 +30,14 @@ class NotificationStore extends StoreBase {
   unsubscribeOnMessage = this.messaging.onMessage(async remoteMessage => {
     const { data } = remoteMessage
     if (data) {
-      this.notification = [
-        { title: data.title, description: data.description }
-      ]
-      this.trigger(NotificationStore.NotificationsKey)
+      if (data.medicalStaffId) {
+        AccessPermissionStore.setIsRequesting(data.medicalStaffId, true)
+      } else {
+        this.notification = [
+          { title: data.title, description: data.description }
+        ]
+        this.trigger(NotificationStore.NotificationsKey)
+      }
     }
   })
 

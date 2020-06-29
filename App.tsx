@@ -1,4 +1,4 @@
-import React, { useState, FC } from 'react'
+import React, { FC } from 'react'
 import 'react-native-gesture-handler'
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper'
 import { withResubAutoSubscriptions } from 'resub'
@@ -10,9 +10,9 @@ import { createMaterialBottomTabNavigator } from '@react-navigation/material-bot
 import {
   AuthLoadingScreen, LoginScreen, OTPScreen, RegisterScreen, HomeScreen, HealthRecordPage,
   AnalysisPage, ProfilePage, HealthPrescriptionPage, LabTestResultPage,
-  UpdateHealthRecordScreen, AuthenticationDialog, PermitUsersPage, UpdateProfilePage,
+  UpdateHealthRecordScreen, PermitUsersPage, UpdateProfilePage,
   AppointmentConfirmationPage, AppointmentHistoryPage, AppointmentPage,
-  GetNumberPage, SelectMedicalStaffPage, SelectTimeslotPage, NotificationManager
+  GetNumberPage, SelectMedicalStaffPage, SelectTimeslotPage, NotificationManager, RemoveAuthorizedUsersPage
 } from './src/views'
 import { Colors } from './src/styles'
 
@@ -30,8 +30,6 @@ const theme = {
 }
 
 const App: FC<{}> = () => {
-  const [ ADVisible, setADVisible ] = useState(false)
-
   const paths: Path[] = [
     ...[
       { title: 'AuthLoading', component: AuthLoadingScreen },
@@ -51,6 +49,7 @@ const App: FC<{}> = () => {
       { title: 'HealthCondition/Update', component: UpdateHealthRecordScreen },
       { title: 'Profile/Update', component: UpdateProfilePage },
       { title: 'Profile/PermitUsers', component: PermitUsersPage },
+      { title: 'Profile/RemoveUsers', component: RemoveAuthorizedUsersPage },
       { title: 'Appointment', component: AppointmentPage },
       { title: 'Appointment/History', component: AppointmentHistoryPage },
       { title: 'Appointment/SelectMedicalStaff', component: SelectMedicalStaffPage },
@@ -62,7 +61,6 @@ const App: FC<{}> = () => {
 
   return (
     <PaperProvider theme={ theme }>
-      <AuthenticationDialog visible={ ADVisible } onClose={ () => setADVisible(false) } />
       <NotificationManager />
       <NavigationContainer>
         <Stack.Navigator initialRouteName={ 'AuthLoading' }>
