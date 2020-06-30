@@ -1,4 +1,5 @@
 import qs from 'qs'
+import { getURL } from '../utils'
 import UserStore from './UserStore'
 import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
 
@@ -17,7 +18,7 @@ class AccessPermissionStore extends StoreBase {
   // get available timeslots
   respondRequest = (status: 'Permitted' | 'Rejected') => this.getToken().then(async userToken => {
     if (userToken) {
-      return await fetch('http://10.0.2.2:8001/access/respond', {
+      return await fetch(getURL() + '/access/respond', {
         method: 'POST',
         headers: {
           Accept: 'application/json',

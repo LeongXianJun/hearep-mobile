@@ -1,4 +1,7 @@
 {
+  "presets": [
+    "module:react-native-dotenv"
+  ],
   "plugins": [
     [
       "@babel/plugin-proposal-decorators",

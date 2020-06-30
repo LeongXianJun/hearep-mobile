@@ -1,4 +1,5 @@
 import qs from 'qs'
+import { getURL } from '../utils'
 import UserStore from './UserStore'
 import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
 
@@ -19,7 +20,7 @@ class AvailableTimeSlotStore extends StoreBase {
     if (userToken) {
       this.isReady = false
       this.trigger(AvailableTimeSlotStore.IsReadyKey)
-      await fetch('http://10.0.2.2:8001/workingTime/get', {
+      await fetch(getURL() + '/workingTime/get', {
         method: 'POST',
         headers: {
           Accept: 'application/json',

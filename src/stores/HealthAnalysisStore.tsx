@@ -1,7 +1,7 @@
 import qs from 'qs'
-import { UserStore } from '.'
+import UserStore from './UserStore'
+import { DateUtil, getURL } from '../utils'
 import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
-import { DateUtil } from '../utils'
 
 @AutoSubscribeStore
 class HealthAnalysisStore extends StoreBase {
@@ -30,7 +30,7 @@ class HealthAnalysisStore extends StoreBase {
   fetchHealthAnalysis = () =>
     this.getToken().then(async userToken => {
       if (userToken) {
-        await fetch('http://10.0.2.2:8001/analysis/patient', {
+        await fetch(getURL() + '/analysis/patient', {
           method: 'POST',
           headers: {
             Accept: 'application/json',
@@ -67,7 +67,7 @@ class HealthAnalysisStore extends StoreBase {
   fetchOptions = () =>
     this.getToken().then(async userToken => {
       if (userToken) {
-        await fetch('http://10.0.2.2:8001/healthCondition/option', {
+        await fetch(getURL() + '/healthCondition/option', {
           method: 'POST',
           headers: {
             Accept: 'application/json',
@@ -96,7 +96,7 @@ class HealthAnalysisStore extends StoreBase {
   insertHealthCondition = (healthCondition: HealthCondition) =>
     this.getToken().then(async userToken => {
       if (userToken) {
-        await fetch('http://10.0.2.2:8001/healthCondition/update', {
+        await fetch(getURL() + '/healthCondition/update', {
           method: 'POST',
           headers: {
             Accept: 'application/json',

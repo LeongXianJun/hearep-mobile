@@ -1,4 +1,5 @@
 import qs from 'qs'
+import { getURL } from '../utils'
 import UserStore from './UserStore'
 import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
 
@@ -47,7 +48,7 @@ class AppointmentStore extends StoreBase {
   fetchAllAppointments = () =>
     this.getToken().then(async userToken => {
       if (userToken) {
-        await fetch('http://10.0.2.2:8001/appointment/patient', {
+        await fetch(getURL() + '/appointment/patient', {
           method: 'POST',
           headers: {
             Accept: 'application/json',
@@ -98,7 +99,7 @@ class AppointmentStore extends StoreBase {
   getTurn = (medicalStaffId: string) =>
     this.getToken().then(async userToken => {
       if (userToken) {
-        await fetch('http://10.0.2.2:8001/appointment/turn', {
+        await fetch(getURL() + '/appointment/turn', {
           method: 'POST',
           headers: {
             Accept: 'application/json',
@@ -134,7 +135,7 @@ class AppointmentStore extends StoreBase {
   insertAppointment = () =>
     this.getToken().then(async userToken => {
       if (userToken) {
-        await fetch('http://10.0.2.2:8001/appointment/insert', {
+        await fetch(getURL() + '/appointment/insert', {
           method: 'POST',
           headers: {
             Accept: 'application/json',
@@ -183,7 +184,7 @@ class AppointmentStore extends StoreBase {
   rescheduleAppointment = (oldAppId: string) =>
     this.getToken().then(async userToken => {
       if (userToken) {
-        await fetch('http://10.0.2.2:8001/appointment/reschedule', {
+        await fetch(getURL() + '/appointment/reschedule', {
           method: 'PUT',
           headers: {
             Accept: 'application/json',
@@ -241,7 +242,7 @@ class AppointmentStore extends StoreBase {
   cancelAppointment = (appId: string, medicalStaffId: string) =>
     this.getToken().then(async userToken => {
       if (userToken) {
-        await fetch('http://10.0.2.2:8001/appointment/cancel', {
+        await fetch(getURL() + '/appointment/cancel', {
           method: 'PUT',
           headers: {
             Accept: 'application/json',

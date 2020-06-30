@@ -1,7 +1,9 @@
-import { AsyncStorage } from 'react-native'
 import qs from 'qs'
-import UserStore from './UserStore'
+import { AsyncStorage } from 'react-native'
 import messaging from '@react-native-firebase/messaging'
+
+import { getURL } from '../utils'
+import UserStore from './UserStore'
 import AccessPermissionStore from './AccessPermissionStore'
 import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
 
@@ -50,7 +52,7 @@ class NotificationStore extends StoreBase {
         if (result !== '1') {
           this.getToken().then(async userToken => {
             if (userToken) {
-              await fetch('http://10.0.2.2:8001/user/device', {
+              await fetch(getURL() + '/user/device', {
                 method: 'PUT',
                 headers: {
                   Accept: 'application/json',

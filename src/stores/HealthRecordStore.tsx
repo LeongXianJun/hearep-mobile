@@ -1,4 +1,5 @@
 import qs from 'qs'
+import { getURL } from '../utils'
 import UserStore from './UserStore'
 import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
 
@@ -19,7 +20,7 @@ class HealthRecordStore extends StoreBase {
   fetchPatientRecords = () =>
     this.getToken().then(async userToken => {
       if (userToken) {
-        await fetch('http://10.0.2.2:8001/healthrecords/patient', {
+        await fetch(getURL() + '/healthrecords/patient', {
           method: 'POST',
           headers: {
             Accept: 'application/json',

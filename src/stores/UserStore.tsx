@@ -4,7 +4,8 @@ import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth'
 import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 
-import { NotificationStore } from '.'
+import { getURL } from '../utils'
+import NotificationStore from './NotificationStore'
 
 @AutoSubscribeStore
 class UserStore extends StoreBase {
@@ -74,7 +75,7 @@ class UserStore extends StoreBase {
   fetchUser = () =>
     this.getToken().then(async userToken => {
       if (userToken) {
-        await fetch('http://10.0.2.2:8001/user/get', {
+        await fetch(getURL() + '/user/get', {
           method: 'POST',
           headers: {
             Accept: 'application/json',
@@ -103,7 +104,7 @@ class UserStore extends StoreBase {
   fetchAllMedicalStaff = () =>
     this.getToken().then(async userToken => {
       if (userToken) {
-        await fetch('http://10.0.2.2:8001/medicalStaff/all', {
+        await fetch(getURL() + '/medicalStaff/all', {
           method: 'POST',
           headers: {
             Accept: 'application/json',
@@ -132,7 +133,7 @@ class UserStore extends StoreBase {
   fetchAllPatients = () =>
     this.getToken().then(async userToken => {
       if (userToken) {
-        await fetch('http://10.0.2.2:8001/patient/all', {
+        await fetch(getURL() + '/patient/all', {
           method: 'POST',
           headers: {
             Accept: 'application/json',
@@ -174,7 +175,7 @@ class UserStore extends StoreBase {
   createUser = (info: { username: string, dob: Date, gender: 'M' | 'F', email: string, occupation?: string }) =>
     this.getToken().then(async userToken => {
       if (userToken) {
-        await fetch('http://10.0.2.2:8001/user/create', {
+        await fetch(getURL() + '/user/create', {
           method: 'POST',
           headers: {
             Accept: 'application/json',
@@ -210,7 +211,7 @@ class UserStore extends StoreBase {
   updateProfile = (latest: { username: string, dob: Date, gender: 'M' | 'F', email: string, occupation?: string }) =>
     this.getToken().then(async userToken => {
       if (userToken) {
-        await fetch('http://10.0.2.2:8001/user/update', {
+        await fetch(getURL() + '/user/update', {
           method: 'PUT',
           headers: {
             Accept: 'application/json',
@@ -245,7 +246,7 @@ class UserStore extends StoreBase {
   updateAuthorizedUsers = (userIds: string[]) =>
     this.getToken().then(async userToken => {
       if (userToken) {
-        await fetch('http://10.0.2.2:8001/user/authorized/update', {
+        await fetch(getURL() + '/user/authorized/update', {
           method: 'PUT',
           headers: {
             Accept: 'application/json',
@@ -285,7 +286,7 @@ class UserStore extends StoreBase {
   removeAuthorizedUsers = (userIds: string[]) =>
     this.getToken().then(async userToken => {
       if (userToken) {
-        await fetch('http://10.0.2.2:8001/user/authorized/remove', {
+        await fetch(getURL() + '/user/authorized/remove', {
           method: 'PUT',
           headers: {
             Accept: 'application/json',
@@ -325,7 +326,7 @@ class UserStore extends StoreBase {
   removeAccount = () =>
     this.getToken().then(async userToken => {
       if (userToken) {
-        await fetch('http://10.0.2.2:8001/user/delete', {
+        await fetch(getURL() + '/user/delete', {
           method: 'PUT',
           headers: {
             Accept: 'application/json',
