@@ -1,7 +1,5 @@
 import React, { useState, useEffect, FC, ReactText } from 'react'
-import {
-  StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions,
-} from 'react-native'
+import { View, StyleSheet } from 'react-native'
 import {
   Text, List, Searchbar, Title, Divider, Button, Card
 } from 'react-native-paper'
@@ -10,8 +8,9 @@ import { withResubAutoSubscriptions } from 'resub'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { useNavigation, NavigationProp, ParamListBase } from '@react-navigation/native'
 
-import { DateUtil } from '../../utils'
 import { Colors } from '../../styles'
+import { DateUtil } from '../../utils'
+import { AppContainer } from '../common'
 import { isUndefined } from '../../utils'
 import { UserStore, AppointmentStore, Appointment, MedicalStaff } from '../../stores'
 
@@ -43,9 +42,14 @@ const AppointmentPage: FC<PageProp> = ({ navigation }) => {
   const [ expandId, setExpandId ] = useState(1)
   const [ filter, setFilter ] = useState('')
   const [ selectedAppointment, setSelectedAppointment ] = useState<Appointment>()
+  const [ isLoading, setIsLoading ] = useState(true)
 
   useEffect(() => {
-    UserStore.fetchAllMedicalStaff()
+    Promise.all([
+      UserStore.fetchAllMedicalStaff(),
+      AppointmentStore.fetchAllAppointments()
+    ]).catch(err => console.log(err))
+      .finally(() => setIsLoading(false))
   }, [])
 
   useEffect(() => {
@@ -57,39 +61,34 @@ const AppointmentPage: FC<PageProp> = ({ navigation }) => {
   }, [ CurrentUser ])
 
   return (
-    <React.Fragment>
-      <StatusBar barStyle='default' animated backgroundColor={ barColor } />
+    <AppContainer isLoading={ isLoading }>
       <AppointmentDialog onClose={ () => setSelectedAppointment(undefined) } appointment={ selectedAppointment } />
-      <SafeAreaView style={ styles.container }>
-        <ScrollView style={ { flex: 1 } } contentContainerStyle={ styles.content }>
-          <View style={ { marginTop: 25, flexDirection: 'row-reverse' } }>
-            <Button mode='text' onPress={ () => navigation.navigate('Appointment/History') }>{ 'History' }</Button>
+      <View style={ { marginTop: 25, flexDirection: 'row-reverse' } }>
+        <Button mode='text' onPress={ () => navigation.navigate('Appointment/History') }>{ 'History' }</Button>
+      </View>
+      <Card style={ { marginVertical: 5 } } onPress={ () => navigation.navigate('Appointment/SelectMedicalStaff') }>
+        <Card.Cover source={ avatar[ gender ]() } />
+        <Card.Content style={ styles.cardEnd }>
+          <View style={ { flex: 1, marginTop: 10, flexDirection: 'row', justifyContent: 'center' } }>
+            <View style={ { flex: 1, justifyContent: 'center' } }>
+              <Text style={ { fontSize: 16 } }>{ 'Schedule an Appointment' }</Text>
+            </View>
+            <MaterialCommunityIcons name='chevron-right' color={ Colors.text } size={ 24 } />
           </View>
-          <Card style={ { marginVertical: 5 } } onPress={ () => navigation.navigate('Appointment/SelectMedicalStaff') }>
-            <Card.Cover source={ avatar[ gender ]() } />
-            <Card.Content style={ styles.cardEnd }>
-              <View style={ { flex: 1, marginTop: 10, flexDirection: 'row', justifyContent: 'center' } }>
-                <View style={ { flex: 1, justifyContent: 'center' } }>
-                  <Text style={ { fontSize: 16 } }>{ 'Schedule an Appointment' }</Text>
-                </View>
-                <MaterialCommunityIcons name='chevron-right' color={ Colors.text } size={ 24 } />
-              </View>
-            </Card.Content>
-          </Card>
-          <View style={ styles.lastView }>
-            <List.Section>
-              <List.AccordionGroup
-                expandedId={ expandId }
-                onAccordionPress={ (expandedId: ReactText) => setExpandId(Number.parseInt(expandedId.toString())) }
-              >
-                { NearingAppointments() }
-                { AllAppointments() }
-              </List.AccordionGroup>
-            </List.Section>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </React.Fragment>
+        </Card.Content>
+      </Card>
+      <View style={ styles.lastView }>
+        <List.Section>
+          <List.AccordionGroup
+            expandedId={ expandId }
+            onAccordionPress={ (expandedId: ReactText) => setExpandId(Number.parseInt(expandedId.toString())) }
+          >
+            { NearingAppointments() }
+            { AllAppointments() }
+          </List.AccordionGroup>
+        </List.Section>
+      </View>
+    </AppContainer>
   )
 
   function NearingAppointments() {
@@ -128,57 +127,61 @@ const AppointmentPage: FC<PageProp> = ({ navigation }) => {
 
   function AllAppointments() {
     return (
-      <List.Accordion id={ 2 } title={ 'All Appointments' }
-        titleStyle={ { color: Colors.text, fontWeight: 'bold' } }
-        style={ styles.listStart }
-      >
-        <Searchbar
-          placeholder={ 'Enter Doctor\'s Name' }
-          placeholderTextColor={ barColor }
-          iconColor={ barColor }
-          onChangeText={ val => setFilter(val) }
-          style={ { elevation: 0, borderRadius: 0, borderBottomWidth: 1, borderColor: barColor } }
-          inputStyle={ { color: barColor } }
-          value={ filter }
-        />
-        {
-          [
-            {
-              section: 'Pending',
-              app: Pending.map(a => ({ ...a, medicalStaff: medicalStaff.find(ms => ms.id === a.medicalStaffId) }))
-                .filter(u => u.medicalStaff?.username.toLowerCase().includes(filter.toLowerCase()))
-            },
-            {
-              section: 'Rejected',
-              app: Rejected.map(a => ({ ...a, medicalStaff: medicalStaff.find(ms => ms.id === a.medicalStaffId) }))
-                .filter(u => u.medicalStaff?.username.toLowerCase().includes(filter.toLowerCase()))
-            }
-          ].filter(({ app }) => app.length > 0)
-            .map(({ section, app }, index) =>
-              <List.Section key={ 'Section-' + index } style={ { backgroundColor: Colors.surface } }>
-                <List.Subheader style={ [ styles.text, { textTransform: 'capitalize' } ] }>{ section }</List.Subheader>
-                {
-                  app.map(a =>
-                    <List.Item key={ 'PU-' + index }
-                      style={ { backgroundColor: Colors.surface, marginBottom: 1 } }
-                      title={ 'Appointment on ' + (a.type === 'byTime' ? a.time : a.date).toDateString() }
-                      titleStyle={ [ styles.text, { textTransform: 'capitalize' } ] }
-                      description={ a.medicalStaff?.username + '\n' + a.address }
-                      descriptionStyle={ [ styles.text ] }
-                      descriptionNumberOfLines={ 5 }
-                      right={ props =>
-                        <View style={ { justifyContent: 'center' } }>
-                          <MaterialCommunityIcons { ...props } color={ barColor } name='details' size={ 24 } />
-                        </View>
-                      }
-                      onPress={ () => setSelectedAppointment(a) }
-                    />
-                  )
-                }
-              </List.Section>
-            )
-        }
-      </List.Accordion>
+      Pending.length > 0 || Rejected.length > 0
+        ? <List.Accordion id={ 2 } title={ 'All Appointments' }
+          titleStyle={ { color: Colors.text, fontWeight: 'bold' } }
+          style={ styles.listStart }
+        >
+          <Searchbar
+            placeholder={ 'Enter Doctor\'s Name' }
+            placeholderTextColor={ barColor }
+            iconColor={ barColor }
+            onChangeText={ val => setFilter(val) }
+            style={ { elevation: 0, borderRadius: 0, borderBottomWidth: 1, borderColor: barColor } }
+            inputStyle={ { color: barColor } }
+            value={ filter }
+          />
+          {
+            [
+              {
+                section: 'Pending',
+                app: Pending.map(a => ({ ...a, medicalStaff: medicalStaff.find(ms => ms.id === a.medicalStaffId) }))
+                  .filter(u => u.medicalStaff?.username.toLowerCase().includes(filter.toLowerCase()))
+              },
+              {
+                section: 'Rejected',
+                app: Rejected.map(a => ({ ...a, medicalStaff: medicalStaff.find(ms => ms.id === a.medicalStaffId) }))
+                  .filter(u => u.medicalStaff?.username.toLowerCase().includes(filter.toLowerCase()))
+              }
+            ].filter(({ app }) => app.length > 0)
+              .map(({ section, app }, index) =>
+                <List.Section key={ 'Section-' + index } style={ { backgroundColor: Colors.surface } }>
+                  <List.Subheader style={ [ styles.text, { textTransform: 'capitalize' } ] }>{ section }</List.Subheader>
+                  {
+                    app.map(a =>
+                      <List.Item key={ 'PU-' + index }
+                        style={ { backgroundColor: Colors.surface, marginBottom: 1 } }
+                        title={ 'Appointment on ' + (a.type === 'byTime' ? a.time : a.date).toDateString() }
+                        titleStyle={ [ styles.text, { textTransform: 'capitalize' } ] }
+                        description={ a.medicalStaff?.username + '\n' + a.address }
+                        descriptionStyle={ [ styles.text ] }
+                        descriptionNumberOfLines={ 5 }
+                        right={ props =>
+                          <View style={ { justifyContent: 'center' } }>
+                            <MaterialCommunityIcons { ...props } color={ barColor } name='details' size={ 24 } />
+                          </View>
+                        }
+                        onPress={ () => setSelectedAppointment(a) }
+                      />
+                    )
+                  }
+                </List.Section>
+              )
+          }
+        </List.Accordion>
+        : <View style={ { alignItems: 'center' } }>
+          <Text style={ { textAlignVertical: 'center' } }>{ `No appointment is scheduled.` }</Text>
+        </View>
     )
   }
 
@@ -279,14 +282,6 @@ interface AppointmentDialogProps {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background
-  },
-  content: {
-    minHeight: Dimensions.get('window').height - (StatusBar.currentHeight ?? 0) - 60,
-    marginHorizontal: '10%'
-  },
   cardEnd: {
     backgroundColor: barColor,
     borderBottomRightRadius: 5,

@@ -1,5 +1,5 @@
+import UserStore from '../stores/UserStore'
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth'
-import { UserStore } from '../stores'
 
 let confirmR: FirebaseAuthTypes.ConfirmationResult | undefined
 
@@ -8,9 +8,9 @@ const signIn = (phoneNumber: string) =>
     .then(result => confirmR = result)
 
 const verifyCode = (code: string) =>
-  new Promise((resolve, reject) =>
+  new Promise(async (resolve, reject) =>
     confirmR
-      ? confirmR.confirm(code)
+      ? await confirmR.confirm(code)
         .then(user => {
           if (user) {
             UserStore.setFirebaseUser(user)

@@ -14,9 +14,6 @@ interface PageProp {
 const LineGraph: FC<PageProp> = ({ data, color = 'tomato', showSymbol, showMonth, yLabel }) => {
   return (
     <VictoryChart
-      style={ {
-
-      } }
       animate={ { duration: 2000 } }
       height={ 250 }
       width={ 325 }

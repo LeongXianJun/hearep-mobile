@@ -1,97 +1,79 @@
-import React, { FC, useEffect } from 'react'
-import {
-  StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions,
-} from 'react-native'
-import {
-  Text, Card, FAB, ActivityIndicator
-} from 'react-native-paper'
+import React, { FC, useEffect, useState } from 'react'
+import { View, StyleSheet, ScrollView } from 'react-native'
 import { withResubAutoSubscriptions } from 'resub'
+import { Text, Card, FAB } from 'react-native-paper'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
 import { Colors } from '../../styles'
-import { LineGraph } from '../common'
 import { HealthAnalysisStore } from '../../stores'
+import { LineGraph, AppContainer } from '../common'
+
+const barColor = '#34675c'
 
 interface PageProp {
   navigation: NavigationProp<ParamListBase>
 }
 
 const AnalysisPage: FC<PageProp> = ({ navigation }) => {
-  const isHCReady = HealthAnalysisStore.ready()
   const healthConditions = HealthAnalysisStore.getHealthCondition()
+
+  const [ isLoading, setIsLoading ] = useState(true)
 
   useEffect(() => {
     HealthAnalysisStore.fetchHealthAnalysis()
+      .finally(() => setIsLoading(false))
   }, [])
 
+  const FloatingButtons = () =>
+    <FAB
+      style={ styles.fab }
+      icon="plus"
+      color={ Colors.secondary }
+      onPress={ () => navigation.navigate('HealthCondition/Update') }
+    />
+
   return (
-    <React.Fragment>
-      <StatusBar barStyle='default' />
-      <SafeAreaView style={ styles.container }>
-        <ScrollView style={ { flex: 1 } } contentContainerStyle={ [ styles.content, { paddingBottom: 50 } ] }>
+    <AppContainer isLoading={ isLoading } FAB={ FloatingButtons() } ContentStyle={ { paddingBottom: 50 } } >
+      <Text style={ styles.title }>{ 'Health Analysis' }</Text>
+      {
+        [
           {
-            isHCReady
-              ? <>
-                <Text style={ styles.title }>{ 'Health Analysis' }</Text>
-                {
-                  [
-                    {
-                      title: 'Sickness Frequency',
-                      graph: <LineGraph data={ healthConditions[ 'Sickness Frequency' ].map(a => ({ x: a.month, y: a.count })) } showSymbol yLabel='Count' showMonth />
-                    },
-                    {
-                      title: 'Blood Sugar Level',
-                      graph: <LineGraph data={ healthConditions[ 'Blood Sugar Level' ].map(a => ({ x: a.day, y: a.length > 0 ? a.count / a.length : 0 })) } showSymbol yLabel='Count' />
-                    },
-                    {
-                      title: 'Blood Pressure',
-                      graph: <LineGraph data={ healthConditions[ 'Blood Pressure Level' ].map(a => ({ x: a.day, y: a.length > 0 ? a.count / a.length : 0 })) } showSymbol yLabel='Count' />
-                    },
-                    {
-                      title: 'BMI',
-                      graph: <LineGraph data={ healthConditions[ 'BMI' ].map(a => ({ x: a.day, y: a.length > 0 ? a.count / a.length : 0 })) } showSymbol yLabel='Count' />
-                    }
-                  ].map(({ title, graph }, index, arr) =>
-                    <View key={ 'graph-' + index } style={ [ { marginVertical: 10 }, index === arr.length - 1 ? styles.lastView : undefined ] }>
-                      <Card style={ { flex: 1 } }>
-                        <Card.Title title={ title } titleStyle={ { color: '#000000' } } />
-                        { graph }
-                        <Card.Content>{ }</Card.Content>
-                      </Card>
-                    </View>
-                  )
-                }
-              </>
-              : <View style={ { flex: 1, justifyContent: 'center', alignItems: 'center' } }>
-                <ActivityIndicator size='large' style={ styles.indicator } />
-              </View>
+            title: 'Sickness Frequency',
+            graph: <LineGraph data={ healthConditions[ 'Sickness Frequency' ].map(a => ({ x: a.month, y: a.count })) } showSymbol yLabel='Count' showMonth />
+          },
+          {
+            title: 'Blood Sugar Level',
+            graph: <LineGraph data={ healthConditions[ 'Blood Sugar Level' ].map(a => ({ x: a.day, y: a.length > 0 ? a.count / a.length : 0 })) } showSymbol yLabel='Count' />
+          },
+          {
+            title: 'Blood Pressure',
+            graph: <LineGraph data={ healthConditions[ 'Blood Pressure Level' ].map(a => ({ x: a.day, y: a.length > 0 ? a.count / a.length : 0 })) } showSymbol yLabel='Count' />
+          },
+          {
+            title: 'BMI',
+            graph: <LineGraph data={ healthConditions[ 'BMI' ].map(a => ({ x: a.day, y: a.length > 0 ? a.count / a.length : 0 })) } showSymbol yLabel='Count' />
           }
-        </ScrollView>
-      </SafeAreaView>
-      <FAB
-        style={ styles.fab }
-        icon="plus"
-        color={ Colors.secondary }
-        onPress={ () => navigation.navigate('HealthCondition/Update') }
-      />
-    </React.Fragment>
+        ].map(({ title, graph }, index, arr) =>
+          <View key={ 'graph-' + index } style={ [ { marginVertical: 10 }, index === arr.length - 1 ? styles.lastView : undefined ] }>
+            <Card style={ { flex: 1, backgroundColor: barColor } }>
+              <Card.Title title={ title } />
+              <Card.Content style={ { backgroundColor: Colors.surface } }>
+                <ScrollView horizontal centerContent style={ { overflow: 'visible' } } showsHorizontalScrollIndicator={ false }>
+                  { graph }
+                </ScrollView>
+              </Card.Content>
+              <Card.Content style={ styles.cardEnd }>{ }</Card.Content>
+            </Card>
+          </View>
+        )
+      }
+    </AppContainer>
   )
 }
 
 export default withResubAutoSubscriptions(AnalysisPage)
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background
-  },
-  content: {
-    minHeight: Dimensions.get('window').height - (StatusBar.currentHeight ?? 0) - 60,
-    marginHorizontal: '10%'
-  },
-  indicator: {
-    marginVertical: 50
-  },
   title: {
     fontWeight: 'bold',
     marginTop: 25,
@@ -100,6 +82,11 @@ const styles = StyleSheet.create({
   lastView: {
     marginTop: 10,
     marginBottom: 25,
+  },
+  cardEnd: {
+    backgroundColor: barColor,
+    borderBottomRightRadius: 5,
+    borderBottomLeftRadius: 5
   },
   fab: {
     backgroundColor: '#5f27d8',

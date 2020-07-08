@@ -1,11 +1,11 @@
 import qs from 'qs'
 import UserStore from './UserStore'
-import { DateUtil, getURL } from '../utils'
+import DateUtil from '../utils/DateUtil'
+import { getURL } from '../utils/Common'
 import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
 
 @AutoSubscribeStore
 class HealthAnalysisStore extends StoreBase {
-  isReady: boolean
   options: string[]
   healthCondition: {
     'Sickness Frequency': { month: Date, count: number }[],
@@ -15,7 +15,6 @@ class HealthAnalysisStore extends StoreBase {
   }
   constructor() {
     super()
-    this.isReady = false
     this.options = []
     this.healthCondition = {
       'Sickness Frequency': [],
@@ -45,18 +44,15 @@ class HealthAnalysisStore extends StoreBase {
           }
         }).then(data => {
           if (data.errors) {
-            this.isReady = false
-            this.trigger([ HealthAnalysisStore.HCReadyKey ])
             throw new Error(data.errors)
           } else {
-            this.isReady = true
             this.healthCondition = {
               'Sickness Frequency': data[ 'Sickness Frequency' ].map((d: any) => ({ month: new Date(d.month), count: d.count })),
               'Blood Sugar Level': data[ 'Blood Sugar Level' ].map((d: any) => ({ day: new Date(d.day), count: d.count, length: d.length })),
               'Blood Pressure Level': data[ 'Blood Pressure Level' ].map((d: any) => ({ day: new Date(d.day), count: d.count, length: d.length })),
               'BMI': data[ 'BMI' ].map((d: any) => ({ day: new Date(d.day), count: d.count, length: d.length }))
             }
-            this.trigger([ HealthAnalysisStore.HealthConditionKey, HealthAnalysisStore.HCReadyKey ])
+            this.trigger(HealthAnalysisStore.HealthConditionKey)
           }
         }).catch(err => Promise.reject(new Error('Fetch Analysis: ' + err.message)))
       } else {
@@ -119,7 +115,7 @@ class HealthAnalysisStore extends StoreBase {
                 ...this.healthCondition[ healthCondition.option as 'Blood Sugar Level' | 'Blood Pressure Level' | 'BMI' ].map(a => DateUtil.isSameDay(a.day, healthCondition.date) ? { ...a, count: a.count + healthCondition.value, length: a.length + 1 } : a)
               ]
             }
-            this.trigger([ HealthAnalysisStore.HealthConditionKey, HealthAnalysisStore.HCReadyKey ])
+            this.trigger(HealthAnalysisStore.HealthConditionKey)
           }
         }).catch(err => Promise.reject(new Error('Fetch Analysis: ' + err.message)))
       } else {
@@ -137,12 +133,6 @@ class HealthAnalysisStore extends StoreBase {
   @autoSubscribeWithKey('HealthConditionKey')
   getHealthCondition() {
     return this.healthCondition
-  }
-
-  static HCReadyKey = 'HCReadyKey'
-  @autoSubscribeWithKey('HCReadyKey')
-  ready() {
-    return this.isReady
   }
 }
 

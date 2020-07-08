@@ -1,6 +1,6 @@
 import qs from 'qs'
-import { getURL } from '../utils'
 import UserStore from './UserStore'
+import { getURL } from '../utils/Common'
 import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
 
 @AutoSubscribeStore
@@ -26,7 +26,6 @@ class AppointmentStore extends StoreBase {
     endTime: Date
     turn: number
   } | undefined
-  private isReady: boolean
 
   constructor() {
     super()
@@ -38,7 +37,6 @@ class AppointmentStore extends StoreBase {
       'Completed': [],
       'Cancelled': []
     }
-    this.isReady = false
     this.newAppDetail = {}
   }
 
@@ -62,7 +60,6 @@ class AppointmentStore extends StoreBase {
             throw response.status + ': (' + response.statusText + ')'
           }
         }).then(data => {
-          this.isReady = true
           if (data.errors) {
             this.groupedAppointments = {
               'Pending': [],
@@ -72,7 +69,7 @@ class AppointmentStore extends StoreBase {
               'Completed': [],
               'Cancelled': []
             }
-            this.trigger([ AppointmentStore.GroupedAppointmentsKey, AppointmentStore.AReadyKey ])
+            this.trigger(AppointmentStore.GroupedAppointmentsKey)
             throw data.errors
           } else {
             const createAppointment = (app: any) =>
@@ -87,7 +84,7 @@ class AppointmentStore extends StoreBase {
               'Completed': data[ 'Completed' ].map(createAppointment),
               'Cancelled': data[ 'Cancelled' ].map(createAppointment)
             }
-            this.trigger([ AppointmentStore.GroupedAppointmentsKey, AppointmentStore.AReadyKey ])
+            this.trigger(AppointmentStore.GroupedAppointmentsKey)
           }
         }).catch(err => Promise.reject(new Error('Fetch Appointments: ' + err)))
       } else {
@@ -291,12 +288,6 @@ class AppointmentStore extends StoreBase {
   @autoSubscribeWithKey('ByNumberDetailKey')
   getByNumberDetail() {
     return this.byNumberDetail
-  }
-
-  static AReadyKey = 'AReadyKey'
-  @autoSubscribeWithKey('AReadyKey')
-  ready() {
-    return this.isReady
   }
 
   static newAppDetailKey = 'newAppDetailKey'

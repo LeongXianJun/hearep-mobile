@@ -1,9 +1,7 @@
 import React, { useEffect, useState, FC } from 'react'
+import { View, StyleSheet, Dimensions, AsyncStorage } from 'react-native'
 import {
-  StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions, AsyncStorage,
-} from 'react-native'
-import {
-  Text, Title, Card, Button, Divider, Snackbar, Paragraph
+  Text, Title, Card, Button, Divider, Paragraph
 } from 'react-native-paper'
 import CalendarEvents from 'react-native-calendar-events'
 import Carousel from 'react-native-snap-carousel'
@@ -11,7 +9,7 @@ import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
 import { DateUtil } from '../../../utils'
-import { Colors } from '../../../styles'
+import { AppContainer } from '../../common'
 import {
   UserStore, HealthRecordStore, HealthPrescription, MedicationRecord, AppointmentStore,
   Appointment
@@ -37,12 +35,15 @@ const HealthPrescriptionPage: FC<PageProp> = ({ navigation }) => {
   const appointments = AppointmentStore.getGroupedAppointments()
   const { Completed } = appointments
 
-  const [ snackVisible, setSnackVisible ] = useState(false)
+  const [ snackMessage, setSnackMessage ] = useState<string>()
   const [ appointment, setAppointment ] = useState<Appointment>()
+  const [ isLoading, setIsLoading ] = useState(true)
 
   useEffect(() => {
     if (healthPrescription && healthPrescription.type === 'Health Prescription' && healthPrescription.appId) {
-      setAppointment(Completed.find(app => app.id === healthPrescription.appId))
+      Promise.resolve(
+        setAppointment(Completed.find(app => app.id === healthPrescription.appId))
+      ).finally(() => setIsLoading(false))
     }
   }, [ healthPrescription ])
 
@@ -52,39 +53,27 @@ const HealthPrescriptionPage: FC<PageProp> = ({ navigation }) => {
   }, [ medicalStaff ])
 
   return (
-    <React.Fragment>
-      <StatusBar barStyle='default' animated backgroundColor={ barColor } />
-      <SafeAreaView style={ styles.container }>
-        <ScrollView style={ { flex: 1 } } contentContainerStyle={ styles.content }>
-          <View style={ { flex: 1, marginTop: 10 } }>
-            {
-              healthPrescription
-                ? <>
-                  { RecordInformation(healthPrescription) }
-                  {
-                    appointment
-                      ? AppointmentDetail(appointment)
-                      : undefined
-                  }
-                  {
-                    healthPrescription.medicationRecords.length > 0
-                      ? MedicationRecords(healthPrescription.medicationRecords)
-                      : undefined
-                  }
-                </>
-                : undefined
-            }
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-      <Snackbar
-        visible={ snackVisible }
-        duration={ Snackbar.DURATION_MEDIUM }
-        onDismiss={ () => setSnackVisible(false) }
-      >
-        { 'Medication Reminder Added.' }
-      </Snackbar>
-    </React.Fragment>
+    <AppContainer isLoading={ isLoading } snackMessage={ snackMessage }>
+      <View style={ { flex: 1, marginTop: 10 } }>
+        {
+          healthPrescription
+            ? <>
+              { RecordInformation(healthPrescription) }
+              {
+                appointment
+                  ? AppointmentDetail(appointment)
+                  : undefined
+              }
+              {
+                healthPrescription.medicationRecords.length > 0
+                  ? MedicationRecords(healthPrescription.medicationRecords)
+                  : undefined
+              }
+            </>
+            : undefined
+        }
+      </View>
+    </AppContainer>
   )
 
   function RecordInformation(record: HealthPrescription) {
@@ -185,7 +174,7 @@ const HealthPrescriptionPage: FC<PageProp> = ({ navigation }) => {
                   allDay: true, location: appointment?.address, calendarId: primaryC.id
                 }).then(eventId => {
                   AsyncStorage.setItem(mr.id, eventId)
-                    .then(() => setSnackVisible(true))
+                    .then(() => setSnackMessage('Medication Reminder Added.'))
                 })
               }
             }).catch(err => console.log(err))
@@ -255,14 +244,6 @@ const HealthPrescriptionPage: FC<PageProp> = ({ navigation }) => {
 export default withResubAutoSubscriptions(HealthPrescriptionPage)
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background
-  },
-  content: {
-    minHeight: Dimensions.get('window').height - (StatusBar.currentHeight ?? 0) - 60,
-    marginHorizontal: '10%'
-  },
   cardStart: {
     backgroundColor: barColor,
     borderTopRightRadius: 5,

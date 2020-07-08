@@ -1,16 +1,20 @@
 import qs from 'qs'
-import { getURL } from '../utils'
 import UserStore from './UserStore'
+import { getURL } from '../utils/Common'
 import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
 
 @AutoSubscribeStore
 class AccessPermissionStore extends StoreBase {
   medicalStaffId: string
   isRequesting: boolean
+  isEmergency: boolean
+  targetId: string
   constructor() {
     super()
     this.medicalStaffId = ''
     this.isRequesting = false
+    this.isEmergency = false
+    this.targetId = ''
   }
 
   private getToken = () => UserStore.getToken()
@@ -36,7 +40,7 @@ class AccessPermissionStore extends StoreBase {
           throw new Error(data.errors)
         } else {
           if (data.response.includes('Send Successfully')) {
-            this.setIsRequesting('', false)
+            this.setIsRequesting('', '', false, false)
             return data.response
           } else {
             throw new Error('Weird Error')
@@ -54,10 +58,22 @@ class AccessPermissionStore extends StoreBase {
     return this.isRequesting
   }
 
-  setIsRequesting(medicalStaffId: string, isRequesting: boolean) {
+  static requestInfoKey = 'requestInfoKey'
+  @autoSubscribeWithKey('requestInfoKey')
+  getRequestInfo() {
+    return {
+      medicalStaffId: this.medicalStaffId,
+      targetId: this.targetId,
+      isEmergency: this.isEmergency
+    }
+  }
+
+  setIsRequesting(medicalStaffId: string, targetId: string, isEmergency: boolean, isRequesting: boolean) {
     this.medicalStaffId = medicalStaffId
+    this.targetId = targetId
+    this.isEmergency = isEmergency
     this.isRequesting = isRequesting
-    this.trigger(AccessPermissionStore.isRequestingKey)
+    this.trigger([ AccessPermissionStore.isRequestingKey, AccessPermissionStore.requestInfoKey ])
   }
 }
 

@@ -1,7 +1,5 @@
 import React, { useState, FC, ReactText, useEffect } from 'react'
-import {
-  StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions,
-} from 'react-native'
+import { View, StyleSheet } from 'react-native'
 import {
   Text, List, DefaultTheme, Card
 } from 'react-native-paper'
@@ -10,6 +8,7 @@ import { NavigationProp, ParamListBase } from '@react-navigation/native'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import { Colors } from '../../styles'
+import { AppContainer } from '../common'
 import { UserStore, HealthRecordStore, MedicationRecord, AppointmentStore } from '../../stores'
 
 const barColor = Colors.primaryVariant
@@ -22,45 +21,43 @@ const HomePage: FC<PageProp> = ({ navigation }) => {
   const isReady = UserStore.ready()
   const CurrentUser = UserStore.getUser()
   const records = HealthRecordStore.getHealthRecords()
-  const isAppStoreReady = AppointmentStore.ready()
   const appointments = AppointmentStore.getGroupedAppointments()
+  const nearingAppointments = [ ...appointments[ 'Waiting' ], ...appointments[ 'Accepted' ] ]
+  const medications = records.healthPrescriptions.reduce<MedicationRecord[]>((all, hp) => [ ...all, ...hp.medicationRecords ], [])
+
+  const [ isLoading, setIsLoading ] = useState(true)
 
   const [ expandId, setExpandId ] = useState(1)
 
   useEffect(() => {
+    if (isReady) {
+      Promise.all([
+        HealthRecordStore.fetchPatientRecords(),
+        AppointmentStore.fetchAllAppointments()
+      ]).catch(err => console.log(err))
+        .finally(() => setIsLoading(false))
+    }
     return UserStore.unsubscribe
-  }, [ CurrentUser ])
-
-  useEffect(() => {
-    if (isReady)
-      HealthRecordStore.fetchPatientRecords()
   }, [ isReady ])
 
-  useEffect(() => {
-    if (isReady && isAppStoreReady === false)
-      AppointmentStore.fetchAllAppointments()
-        .catch(err => console.log(err))
-  }, [ isReady, isAppStoreReady ])
-
   return (
-    <React.Fragment>
-      <StatusBar barStyle='default' animated backgroundColor={ Colors.primaryVariant } />
-      <SafeAreaView style={ styles.container }>
-        <ScrollView style={ { flex: 1 } } contentContainerStyle={ styles.content }>
-          <Text style={ styles.title }>{ 'Welcome,\n' + CurrentUser?.username }</Text>
-          <Text style={ styles.subtitle }>{ 'Enhancing Life. Excelling in Care.' }</Text>
-          <Card style={ { marginTop: 10 } } onPress={ () => navigation.navigate('Appointment') }>
-            <Card.Cover source={ require('../../resources/images/appointment.jpg') } />
-            <Card.Content style={ styles.cardEnd }>
-              <View style={ { flex: 1, marginTop: 10, flexDirection: 'row', justifyContent: 'center' } }>
-                <View style={ { flex: 1, justifyContent: 'center' } }>
-                  <Text style={ { fontSize: 16 } }>{ 'Make an Appointment Now' }</Text>
-                </View>
-                <MaterialCommunityIcons name='chevron-right' color={ Colors.text } size={ 24 } />
-              </View>
-            </Card.Content>
-          </Card>
-          <View style={ styles.lastView }>
+    <AppContainer isLoading={ isLoading }>
+      <Text style={ styles.title }>{ 'Welcome,\n' + CurrentUser?.username }</Text>
+      <Text style={ styles.subtitle }>{ 'Enhancing Life. Excelling in Care.' }</Text>
+      <Card style={ { marginTop: 10 } } onPress={ () => navigation.navigate('Appointment') }>
+        <Card.Cover source={ require('../../resources/images/appointment.jpg') } />
+        <Card.Content style={ styles.cardEnd }>
+          <View style={ { flex: 1, marginTop: 10, flexDirection: 'row', justifyContent: 'center' } }>
+            <View style={ { flex: 1, justifyContent: 'center' } }>
+              <Text style={ { fontSize: 16 } }>{ 'Make an Appointment Now' }</Text>
+            </View>
+            <MaterialCommunityIcons name='chevron-right' color={ Colors.text } size={ 24 } />
+          </View>
+        </Card.Content>
+      </Card>
+      {
+        nearingAppointments.length > 0 || medications.length > 0
+          ? <View style={ styles.lastView }>
             <List.Section title={ 'Notification' } titleStyle={ { fontSize: 25, color: Colors.text } }>
               <List.AccordionGroup
                 expandedId={ expandId }
@@ -71,56 +68,56 @@ const HomePage: FC<PageProp> = ({ navigation }) => {
               </List.AccordionGroup>
             </List.Section>
           </View>
-        </ScrollView>
-      </SafeAreaView>
-    </React.Fragment>
+          : <></>
+      }
+    </AppContainer>
   )
 
   function AppointmentNotification() {
-    const nearingAppointments = [ ...appointments[ 'Waiting' ], ...appointments[ 'Accepted' ] ]
-
     return (
-      <List.Accordion id={ 1 } title='Appointments'
-        titleStyle={ { color: Colors.text, fontWeight: 'bold' } }
-        theme={ DefaultTheme }
-        style={ styles.listStart }
-      >
-        {
-          nearingAppointments.map((app, index) =>
-            <List.Item key={ 'PU-' + index }
-              style={ { backgroundColor: Colors.surface, marginBottom: 1 } }
-              title={ 'Appointment on ' + (app.type === 'byTime' ? app.time : app.date).toDateString() }
-              titleStyle={ [ styles.text, { textTransform: 'capitalize' } ] }
-              description={ app.address + '\n' }
-              descriptionStyle={ [ styles.text ] }
-            />
-          )
-        }
-      </List.Accordion>
+      nearingAppointments.length > 0
+        ? <List.Accordion id={ 1 } title='Appointments'
+          titleStyle={ { color: Colors.text, fontWeight: 'bold' } }
+          theme={ DefaultTheme }
+          style={ styles.listStart }
+        >
+          {
+            nearingAppointments.map((app, index) =>
+              <List.Item key={ 'PU-' + index }
+                style={ { backgroundColor: Colors.surface, marginBottom: 1 } }
+                title={ 'Appointment on ' + (app.type === 'byTime' ? app.time : app.date).toDateString() }
+                titleStyle={ [ styles.text, { textTransform: 'capitalize' } ] }
+                description={ app.address + '\n' }
+                descriptionStyle={ [ styles.text ] }
+              />
+            )
+          }
+        </List.Accordion>
+        : null
     )
   }
 
   function MedicationNotification() {
-    const { healthPrescriptions } = records
-    const medications = healthPrescriptions.reduce<MedicationRecord[]>((all, hp) => [ ...all, ...hp.medicationRecords ], [])
     return (
-      <List.Accordion id={ 2 } title='Medications'
-        titleStyle={ { color: Colors.text, fontWeight: 'bold' } }
-        theme={ DefaultTheme }
-        style={ styles.listStart }
-      >
-        {
-          medications.map((m, index) =>
-            <List.Item key={ 'PU-' + index }
-              style={ { backgroundColor: Colors.surface, marginBottom: 1 } }
-              title={ 'Medication Refill on ' + m.refillDate.toDateString() }
-              titleStyle={ [ styles.text, { textTransform: 'capitalize' } ] }
-              description={ m.medications.reduce<string[]>((a, { medicine }) => [ ...a, medicine ], []).join(', ') }
-              descriptionStyle={ [ styles.text ] }
-            />
-          )
-        }
-      </List.Accordion>
+      medications.length > 0
+        ? <List.Accordion id={ 2 } title='Medications'
+          titleStyle={ { color: Colors.text, fontWeight: 'bold' } }
+          theme={ DefaultTheme }
+          style={ styles.listStart }
+        >
+          {
+            medications.map((m, index) =>
+              <List.Item key={ 'PU-' + index }
+                style={ { backgroundColor: Colors.surface, marginBottom: 1 } }
+                title={ 'Medication Refill on ' + m.refillDate.toDateString() }
+                titleStyle={ [ styles.text, { textTransform: 'capitalize' } ] }
+                description={ m.medications.reduce<string[]>((a, { medicine }) => [ ...a, medicine ], []).join(', ') }
+                descriptionStyle={ [ styles.text ] }
+              />
+            )
+          }
+        </List.Accordion>
+        : null
     )
   }
 }
@@ -128,14 +125,6 @@ const HomePage: FC<PageProp> = ({ navigation }) => {
 export default withResubAutoSubscriptions(HomePage)
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background
-  },
-  content: {
-    minHeight: Dimensions.get('window').height - (StatusBar.currentHeight ?? 0) - 60,
-    marginHorizontal: '10%'
-  },
   cardEnd: {
     backgroundColor: barColor,
     borderBottomRightRadius: 5,

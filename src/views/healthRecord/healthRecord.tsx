@@ -1,15 +1,11 @@
-import React, { FC, useEffect } from 'react'
-import {
-  StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions
-} from 'react-native'
-import {
-  Text, Card, Title, TouchableRipple
-} from 'react-native-paper'
+import React, { FC, useEffect, useState } from 'react'
+import { View, StyleSheet, Dimensions } from 'react-native'
 import Carousel from 'react-native-snap-carousel'
 import { withResubAutoSubscriptions } from 'resub'
+import { Text, Card, Title, TouchableRipple } from 'react-native-paper'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
-import { Colors } from '../../styles'
+import { AppContainer } from '../common'
 import { HealthRecordStore, HR } from '../../stores'
 
 const imgs = {
@@ -27,11 +23,18 @@ interface PageProp {
 const HealthRecordPage: FC<PageProp> = ({ navigation }) => {
   const { width } = Dimensions.get('window')
   const records = HealthRecordStore.getHealthRecords()
-
   const { healthPrescriptions, labTestResults } = records
+
+  const [ isLoading, setIsLoading ] = useState(true)
 
   useEffect(() => {
     HealthRecordStore.fetchPatientRecords()
+      .catch(err => {
+        if (err.message.includes('No more record') === false) {
+          console.log(err)
+        }
+      })
+      .finally(() => setIsLoading(false))
   }, [])
 
   const navigate = (category: HR[ 'type' ]) => (record: HR) => () => {
@@ -58,45 +61,41 @@ const HealthRecordPage: FC<PageProp> = ({ navigation }) => {
     </TouchableRipple>
 
   return (
-    <React.Fragment>
-      <StatusBar barStyle='default' />
-      <SafeAreaView style={ styles.container }>
-        <ScrollView style={ { flex: 1 } } contentContainerStyle={ styles.content }>
-          <Text style={ styles.title }>{ 'All Health Records' }</Text>
-          {
-            [
-              { type: 'Health Prescription' as HR[ 'type' ], data: healthPrescriptions },
-              { type: 'Lab Test Result' as HR[ 'type' ], data: labTestResults }
-            ].map(({ type, data }) =>
-              <View key={ 'l-' + type } style={ { marginVertical: 5 } }>
-                <Text style={ [ styles.category, { textTransform: 'capitalize' } ] }>{ type }</Text>
-                <Carousel
+    <AppContainer isLoading={ isLoading }>
+      <Text style={ styles.title }>{ 'All Health Records' }</Text>
+      {
+        [
+          { type: 'Health Prescription' as HR[ 'type' ], data: healthPrescriptions },
+          { type: 'Lab Test Result' as HR[ 'type' ], data: labTestResults }
+        ].map(({ type, data }) =>
+          <View key={ 'l-' + type } style={ { marginVertical: 5 } }>
+            <Text style={ [ styles.category, { textTransform: 'capitalize' } ] }>{ type }</Text>
+            {
+              data.length > 0
+                ? <Carousel
                   layout='default'
                   data={ data }
                   renderItem={ renderItem(type) }
                   itemWidth={ width * 0.64 } // 0.8 * 0.8
                   sliderWidth={ width * 0.8 }
                 />
-              </View>
-            )
-          }
-        </ScrollView>
-      </SafeAreaView>
-    </React.Fragment>
+                :
+                <Card style={ { height: '25%', backgroundColor: barColor } }>
+                  <Card.Content style={ { alignItems: 'center' } }>
+                    <Text style={ { textAlignVertical: 'center' } }>{ `No ${type} for now.` }</Text>
+                  </Card.Content>
+                </Card>
+            }
+          </View>
+        )
+      }
+    </AppContainer>
   )
 }
 
 export default withResubAutoSubscriptions(HealthRecordPage)
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background
-  },
-  content: {
-    minHeight: Dimensions.get('window').height - (StatusBar.currentHeight ?? 0) - 60,
-    marginHorizontal: '10%'
-  },
   title: {
     fontWeight: 'bold',
     marginTop: 25,

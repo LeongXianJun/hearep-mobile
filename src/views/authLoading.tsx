@@ -1,15 +1,11 @@
 import React, { FC, useEffect } from 'react'
-import {
-  StatusBar, StyleSheet, View, Dimensions
-} from 'react-native'
-import {
-  ActivityIndicator
-} from 'react-native-paper'
+import { View } from 'react-native'
 import { withResubAutoSubscriptions } from 'resub'
+import { ActivityIndicator } from 'react-native-paper'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
-import { Colors } from '../styles'
 import { UserStore } from '../stores'
+import { AppContainer } from './common'
 import { Logo } from '../resources/logo'
 
 interface PageProp {
@@ -31,32 +27,13 @@ const AuthLoadingScreen: FC<PageProp> = ({ navigation }) => {
   }, [ isReady, navigation ])
 
   return (
-    <React.Fragment>
-      <StatusBar barStyle='default' animated backgroundColor={ Colors.primaryVariant } />
-      <View style={ styles.container }>
-        <View style={ styles.content }>
-          <Logo width={ 150 } height={ 130 } />
-          <ActivityIndicator size='large' style={ styles.indicator } />
-        </View>
+    <AppContainer>
+      <View style={ { flex: 1, justifyContent: 'center', alignItems: 'center' } }>
+        <Logo width={ 150 } height={ 130 } />
+        <ActivityIndicator size='large' style={ { marginVertical: 50 } } />
       </View>
-    </React.Fragment>
+    </AppContainer>
   )
 }
 
 export default withResubAutoSubscriptions(AuthLoadingScreen)
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background
-  },
-  content: {
-    minHeight: Dimensions.get('window').height - (StatusBar.currentHeight ?? 0),
-    marginHorizontal: '10%',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  indicator: {
-    marginVertical: 50
-  }
-})

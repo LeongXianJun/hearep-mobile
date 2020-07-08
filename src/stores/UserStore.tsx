@@ -4,7 +4,7 @@ import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth'
 import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 
-import { getURL } from '../utils'
+import { getURL } from '../utils/Common'
 import NotificationStore from './NotificationStore'
 
 @AutoSubscribeStore
@@ -41,24 +41,30 @@ class UserStore extends StoreBase {
         if (currentToken) {
           NotificationStore.sendTokenToServer(currentToken)
 
-          if (Platform.OS === 'ios')
+          if (Platform.OS === 'ios') {
             messaging().hasPermission().then(async status => {
               if (status !== FirebaseMessagingTypes.AuthorizationStatus.AUTHORIZED && status !== FirebaseMessagingTypes.AuthorizationStatus.PROVISIONAL)
                 return await messaging().requestPermission()
             })
+          }
         } else {
           throw new Error('No Instance ID token available. Request permission to generate one.')
         }
+      }).then(async () => {
+        if (this.isRegistering == false) {
+          await this.fetchUser()
+            .catch(err => {
+              if (err.message.includes('No such user')) {
+                console.log('account info missing')
+              }
+            })
+        }
       }).catch(err =>
         AsyncStorage.setItem('sentToServer', '0')
-      )
-
-      if (this.isRegistering == false) {
-        this.fetchUser().then(() => {
-          this.isReady = true
-          this.trigger(UserStore.IsReadyKey)
-        })
-      }
+      ).finally(() => {
+        this.isReady = true
+        this.trigger(UserStore.IsReadyKey)
+      })
     } else {
       this.user = undefined
       this.firebaseUser = undefined
@@ -67,9 +73,45 @@ class UserStore extends StoreBase {
     }
   })
 
-  setFirebaseUser = (firebaseUser: FirebaseAuthTypes.User) => this.firebaseUser = firebaseUser
+  setFirebaseUser = (firebaseUser: FirebaseAuthTypes.User) => Promise.resolve(
+    this.firebaseUser = firebaseUser
+  ).then(async () => {
+    if (this.isRegistering == false) {
+      await this.fetchUser()
+        .catch(err => {
+          if (err.message.includes('No such user')) {
+            console.log('account info missing')
+          }
+        })
+    }
+  }).finally(() => {
+    this.isReady = true
+    this.trigger(UserStore.IsReadyKey)
+  })
 
   getToken = async () => await this.firebaseUser?.getIdToken().catch(err => err)
+
+  checkExistingUser = (phoneNumber: string) =>
+    fetch(getURL() + '/patient/exist', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: qs.stringify({ phoneNumber })
+    }).then(response => {
+      if (response.ok) {
+        return response.json()
+      } else {
+        throw response.status + ': (' + response.statusText + ')'
+      }
+    }).then(data => {
+      if (data.errors) {
+        throw data.errors
+      } else {
+        return Boolean(data.hasUser)
+      }
+    }).catch(err => Promise.reject(new Error('Fetch User: ' + err)))
 
   // endpoints
   fetchUser = () =>

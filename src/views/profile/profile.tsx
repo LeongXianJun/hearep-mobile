@@ -1,17 +1,13 @@
-import React, { FC, useEffect } from 'react'
-import {
-  StatusBar, SafeAreaView, ScrollView, View, StyleSheet,
-  Dimensions, Image
-} from 'react-native'
-import {
-  Text, Card, FAB, Button
-} from 'react-native-paper'
+import React, { FC, useEffect, useState } from 'react'
+import { View, StyleSheet, Image } from 'react-native'
 import { withResubAutoSubscriptions } from 'resub'
+import { Text, Card, FAB, Button } from 'react-native-paper'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
 import { Colors } from '../../styles'
-import { isUndefined, AuthUtil } from '../../utils'
+import { AppContainer } from '../common'
 import { UserStore, Patient } from '../../stores'
+import { isUndefined, AuthUtil } from '../../utils'
 
 const avatar = {
   M: () => require('../../resources/images/maleAvatar.png'),
@@ -27,14 +23,15 @@ interface PageProp {
 const ProfilePage: FC<PageProp> = ({ navigation }) => {
   const CurrentUser = UserStore.getUser()
 
+  const [ isLoading, setIsLoading ] = useState(true)
+
   useEffect(() => {
-    if (isUndefined(CurrentUser)) {
-      UserStore.fetchUser()
-        .catch(err => console.log('profile', err))
-    }
+    UserStore.fetchUser()
+      .catch(err => console.log('profile', err))
+      .finally(() => setIsLoading(false))
 
     return UserStore.unsubscribe
-  }, [ CurrentUser ])
+  }, [])
 
   const logout = () =>
     AuthUtil.signOut()
@@ -43,26 +40,20 @@ const ProfilePage: FC<PageProp> = ({ navigation }) => {
       })
 
   return (
-    <React.Fragment>
-      <StatusBar barStyle='default' />
-      <SafeAreaView style={ styles.container }>
-        <ScrollView style={ { flex: 1 } } contentContainerStyle={ styles.content }>
-          <Text style={ styles.title }>{ 'Profile' }</Text>
-          <View style={ { flex: 1 } }>
-            {
-              CurrentUser ?
-                <>
-                  { BasicInformation(CurrentUser) }
-                  { ContactInformation({ email: CurrentUser.email, phoneNumber: CurrentUser.phoneNumber }) }
-                </>
-                : null
-            }
-            <Button mode='outlined' onPress={ logout }>{ 'Logout' }</Button>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-      { FloatingButtons() }
-    </React.Fragment>
+    <AppContainer isLoading={ isLoading } FAB={ FloatingButtons() }>
+      <Text style={ styles.title }>{ 'Profile' }</Text>
+      <View style={ { flex: 1 } }>
+        {
+          CurrentUser ?
+            <>
+              { BasicInformation(CurrentUser) }
+              { ContactInformation({ email: CurrentUser.email, phoneNumber: CurrentUser.phoneNumber }) }
+            </>
+            : null
+        }
+        <Button mode='outlined' onPress={ logout }>{ 'Logout' }</Button>
+      </View>
+    </AppContainer>
   )
 
   function BasicInformation(info: Patient) {
@@ -145,14 +136,6 @@ const ProfilePage: FC<PageProp> = ({ navigation }) => {
 export default withResubAutoSubscriptions(ProfilePage)
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background
-  },
-  content: {
-    minHeight: Dimensions.get('window').height - (StatusBar.currentHeight ?? 0) - 60,
-    marginHorizontal: '10%'
-  },
   cardStart: {
     backgroundColor: barColor,
     borderTopRightRadius: 5,

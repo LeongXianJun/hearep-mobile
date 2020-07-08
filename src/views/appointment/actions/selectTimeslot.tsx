@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect, FC } from 'react'
 import {
-  StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions, TouchableOpacity
+  ScrollView, View, StyleSheet, Dimensions, TouchableOpacity
 } from 'react-native'
-import {
-  Text, Card, Title, ActivityIndicator
-} from 'react-native-paper'
+import { Text, Card, Title } from 'react-native-paper'
 import Carousel from 'react-native-snap-carousel'
 import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
@@ -13,6 +11,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { Colors } from '../../../styles'
 import { DateUtil } from '../../../utils'
 import { AppointmentStore, AvailableTimeSlotStore } from '../../../stores'
+import { AppContainer } from '../../common'
 
 const barColor = '#e982f6'
 
@@ -32,11 +31,11 @@ const SelectTimeslotPage: FC<PageProp> = ({ route, navigation }) => {
   })
   const { width, height } = Dimensions.get('window')
   const newAppDetail = AppointmentStore.getNewAppDetail()
-  const isTSReady = AvailableTimeSlotStore.ready()
   const available = AvailableTimeSlotStore.getAvailableTimeSlots()
   const longScroll = height < 500
 
   const [ dayIndex, setDayIndex ] = useState(0)
+  const [ isLoading, setIsLoading ] = useState(true)
   const [ availableSlots, setAvailableSlots ] = useState<Date[]>([])
   const _carousel = useRef<any>(null) // not sure the type
 
@@ -44,6 +43,7 @@ const SelectTimeslotPage: FC<PageProp> = ({ route, navigation }) => {
     if (newAppDetail.medicalStaffId)
       AvailableTimeSlotStore.fetchAvailableTimeslots(newAppDetail.medicalStaffId, new Date())
         .catch(err => console.log(err))
+        .finally(() => setIsLoading(false))
   }, [ newAppDetail ])
 
   useEffect(() => {
@@ -88,72 +88,47 @@ const SelectTimeslotPage: FC<PageProp> = ({ route, navigation }) => {
   }
 
   return (
-    <React.Fragment>
-      <StatusBar barStyle='default' animated backgroundColor={ barColor } />
-      <SafeAreaView style={ styles.container }>
-        <ScrollView scrollEnabled={ longScroll } style={ { flex: 1 } } contentContainerStyle={ longScroll ? styles.content : styles.longScrollContent }>
-          {
-            isTSReady
-              ? <View style={ [ styles.firstView, { flex: 7 } ] }>
-                <Title>Select a { rescheduleId ? 'new ' : '' }Day</Title>
-                <View>
-                  <Carousel
-                    ref={ _carousel }
-                    layout='default'
-                    data={ available?.daySlots ?? [] }
-                    enableSnap
-                    snapToAlignment='center'
-                    onSnapToItem={ index => onIndexChange(index) }
-                    renderItem={ renderItem }
-                    itemWidth={ width * 0.25 }
-                    sliderWidth={ width * 0.8 }
-                  />
-                </View>
-                <Title>Pick a { rescheduleId ? 'new ' : '' }Time</Title>
-                <ScrollView scrollEnabled={ !longScroll } style={ [ styles.lastView, { marginVertical: 10 } ] }>
-                  <View>
-                    {
-                      availableSlots.map((as, index) =>
-                        <TouchableOpacity key={ 'slot-' + index } style={ styles.bar } onPress={ cont(as) }>
-                          <View style={ styles.row }>
-                            <View style={ { flex: 1, justifyContent: 'center' } }>
-                              <Text style={ { fontSize: 20, color: 'black' } }>{ DateUtil.hour12(as) }</Text>
-                            </View>
-                            <MaterialCommunityIcons name='chevron-right' color='black' size={ 36 } />
-                          </View>
-                        </TouchableOpacity>
-                      )
-                    }
+    <AppContainer isLoading={ isLoading } ContentStyle={ longScroll && { flex: 1 } }>
+      <View style={ [ styles.firstView ] }>
+        <Title>Select a { rescheduleId ? 'new ' : '' }Day</Title>
+        <View>
+          <Carousel
+            ref={ _carousel }
+            layout='default'
+            data={ available?.daySlots ?? [] }
+            enableSnap
+            snapToAlignment='center'
+            onSnapToItem={ index => onIndexChange(index) }
+            renderItem={ renderItem }
+            itemWidth={ width * 0.25 }
+            sliderWidth={ width * 0.8 }
+          />
+        </View>
+        <Title>Pick a { rescheduleId ? 'new ' : '' }Time</Title>
+        <ScrollView scrollEnabled={ !longScroll } style={ [ styles.lastView, { marginVertical: 10 } ] }>
+          <View>
+            {
+              availableSlots.map((as, index) =>
+                <TouchableOpacity key={ 'slot-' + index } style={ styles.bar } onPress={ cont(as) }>
+                  <View style={ styles.row }>
+                    <View style={ { flex: 1, justifyContent: 'center' } }>
+                      <Text style={ { fontSize: 20, color: 'black' } }>{ DateUtil.hour12(as) }</Text>
+                    </View>
+                    <MaterialCommunityIcons name='chevron-right' color='black' size={ 36 } />
                   </View>
-                </ScrollView>
-              </View>
-              : <ActivityIndicator size='large' style={ styles.indicator } />
-          }
+                </TouchableOpacity>
+              )
+            }
+          </View>
         </ScrollView>
-      </SafeAreaView>
-    </React.Fragment>
+      </View>
+    </AppContainer>
   )
 }
 
 export default withResubAutoSubscriptions(SelectTimeslotPage)
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background
-  },
-  longScrollContent: {
-    flex: 1,
-    maxHeight: Dimensions.get('window').height - (StatusBar.currentHeight ?? 0) - 60,
-    marginHorizontal: '10%'
-  },
-  content: {
-    minHeight: Dimensions.get('window').height - (StatusBar.currentHeight ?? 0) - 60,
-    marginHorizontal: '10%'
-  },
-  indicator: {
-    marginVertical: 50
-  },
   cardStart: {
     backgroundColor: barColor,
     borderTopRightRadius: 5,

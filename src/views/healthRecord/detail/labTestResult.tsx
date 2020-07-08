@@ -1,15 +1,11 @@
 import React, { FC, useState, useEffect } from 'react'
-import {
-  StatusBar, SafeAreaView, ScrollView, View, StyleSheet, Dimensions,
-} from 'react-native'
-import {
-  Text, Card, Divider, Paragraph
-} from 'react-native-paper'
+import { View, StyleSheet } from 'react-native'
 import { withResubAutoSubscriptions } from 'resub'
+import { Text, Card, Divider, Paragraph } from 'react-native-paper'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
 import { DateUtil } from '../../../utils'
-import { Colors } from '../../../styles'
+import { AppContainer } from '../../common'
 import {
   UserStore, HealthRecordStore, LabTestResult, AppointmentStore, Appointment
 } from '../../../stores'
@@ -34,10 +30,13 @@ const LabTestPage: FC<PageProp> = ({ navigation }) => {
   const { Completed } = appointments
 
   const [ appointment, setAppointment ] = useState<Appointment>()
+  const [ isLoading, setIsLoading ] = useState(true)
 
   useEffect(() => {
     if (labTestResult && labTestResult.type === 'Lab Test Result' && labTestResult.appId) {
-      setAppointment(Completed.find(app => app.id === labTestResult.appId))
+      Promise.resolve(
+        setAppointment(Completed.find(app => app.id === labTestResult.appId))
+      ).finally(() => setIsLoading(false))
     }
   }, [ labTestResult ])
 
@@ -47,28 +46,23 @@ const LabTestPage: FC<PageProp> = ({ navigation }) => {
   }, [ medicalStaff ])
 
   return (
-    <React.Fragment>
-      <StatusBar barStyle='default' animated backgroundColor={ barColor } />
-      <SafeAreaView style={ styles.container }>
-        <ScrollView style={ { flex: 1 } } contentContainerStyle={ styles.content }>
-          <View style={ { flex: 1, marginTop: 10 } }>
-            {
-              labTestResult
-                ? <>
-                  { RecordInformation(labTestResult) }
-                  {
-                    appointment
-                      ? AppointmentDetail(appointment)
-                      : undefined
-                  }
-                  { LabTestResult(labTestResult) }
-                </>
-                : undefined
-            }
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </React.Fragment>
+    <AppContainer isLoading={ isLoading }>
+      <View style={ { flex: 1, marginTop: 10 } }>
+        {
+          labTestResult
+            ? <>
+              { RecordInformation(labTestResult) }
+              {
+                appointment
+                  ? AppointmentDetail(appointment)
+                  : undefined
+              }
+              { LabTestResult(labTestResult) }
+            </>
+            : undefined
+        }
+      </View>
+    </AppContainer>
   )
 
   function RecordInformation(record: LabTestResult) {
@@ -187,14 +181,6 @@ const LabTestPage: FC<PageProp> = ({ navigation }) => {
 export default withResubAutoSubscriptions(LabTestPage)
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background
-  },
-  content: {
-    minHeight: Dimensions.get('window').height - (StatusBar.currentHeight ?? 0) - 60,
-    marginHorizontal: '10%'
-  },
   cardStart: {
     backgroundColor: barColor,
     borderTopRightRadius: 5,

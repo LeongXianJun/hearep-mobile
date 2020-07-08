@@ -1,6 +1,6 @@
 import qs from 'qs'
-import { getURL } from '../utils'
 import UserStore from './UserStore'
+import { getURL } from '../utils/Common'
 import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
 
 @AutoSubscribeStore

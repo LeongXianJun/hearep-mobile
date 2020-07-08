@@ -2,8 +2,8 @@ import qs from 'qs'
 import { AsyncStorage } from 'react-native'
 import messaging from '@react-native-firebase/messaging'
 
-import { getURL } from '../utils'
 import UserStore from './UserStore'
+import { getURL } from '../utils/Common'
 import AccessPermissionStore from './AccessPermissionStore'
 import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
 
@@ -33,7 +33,7 @@ class NotificationStore extends StoreBase {
     const { data } = remoteMessage
     if (data) {
       if (data.medicalStaffId) {
-        AccessPermissionStore.setIsRequesting(data.medicalStaffId, true)
+        AccessPermissionStore.setIsRequesting(data.medicalStaffId, data.patientId, data.isEmergency as any, true)
       } else {
         this.notification = [
           { title: data.title, description: data.description }

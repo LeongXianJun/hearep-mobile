@@ -1,16 +1,14 @@
 import qs from 'qs'
-import { getURL } from '../utils'
 import UserStore from './UserStore'
+import { getURL } from '../utils/Common'
 import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
 
 @AutoSubscribeStore
 class AvailableTimeSlotStore extends StoreBase {
   private availableTimeSlots: AvailableTimeSlots | undefined
-  private isReady: boolean
 
   constructor() {
     super()
-    this.isReady = false
   }
 
   private getToken = () => UserStore.getToken()
@@ -18,8 +16,6 @@ class AvailableTimeSlotStore extends StoreBase {
   // get available timeslots
   fetchAvailableTimeslots = (medicalStaffId: string, date: Date) => this.getToken().then(async userToken => {
     if (userToken) {
-      this.isReady = false
-      this.trigger(AvailableTimeSlotStore.IsReadyKey)
       await fetch(getURL() + '/workingTime/get', {
         method: 'POST',
         headers: {
@@ -37,9 +33,8 @@ class AvailableTimeSlotStore extends StoreBase {
         if (data.errors) {
           throw data.errors
         } else {
-          this.isReady = true
           this.availableTimeSlots = new AvailableTimeSlots(data)
-          this.trigger([ AvailableTimeSlotStore.IsReadyKey, AvailableTimeSlotStore.AvailableTimeSlotsKey ])
+          this.trigger(AvailableTimeSlotStore.AvailableTimeSlotsKey)
         }
       }).catch(err => Promise.reject(new Error(err)))
     } else {
@@ -51,12 +46,6 @@ class AvailableTimeSlotStore extends StoreBase {
   @autoSubscribeWithKey('AvailableTimeSlotsKey')
   getAvailableTimeSlots() {
     return this.availableTimeSlots
-  }
-
-  static IsReadyKey = 'IsReadyKey'
-  @autoSubscribeWithKey('IsReadyKey')
-  ready() {
-    return this.isReady
   }
 }
 

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, FC } from 'react'
 import { StyleSheet, View } from 'react-native'
-import { Title, Button, Paragraph, Divider } from 'react-native-paper'
 import Modal from 'react-native-modal'
+import { withResubAutoSubscriptions } from 'resub'
+import { Title, Button, Paragraph, Divider } from 'react-native-paper'
 
 import { Colors } from '../styles'
-import { AccessPermissionStore } from '../stores'
+import { AccessPermissionStore, UserStore, MedicalStaff, Patient } from '../stores'
 
 interface AuthenticationDialogProps {
   visible: boolean
@@ -12,13 +13,27 @@ interface AuthenticationDialogProps {
 }
 
 const AuthenticationDialog: FC<AuthenticationDialogProps> = ({ visible, onClose }) => {
-  const [ isVisible, setIsVisible ] = useState(false)
+  const medicalStaff = UserStore.getMedicalStaff()
+  const patients = UserStore.getPatients()
+  const allPatients = [ ...patients.authorized, ...patients.notAuthorized ]
+  const requestInfo = AccessPermissionStore.getRequestInfo()
+
+  const [ ms, setMS ] = useState<MedicalStaff>()
+  const [ p, setP ] = useState<Patient>()
   const [ show, setShow ] = useState(false)
+  const [ isVisible, setIsVisible ] = useState(false)
+
+  useEffect(() => {
+    UserStore.fetchAllMedicalStaff()
+      .catch(err => console.log(err))
+  }, [])
 
   useEffect(() => {
     setIsVisible(visible)
     if (visible) {
       setShow(true)
+      setMS(medicalStaff.find(ms => ms.id === requestInfo.medicalStaffId))
+      setP(allPatients.find(p => p.id === requestInfo.targetId))
     }
   }, [ visible ])
 
@@ -44,7 +59,7 @@ const AuthenticationDialog: FC<AuthenticationDialogProps> = ({ visible, onClose 
             <View style={ styles.modalView }>
               <View>
                 <Title style={ { color: 'black' } }>Authorize the Access to Your Health Records</Title>
-                <Paragraph style={ { color: 'black' } }>{ 'Medical staff, Dr Jone want to acceess your health record. Do you authorize him to view your records?' }</Paragraph>
+                <Paragraph style={ { color: 'black' } }>{ `Medical staff, Dr ${ms?.username} want to acceess your health record. Do you authorize him/her to view ${requestInfo.isEmergency === true ? p?.username + "\'s" : 'your'} records?` }</Paragraph>
               </View>
               <Divider style={ { marginVertical: 5 } } />
               <View style={ { flexDirection: 'row', justifyContent: 'flex-end' } }>
@@ -59,7 +74,7 @@ const AuthenticationDialog: FC<AuthenticationDialogProps> = ({ visible, onClose 
   )
 }
 
-export default AuthenticationDialog
+export default withResubAutoSubscriptions(AuthenticationDialog)
 
 const styles = StyleSheet.create({
   dialog: {
