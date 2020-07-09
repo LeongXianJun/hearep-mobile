@@ -150,8 +150,12 @@ const UpdateProfilePage: FC<PageProp> = ({ navigation }) => {
           </View>
           <View style={ { flex: 2, flexDirection: 'row', alignContent: 'center' } }>
             <RadioButton.Group value={ gender } onValueChange={ val => updateInfo('gender', val) }>
-              <RadioButton.Item label='Male' value="M" />
-              <RadioButton.Item label='Female' value="F" />
+              <View style={ { flex: 1 } }>
+                <RadioButton.Item label='Male' value="M" />
+              </View>
+              <View style={ { flex: 1 } }>
+                <RadioButton.Item label='Female' value="F" />
+              </View>
             </RadioButton.Group>
           </View>
         </View>

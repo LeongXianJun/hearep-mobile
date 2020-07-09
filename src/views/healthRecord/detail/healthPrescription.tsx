@@ -41,15 +41,17 @@ const HealthPrescriptionPage: FC<PageProp> = ({ navigation }) => {
 
   useEffect(() => {
     if (healthPrescription && healthPrescription.type === 'Health Prescription' && healthPrescription.appId) {
-      Promise.resolve(
-        setAppointment(Completed.find(app => app.id === healthPrescription.appId))
-      ).finally(() => setIsLoading(false))
+      setAppointment(Completed.find(app => app.id === healthPrescription.appId))
     }
   }, [ healthPrescription ])
 
   useEffect(() => {
-    if (medicalStaff.length === 0)
+    if (medicalStaff.length === 0) {
       UserStore.fetchAllMedicalStaff()
+        .finally(() => setIsLoading(false))
+    } else {
+      setIsLoading(false)
+    }
   }, [ medicalStaff ])
 
   return (

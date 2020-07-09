@@ -34,15 +34,17 @@ const LabTestPage: FC<PageProp> = ({ navigation }) => {
 
   useEffect(() => {
     if (labTestResult && labTestResult.type === 'Lab Test Result' && labTestResult.appId) {
-      Promise.resolve(
-        setAppointment(Completed.find(app => app.id === labTestResult.appId))
-      ).finally(() => setIsLoading(false))
+      setAppointment(Completed.find(app => app.id === labTestResult.appId))
     }
   }, [ labTestResult ])
 
   useEffect(() => {
-    if (medicalStaff.length === 0)
+    if (medicalStaff.length === 0) {
       UserStore.fetchAllMedicalStaff()
+        .finally(() => setIsLoading(false))
+    } else {
+      setIsLoading(false)
+    }
   }, [ medicalStaff ])
 
   return (
