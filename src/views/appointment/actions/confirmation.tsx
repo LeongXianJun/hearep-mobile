@@ -57,7 +57,7 @@ const AppointmentConfirmationPage: FC<PageProp> = ({ navigation }) => {
                 { field: 'Address', val: (selectedApp ?? newAppDetail)?.address },
                 { field: (selectedApp?.type === 'byTime' ? selectedApp.time.toDateString() : undefined) ?? 'Date', val: newAppDetail?.time?.toDateString(), isChange: selectedApp !== undefined },
                 { field: (selectedApp?.type === 'byTime' ? DateUtil.hour12(selectedApp.time) : undefined) ?? 'Time', val: newAppDetail?.time && DateUtil.hour12(newAppDetail.time), isNormalText: true, isChange: selectedApp !== undefined },
-                { field: 'Turn', val: newAppDetail?.turn, isNormalText: true }
+                { field: 'Turn', val: newAppDetail?.turn !== undefined ? newAppDetail.turn + 1 : undefined, isNormalText: true }
               ].filter(({ val }) => val !== undefined && val !== '').map(({ field, val, isNormalText, isChange }, index) =>
                 <View key={ 'bi-' + index } style={ { flexDirection: 'row', marginVertical: 10 } }>
                   <View style={ { flex: isChange && selectedApp ? 3 : 2 } }>

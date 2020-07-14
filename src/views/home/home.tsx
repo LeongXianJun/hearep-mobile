@@ -42,7 +42,7 @@ const HomePage: FC<PageProp> = ({ navigation }) => {
 
   return (
     <AppContainer isLoading={ isLoading }>
-      <Text style={ styles.title }>{ 'Welcome,\n' + CurrentUser?.username }</Text>
+      <Text style={ styles.title }>{ CurrentUser?.username ? 'Welcome,\n' + CurrentUser.username : 'Welcome' }</Text>
       <Text style={ styles.subtitle }>{ 'Enhancing Life. Excelling in Care.' }</Text>
       <Card style={ { marginTop: 10 } } onPress={ () => navigation.navigate('Appointment') }>
         <Card.Cover source={ require('../../resources/images/appointment.jpg') } />

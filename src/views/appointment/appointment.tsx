@@ -36,7 +36,7 @@ const AppointmentPage: FC<PageProp> = ({ navigation }) => {
   const CurrentUser = UserStore.getUser()
   const medicalStaff = UserStore.getMedicalStaff()
   const appointments = AppointmentStore.getGroupedAppointments()
-  const { Pending, Rejected } = appointments
+  const { Pending, Accepted, Rejected, Waiting } = appointments
 
   const [ gender, setGender ] = useState<'M' | 'F'>('M')
   const [ expandId, setExpandId ] = useState(1)
@@ -78,21 +78,28 @@ const AppointmentPage: FC<PageProp> = ({ navigation }) => {
         </Card.Content>
       </Card>
       <View style={ styles.lastView }>
-        <List.Section>
-          <List.AccordionGroup
-            expandedId={ expandId }
-            onAccordionPress={ (expandedId: ReactText) => setExpandId(Number.parseInt(expandedId.toString())) }
-          >
-            { NearingAppointments() }
-            { AllAppointments() }
-          </List.AccordionGroup>
-        </List.Section>
+        {
+
+          Waiting.length > 0 || Accepted.length > 0 || Pending.length > 0 || Rejected.length > 0
+            ? <List.Section>
+              <List.AccordionGroup
+                expandedId={ expandId }
+                onAccordionPress={ (expandedId: ReactText) => setExpandId(Number.parseInt(expandedId.toString())) }
+              >
+                { NearingAppointments() }
+                { AllAppointments() }
+              </List.AccordionGroup>
+            </List.Section>
+            : <View style={ { alignItems: 'center' } }>
+              <Text style={ { textAlignVertical: 'center' } }>{ `No appointment is scheduled.` }</Text>
+            </View>
+        }
       </View>
     </AppContainer>
   )
 
   function NearingAppointments() {
-    const app = [ ...appointments[ 'Waiting' ], ...appointments[ 'Accepted' ] ]
+    const app = [ ...Waiting, ...Accepted ]
 
     return (
       app.length > 0
@@ -179,9 +186,7 @@ const AppointmentPage: FC<PageProp> = ({ navigation }) => {
               )
           }
         </List.Accordion>
-        : <View style={ { alignItems: 'center' } }>
-          <Text style={ { textAlignVertical: 'center' } }>{ `No appointment is scheduled.` }</Text>
-        </View>
+        : null
     )
   }
 

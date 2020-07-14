@@ -1,5 +1,5 @@
 import qs from 'qs'
-import { AsyncStorage, Platform } from 'react-native'
+import { Platform } from 'react-native'
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth'
 import { StoreBase, AutoSubscribeStore, autoSubscribeWithKey } from 'resub'
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
@@ -59,17 +59,15 @@ class UserStore extends StoreBase {
               }
             })
         }
-      }).catch(err =>
-        AsyncStorage.setItem('sentToServer', '0')
-      ).finally(() => {
+      }).finally(() => {
         this.isReady = true
-        this.trigger(UserStore.IsReadyKey)
+        this.trigger()
       })
     } else {
       this.user = undefined
       this.firebaseUser = undefined
       this.isReady = true
-      this.trigger(UserStore.IsReadyKey)
+      this.trigger()
     }
   })
 

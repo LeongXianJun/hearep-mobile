@@ -62,7 +62,7 @@ const GetNumberPage: FC<PageProp> = ({ navigation }) => {
               <Text style={ { textAlign: 'center' } }>{ DateUtil.hour12(turnDetail?.startTime) + ' - ' + DateUtil.hour12(turnDetail?.endTime) }</Text>
               <Text style={ styles.instruction }>{ 'Click this to get this number and queue up' }</Text>
               <TouchableOpacity style={ [ styles.circle, { width: width, height: width, borderRadius: width / 2 } ] } onPress={ process } activeOpacity={ 0.75 }>
-                <Text style={ styles.num }>{ turnDetail?.turn ?? 0 + 1 }</Text>
+                <Text style={ styles.num }>{ (turnDetail?.turn ?? 0) + 1 }</Text>
               </TouchableOpacity>
             </>
           :

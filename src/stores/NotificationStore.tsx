@@ -1,5 +1,4 @@
 import qs from 'qs'
-import { AsyncStorage } from 'react-native'
 import messaging from '@react-native-firebase/messaging'
 
 import UserStore from './UserStore'
@@ -19,7 +18,6 @@ class NotificationStore extends StoreBase {
   messaging = messaging()
 
   unsubscribeOnTokenRefresh = this.messaging.onTokenRefresh(() => {
-    this.setTokenSentToServer(false)
     this.messaging.getToken().then(refreshedToken => {
       this.notification = []
       this.sendTokenToServer(refreshedToken)
@@ -40,6 +38,8 @@ class NotificationStore extends StoreBase {
         ]
         this.trigger(NotificationStore.NotificationsKey)
       }
+    } else {
+      console.log(remoteMessage)
     }
   })
 
@@ -47,41 +47,58 @@ class NotificationStore extends StoreBase {
   })
 
   sendTokenToServer = (currentToken: string) =>
-    AsyncStorage.getItem('sentToServer')
-      .then(result => {
-        if (result !== '1') {
-          this.getToken().then(async userToken => {
-            if (userToken) {
-              await fetch(getURL() + '/user/device', {
-                method: 'PUT',
-                headers: {
-                  Accept: 'application/json',
-                  'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: qs.stringify({ userToken, deviceToken: currentToken })
-              }).then(response => {
-                if (response.ok) {
-                  return response.json()
-                } else {
-                  throw new Error(response.status + ': (' + response.statusText + ')')
-                }
-              }).then(result => {
-                if (result.errors) {
-                  throw new Error(result.errors)
-                } else {
-                  this.setTokenSentToServer(true)
-                }
-              })
-                .catch(err => Promise.reject(new Error(err.message)))
-            } else {
-              throw new Error('No Token Found')
-            }
-          })
-        }
-      })
+    this.getToken().then(async userToken => {
+      if (userToken) {
+        await fetch(getURL() + '/user/device', {
+          method: 'PUT',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: qs.stringify({ userToken, deviceToken: currentToken })
+        }).then(response => {
+          if (response.ok) {
+            return response.json()
+          } else {
+            throw new Error(response.status + ': (' + response.statusText + ')')
+          }
+        }).then(result => {
+          if (result.errors) {
+            throw new Error(result.errors)
+          }
+        })
+          .catch(err => Promise.reject(new Error(err.message)))
+      } else {
+        throw new Error('No Token Found')
+      }
+    })
 
-  setTokenSentToServer = (sent: boolean) =>
-    AsyncStorage.setItem('sentToServer', sent ? '1' : '0')
+  removeToken = () =>
+    this.getToken().then(async userToken => {
+      if (userToken) {
+        await fetch(getURL() + '/user/device/remove', {
+          method: 'PUT',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: qs.stringify({ userToken })
+        }).then(response => {
+          if (response.ok) {
+            return response.json()
+          } else {
+            throw new Error(response.status + ': (' + response.statusText + ')')
+          }
+        }).then(result => {
+          if (result.errors) {
+            throw new Error(result.errors)
+          }
+        })
+          .catch(err => Promise.reject(new Error(err.message)))
+      } else {
+        throw new Error('No Token Found')
+      }
+    })
 
   static NotificationsKey = 'NotificationsKey'
   @autoSubscribeWithKey('NotificationsKey')

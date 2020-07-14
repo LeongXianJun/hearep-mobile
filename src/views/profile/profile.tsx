@@ -6,8 +6,8 @@ import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
 import { Colors } from '../../styles'
 import { AppContainer } from '../common'
-import { UserStore, Patient } from '../../stores'
 import { isUndefined, AuthUtil } from '../../utils'
+import { UserStore, Patient, NotificationStore } from '../../stores'
 
 const avatar = {
   M: () => require('../../resources/images/maleAvatar.png'),
@@ -34,7 +34,10 @@ const ProfilePage: FC<PageProp> = ({ navigation }) => {
   }, [])
 
   const logout = () =>
-    AuthUtil.signOut()
+    NotificationStore.removeToken()
+      .then(async () => {
+        await AuthUtil.signOut()
+      })
       .then(() => {
         navigation.navigate('Login')
       })
