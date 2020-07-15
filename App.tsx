@@ -78,9 +78,9 @@ function PageAtBottomNav() {
   const paths: Path[] = [
     ...[
       { title: 'Home', icon: 'home', color: Colors.primaryVariant, component: HomeScreen },
-      { title: 'HealthRecord', icon: 'file-document', color: '#4cb5f5', component: HealthRecordPage },
-      { title: 'Analysis', icon: 'google-analytics', color: '#34675c', component: AnalysisPage },
-      { title: 'Profile', icon: 'account', color: '#b3c100', component: ProfilePage }
+      { title: 'HealthRecord', icon: 'file-document', color: Colors.primaryVariant, component: HealthRecordPage },
+      { title: 'Analysis', icon: 'google-analytics', color: Colors.primaryVariant, component: AnalysisPage },
+      { title: 'Profile', icon: 'account', color: Colors.primaryVariant, component: ProfilePage }
     ].map(p => ({
       ...p,
       options: {

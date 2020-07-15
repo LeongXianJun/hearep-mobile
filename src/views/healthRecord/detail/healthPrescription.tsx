@@ -8,6 +8,7 @@ import Carousel from 'react-native-snap-carousel'
 import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
+import { Colors } from '../../../styles'
 import { DateUtil } from '../../../utils'
 import { AppContainer } from '../../common'
 import {
@@ -15,7 +16,7 @@ import {
   Appointment
 } from '../../../stores'
 
-const barColor = '#4cb5f5'
+const barColor = Colors.primaryVariant
 
 interface PageProp {
   navigation: NavigationProp<ParamListBase>

@@ -13,7 +13,7 @@ import { DateUtil } from '../../../utils'
 import { AppointmentStore, AvailableTimeSlotStore } from '../../../stores'
 import { AppContainer } from '../../common'
 
-const barColor = '#e982f6'
+const barColor = Colors.primaryVariant
 
 interface PageProp {
   route: any

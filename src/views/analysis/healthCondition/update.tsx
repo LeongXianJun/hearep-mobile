@@ -8,7 +8,7 @@ import { Colors } from '../../../styles'
 import { AppContainer } from '../../common'
 import { HealthAnalysisStore } from '../../../stores'
 
-const barColor = '#34675c'
+const barColor = Colors.primaryVariant
 
 interface PageProp {
   navigation: NavigationProp<ParamListBase>

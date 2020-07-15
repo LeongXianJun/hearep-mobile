@@ -14,7 +14,7 @@ const avatar = {
   F: () => require('../../resources/images/femaleAvatar.png')
 }
 
-const barColor = '#b3c100'
+const barColor = Colors.primaryVariant
 
 interface PageProp {
   navigation: NavigationProp<ParamListBase>

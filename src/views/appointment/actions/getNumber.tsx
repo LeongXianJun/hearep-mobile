@@ -4,11 +4,12 @@ import { Text } from 'react-native-paper'
 import { withResubAutoSubscriptions } from 'resub'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
+import { Colors } from '../../../styles'
 import { DateUtil } from '../../../utils'
 import { AppContainer } from '../../common'
 import { AppointmentStore } from '../../../stores'
 
-const barColor = '#e982f6'
+const barColor = Colors.primaryVariant
 
 interface PageProp {
   navigation: NavigationProp<ParamListBase>

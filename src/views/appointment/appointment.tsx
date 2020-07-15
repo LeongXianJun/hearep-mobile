@@ -19,7 +19,7 @@ const avatar = {
   F: () => require('../../resources/images/makeAppointmentMale.jpg')
 }
 
-const barColor = '#e982f6'
+const barColor = Colors.primaryVariant
 
 interface PageProp {
   navigation: NavigationProp<ParamListBase>

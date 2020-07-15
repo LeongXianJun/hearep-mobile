@@ -10,7 +10,7 @@ import { DateUtil } from '../../../utils'
 import { AppContainer } from '../../common'
 import { AppointmentStore, UserStore } from '../../../stores'
 
-const barColor = '#e982f6'
+const barColor = Colors.primaryVariant
 
 interface PageProp {
   navigation: NavigationProp<ParamListBase>

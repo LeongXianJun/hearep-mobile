@@ -5,6 +5,7 @@ import { withResubAutoSubscriptions } from 'resub'
 import { Text, Card, Title, TouchableRipple } from 'react-native-paper'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 
+import { Colors } from '../../styles'
 import { AppContainer } from '../common'
 import { HealthRecordStore, HR } from '../../stores'
 
@@ -14,7 +15,7 @@ const imgs = {
   'Lab Test Result': require('../../resources/images/labTestResult.jpg')
 }
 
-const barColor = '#4cb5f5'
+const barColor = Colors.primaryVariant
 
 interface PageProp {
   navigation: NavigationProp<ParamListBase>
