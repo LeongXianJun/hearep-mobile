@@ -67,7 +67,7 @@ const UpdateProfilePage: FC<PageProp> = ({ navigation }) => {
       UserStore.fetchUser()
         .finally(() => setIsLoading(false))
     }
-    return UserStore.unsubscribe
+    return UserStore.unsubscribeOnAuthStateChanged
   }, [ isLoading, CurrentUser ])
 
   const updateDob = (date: Date) => {
@@ -189,7 +189,7 @@ const UpdateProfilePage: FC<PageProp> = ({ navigation }) => {
         }
       </View>
       <View style={ [ styles.lastView, styles.buttons, { flex: 1, justifyContent: 'center', alignItems: 'center' } ] }>
-        <Button mode='contained' loading={ isSubmitting } style={ styles.button } onPress={ updateProfile }>{ 'Update Profile' }</Button>
+        <Button mode='contained' loading={ isSubmitting } disabled={ isSubmitting } style={ styles.button } onPress={ updateProfile }>{ 'Update Profile' }</Button>
       </View>
       <DateTimePicker
         isVisible={ isDPVisible }

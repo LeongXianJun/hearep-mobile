@@ -13,16 +13,21 @@ interface LoginPageProp {
 }
 
 const LoginPage: FC<LoginPageProp> = ({ navigation }) => {
+  const [ isSubmitting, setIsSubmitting ] = useState(false)
   const [ phoneNumber, setPN ] = useState('')
   const [ err, setErr ] = useState('')
 
-  const login = () =>
-    checkPN(phoneNumber)
-      ? UserStore.checkExistingUser(phoneNumber)
+  const login = () => {
+    if (checkPN(phoneNumber)) {
+      setIsSubmitting(true)
+      UserStore.checkExistingUser(phoneNumber)
         .then(hasUser => {
           if (hasUser) {
             AuthUtil.signIn(phoneNumber)
-              .then(() => setErr(''))
+              .then(() => {
+                setIsSubmitting(false)
+                setErr('')
+              })
               .then(() =>
                 navigation.navigate('OTP', {
                   'isRegister': 'false'
@@ -32,16 +37,26 @@ const LoginPage: FC<LoginPageProp> = ({ navigation }) => {
             throw new Error('This phone number is not registered yet.')
           }
         })
-        .catch(err => setErr(err.message))
-      : setErr('Format of the phone number is wrong.')
+        .catch(err => {
+          setIsSubmitting(false)
+          setErr(err.message)
+        })
+    } else {
+      setErr('Format of the phone number is wrong.')
+    }
+  }
 
-  const register = () =>
-    checkPN(phoneNumber)
-      ? UserStore.checkExistingUser(phoneNumber)
+  const register = () => {
+    if (checkPN(phoneNumber)) {
+      setIsSubmitting(true)
+      UserStore.checkExistingUser(phoneNumber)
         .then(hasUser => {
           if (!hasUser) {
             AuthUtil.signIn(phoneNumber)
-              .then(() => setErr(''))
+              .then(() => {
+                setIsSubmitting(false)
+                setErr('')
+              })
               .then(() =>
                 navigation.navigate('OTP', {
                   'isRegister': 'true'
@@ -51,8 +66,14 @@ const LoginPage: FC<LoginPageProp> = ({ navigation }) => {
             throw new Error('This phone number is used by another user.')
           }
         })
-        .catch(err => setErr(err.message))
-      : setErr('Format of the phone number is wrong.')
+        .catch(err => {
+          setIsSubmitting(false)
+          setErr(err.message)
+        })
+    } else {
+      setErr('Format of the phone number is wrong.')
+    }
+  }
 
   const checkPN = (PN: string) => {
     const regex = /^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[0-9]{9,11}$/
@@ -72,7 +93,7 @@ const LoginPage: FC<LoginPageProp> = ({ navigation }) => {
             label='Phone Number'
             mode='outlined'
             keyboardType='phone-pad'
-            placeholder={ err !== '' ? '' : '+(60)123456789' }
+            placeholder={ err !== '' ? '' : '+60123456789' }
             value={ phoneNumber }
             error={ err !== '' }
             onChangeText={ text => {
@@ -88,8 +109,8 @@ const LoginPage: FC<LoginPageProp> = ({ navigation }) => {
           </HelperText>
         </View>
         <View style={ styles.buttons }>
-          <Button mode='contained' style={ styles.button } onPress={ login }>{ 'Login' }</Button>
-          <Button style={ styles.button } onPress={ register }>{ 'Register' }</Button>
+          <Button mode='contained' style={ styles.button } disabled={ isSubmitting } loading={ isSubmitting } onPress={ login }>{ 'Login' }</Button>
+          <Button style={ styles.button } disabled={ isSubmitting } loading={ isSubmitting } onPress={ register }>{ 'Register' }</Button>
         </View>
       </View>
       <View style={ [ styles.lastView, { flex: 1, justifyContent: 'center', alignItems: 'center' } ] }>

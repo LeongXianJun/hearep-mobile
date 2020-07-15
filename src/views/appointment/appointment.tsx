@@ -44,24 +44,26 @@ const AppointmentPage: FC<PageProp> = ({ navigation }) => {
   const [ selectedAppointment, setSelectedAppointment ] = useState<Appointment>()
   const [ isLoading, setIsLoading ] = useState(true)
 
-  useEffect(() => {
+  const onLoad = () => {
     Promise.all([
       UserStore.fetchAllMedicalStaff(),
       AppointmentStore.fetchAllAppointments()
     ]).catch(err => console.log(err))
       .finally(() => setIsLoading(false))
-  }, [])
+  }
+
+  useEffect(onLoad, [])
 
   useEffect(() => {
     if (CurrentUser) {
       setGender(CurrentUser.gender)
     }
 
-    return UserStore.unsubscribe
+    return UserStore.unsubscribeOnAuthStateChanged
   }, [ CurrentUser ])
 
   return (
-    <AppContainer isLoading={ isLoading }>
+    <AppContainer isLoading={ isLoading } onRefresh={ onLoad }>
       <AppointmentDialog onClose={ () => setSelectedAppointment(undefined) } appointment={ selectedAppointment } />
       <View style={ { marginTop: 25, flexDirection: 'row-reverse' } }>
         <Button mode='text' onPress={ () => navigation.navigate('Appointment/History') }>{ 'History' }</Button>

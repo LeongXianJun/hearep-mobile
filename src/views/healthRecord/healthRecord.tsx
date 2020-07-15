@@ -27,7 +27,7 @@ const HealthRecordPage: FC<PageProp> = ({ navigation }) => {
 
   const [ isLoading, setIsLoading ] = useState(true)
 
-  useEffect(() => {
+  const onLoad = () => {
     HealthRecordStore.fetchPatientRecords()
       .catch(err => {
         if (err.message.includes('No more record') === false) {
@@ -35,7 +35,9 @@ const HealthRecordPage: FC<PageProp> = ({ navigation }) => {
         }
       })
       .finally(() => setIsLoading(false))
-  }, [])
+  }
+
+  useEffect(onLoad, [])
 
   const navigate = (category: HR[ 'type' ]) => (record: HR) => () => {
     HealthRecordStore.setSelectedRecord(record)
@@ -61,7 +63,7 @@ const HealthRecordPage: FC<PageProp> = ({ navigation }) => {
     </TouchableRipple>
 
   return (
-    <AppContainer isLoading={ isLoading }>
+    <AppContainer isLoading={ isLoading } onRefresh={ onLoad }>
       <Text style={ styles.title }>{ 'All Health Records' }</Text>
       {
         [

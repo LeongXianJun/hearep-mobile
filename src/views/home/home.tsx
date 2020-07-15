@@ -29,19 +29,23 @@ const HomePage: FC<PageProp> = ({ navigation }) => {
 
   const [ expandId, setExpandId ] = useState(1)
 
+  const onLoad = () => {
+    Promise.all([
+      HealthRecordStore.fetchPatientRecords(),
+      AppointmentStore.fetchAllAppointments()
+    ]).catch(err => console.log(err))
+      .finally(() => setIsLoading(false))
+  }
+
   useEffect(() => {
     if (isReady) {
-      Promise.all([
-        HealthRecordStore.fetchPatientRecords(),
-        AppointmentStore.fetchAllAppointments()
-      ]).catch(err => console.log(err))
-        .finally(() => setIsLoading(false))
+      onLoad()
     }
-    return UserStore.unsubscribe
+    return UserStore.unsubscribeOnAuthStateChanged
   }, [ isReady ])
 
   return (
-    <AppContainer isLoading={ isLoading }>
+    <AppContainer isLoading={ isLoading } onRefresh={ onLoad }>
       <Text style={ styles.title }>{ CurrentUser?.username ? 'Welcome,\n' + CurrentUser.username : 'Welcome' }</Text>
       <Text style={ styles.subtitle }>{ 'Enhancing Life. Excelling in Care.' }</Text>
       <Card style={ { marginTop: 10 } } onPress={ () => navigation.navigate('Appointment') }>

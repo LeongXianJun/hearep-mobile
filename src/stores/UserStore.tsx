@@ -30,7 +30,7 @@ class UserStore extends StoreBase {
     this.isReady = false
   }
 
-  unsubscribe = auth().onAuthStateChanged(firebaseUser => {
+  unsubscribeOnAuthStateChanged = auth().onAuthStateChanged(firebaseUser => {
     // console.log('running')
     if (firebaseUser) {
       // console.log('login', firebaseUser.phoneNumber)
@@ -192,7 +192,8 @@ class UserStore extends StoreBase {
           } else {
             const allPatients = (data as Array<any>).map(p => new Patient(p)).filter(p => p.id !== this.user?.id)
             const authorizedList = this.user?.authorizedUsers
-            if (authorizedList) {
+            console.log(this.user?.authorizedUsers)
+            if (authorizedList && authorizedList.length > 0) {
               this.patients = allPatients.reduce<{
                 authorized: Patient[], notAuthorized: Patient[]
               }>((all, p) => authorizedList.includes(p.id)
@@ -315,7 +316,13 @@ class UserStore extends StoreBase {
               authorized: [ ...this.patients.authorized, ...result.target ],
               notAuthorized: result.remaining
             }
-            this.trigger(UserStore.PatientKey)
+            if (this.user) {
+              this.user = {
+                ...this.user,
+                authorizedUsers: [ ...this.user?.authorizedUsers ?? [], ...userIds ]
+              }
+            }
+            this.trigger([ UserStore.PatientKey, UserStore.UserKey ])
           }
         }).catch(err => Promise.reject(new Error(err)))
       } else {
@@ -343,7 +350,7 @@ class UserStore extends StoreBase {
           if (result.errors) {
             throw result.errors
           } else {
-            const result = this.patients.notAuthorized.reduce<{
+            const result = this.patients.authorized.reduce<{
               target: Patient[], remaining: Patient[]
             }>((all, p) => userIds.includes(p.id)
               ? { ...all, target: [ ...all.target, p ] }
@@ -353,9 +360,15 @@ class UserStore extends StoreBase {
               })
             this.patients = {
               authorized: result.remaining,
-              notAuthorized: [ ...this.patients.authorized, ...result.target ]
+              notAuthorized: [ ...this.patients.notAuthorized, ...result.target ]
             }
-            this.trigger(UserStore.PatientKey)
+            if (this.user) {
+              this.user = {
+                ...this.user,
+                authorizedUsers: this.user?.authorizedUsers.filter(au => userIds.includes(au) === false) ?? []
+              }
+            }
+            this.trigger([ UserStore.PatientKey, UserStore.UserKey ])
           }
         }).catch(err => Promise.reject(new Error(err)))
       } else {

@@ -169,7 +169,8 @@ class AppointmentStore extends StoreBase {
                   ...this.groupedAppointments.Waiting, new ByNumberApp({ id: data.docId, ...this.newAppDetail })
                 ]
               }
-            this.trigger(AppointmentStore.GroupedAppointmentsKey)
+            this.newAppDetail = {}
+            this.trigger([ AppointmentStore.GroupedAppointmentsKey, AppointmentStore.newAppDetailKey ])
           }
         }).catch(err => Promise.reject(new Error(err)))
       } else {
@@ -226,7 +227,8 @@ class AppointmentStore extends StoreBase {
                     ...this.groupedAppointments.Waiting, new ByNumberApp({ id: data.docId, date: new Date(), status: 'Waiting', ...this.newAppDetail })
                   ]
                 }
-              this.trigger(AppointmentStore.GroupedAppointmentsKey)
+              this.newAppDetail = {}
+              this.trigger([ AppointmentStore.GroupedAppointmentsKey, AppointmentStore.newAppDetailKey ])
             }
           }
         }).catch(err => Promise.reject(new Error(err)))

@@ -25,6 +25,7 @@ const PermitUsersPage: FC<PageProp> = ({ navigation }) => {
   const [ permittedVis, setPermittedVis ] = useState(true)
   const [ otherVis, setOtherVis ] = useState(true)
   const [ isLoading, setIsLoading ] = useState(true)
+  const [ isSubmitting, setIsSubmitting ] = useState(false)
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -41,10 +42,24 @@ const PermitUsersPage: FC<PageProp> = ({ navigation }) => {
     })
   }, [ navigation ])
 
-  useEffect(() => {
+  const onLoad = () => {
+    console.log('call')
     UserStore.fetchAllPatients()
       .finally(() => setIsLoading(false))
+      .catch(err => {
+        setIsLoading(false)
+        console.log(err)
+      })
+  }
+
+  useEffect(() => {
+    onLoad()
+    return UserStore.unsubscribeOnAuthStateChanged
   }, [])
+
+  useEffect(() => {
+    setChecked(notAuthorized.map(() => false))
+  }, [ notAuthorized ])
 
   const permitNewUsers = () => {
     const newUsers = notAuthorized.reduce<string[]>((all, r, index) =>
@@ -53,18 +68,26 @@ const PermitUsersPage: FC<PageProp> = ({ navigation }) => {
         : all
       , [])
     if (newUsers.length > 0) {
+      setIsSubmitting(true)
       UserStore.updateAuthorizedUsers(newUsers)
-        .then(() => setChecked([]))
+        .then(() => {
+          setIsSubmitting(false)
+          setChecked(notAuthorized.map(() => false))
+        })
+        .catch(err => {
+          setIsSubmitting(false)
+          console.log(err)
+        })
     }
   }
 
   const FloatingButtons = () =>
     Object.keys(checked).some(c => checked[ Number.parseInt(c) ])
-      ? <FAB icon='plus' style={ styles.fab } onPress={ permitNewUsers } label={ 'Permit new Users' } />
+      ? <FAB icon='plus' loading={ isSubmitting } disabled={ isSubmitting } style={ styles.fab } onPress={ permitNewUsers } label={ 'Permit new Users' } />
       : null
 
   return (
-    <AppContainer isLoading={ isLoading } FAB={ FloatingButtons() }>
+    <AppContainer isLoading={ isLoading } FAB={ FloatingButtons() } onRefresh={ onLoad }>
       <View style={ { flex: 1 } }>
         <Title style={ { marginTop: 25, marginBottom: 10, fontSize: 30 } }>{ 'Permit Users' }</Title>
         <View style={ { flex: 1 } }>
@@ -102,7 +125,7 @@ const PermitUsersPage: FC<PageProp> = ({ navigation }) => {
 
   function PermitNewUsers() {
     const check = (index: number) => () => {
-      setChecked({ ...checked, [ index ]: !checked[ index ] })
+      setChecked([ ...checked.map((c, i) => i === index ? !c : c) ])
     }
 
     return (
@@ -124,19 +147,20 @@ const PermitUsersPage: FC<PageProp> = ({ navigation }) => {
             value={ filter }
           />
           {
-            notAuthorized.filter(u => u.username.toLowerCase().includes(filter.toLowerCase())).slice(0, 10).map(({ id, username }, index) =>
-              <List.Item key={ 'OU-' + index }
-                style={ { backgroundColor: Colors.surface } }
-                title={ username }
-                titleStyle={ [ styles.text, { textTransform: 'capitalize' } ] }
-                right={ props =>
-                  <Checkbox { ...props } color={ Colors.primaryVariant } uncheckedColor={ Colors.primary }
-                    status={ checked[ index ] ? 'checked' : 'unchecked' }
-                    onPress={ check(index) }
-                  />
-                }
-              />
-            )
+            notAuthorized.filter(u => u.username.toLowerCase().includes(filter.toLowerCase())).slice(0, 10)
+              .map(({ id, username }, index) =>
+                <List.Item key={ 'OU-' + index }
+                  style={ { backgroundColor: Colors.surface } }
+                  title={ username }
+                  titleStyle={ [ styles.text, { textTransform: 'capitalize' } ] }
+                  right={ props =>
+                    <Checkbox { ...props } color={ Colors.primaryVariant } uncheckedColor={ Colors.primary }
+                      status={ checked[ index ] ? 'checked' : 'unchecked' }
+                      onPress={ check(index) }
+                    />
+                  }
+                />
+              )
           }
         </List.Accordion>
       </View>

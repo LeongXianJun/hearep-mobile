@@ -25,12 +25,15 @@ const ProfilePage: FC<PageProp> = ({ navigation }) => {
 
   const [ isLoading, setIsLoading ] = useState(true)
 
-  useEffect(() => {
+  const onLoad = () => {
     UserStore.fetchUser()
       .catch(err => console.log('profile', err))
       .finally(() => setIsLoading(false))
+  }
 
-    return UserStore.unsubscribe
+  useEffect(() => {
+    onLoad()
+    return UserStore.unsubscribeOnAuthStateChanged
   }, [])
 
   const logout = () =>
@@ -39,11 +42,14 @@ const ProfilePage: FC<PageProp> = ({ navigation }) => {
         await AuthUtil.signOut()
       })
       .then(() => {
-        navigation.navigate('Login')
+        navigation.reset({
+          index: 0,
+          routes: [ { name: 'Login' } ]
+        })
       })
 
   return (
-    <AppContainer isLoading={ isLoading } FAB={ FloatingButtons() }>
+    <AppContainer isLoading={ isLoading } FAB={ FloatingButtons() } onRefresh={ onLoad }>
       <Text style={ styles.title }>{ 'Profile' }</Text>
       <View style={ { flex: 1 } }>
         {
@@ -54,7 +60,7 @@ const ProfilePage: FC<PageProp> = ({ navigation }) => {
             </>
             : null
         }
-        <Button mode='outlined' onPress={ logout }>{ 'Logout' }</Button>
+        <Button mode='text' onPress={ logout }>{ 'Logout' }</Button>
       </View>
     </AppContainer>
   )

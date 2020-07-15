@@ -19,10 +19,12 @@ const AnalysisPage: FC<PageProp> = ({ navigation }) => {
 
   const [ isLoading, setIsLoading ] = useState(true)
 
-  useEffect(() => {
+  const onLoad = () => {
     HealthAnalysisStore.fetchHealthAnalysis()
       .finally(() => setIsLoading(false))
-  }, [])
+  }
+
+  useEffect(onLoad, [])
 
   const FloatingButtons = () =>
     <FAB
@@ -33,7 +35,7 @@ const AnalysisPage: FC<PageProp> = ({ navigation }) => {
     />
 
   return (
-    <AppContainer isLoading={ isLoading } FAB={ FloatingButtons() } ContentStyle={ { paddingBottom: 50 } } >
+    <AppContainer isLoading={ isLoading } FAB={ FloatingButtons() } ContentStyle={ { paddingBottom: 50 } } onRefresh={ onLoad }>
       <Text style={ styles.title }>{ 'Health Analysis' }</Text>
       {
         [

@@ -28,11 +28,13 @@ const SelectMedicalStaffPage: FC<PageProp> = ({ navigation }) => {
   const [ filter, setFilter ] = useState('')
   const [ isLoading, setIsLoading ] = useState(true)
 
-  useEffect(() => {
+  const onLoad = () => {
     UserStore.fetchAllMedicalStaff()
       .catch(err => console.log(err))
       .finally(() => setIsLoading(false))
-  }, [])
+  }
+
+  useEffect(onLoad, [])
 
   const onPress = (m: MedicalStaff) => () => {
     const workingTime = m.workingTime
@@ -47,7 +49,7 @@ const SelectMedicalStaffPage: FC<PageProp> = ({ navigation }) => {
   }
 
   return (
-    <AppContainer isLoading={ isLoading }>
+    <AppContainer isLoading={ isLoading } onRefresh={ onLoad }>
       {
         medicalStaff.length > 0
           ? <View style={ styles.firstView }>

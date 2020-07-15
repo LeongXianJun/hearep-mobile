@@ -39,12 +39,14 @@ const SelectTimeslotPage: FC<PageProp> = ({ route, navigation }) => {
   const [ availableSlots, setAvailableSlots ] = useState<Date[]>([])
   const _carousel = useRef<any>(null) // not sure the type
 
-  useEffect(() => {
+  const onLoad = () => {
     if (newAppDetail.medicalStaffId)
       AvailableTimeSlotStore.fetchAvailableTimeslots(newAppDetail.medicalStaffId, new Date())
         .catch(err => console.log(err))
         .finally(() => setIsLoading(false))
-  }, [ newAppDetail ])
+  }
+
+  useEffect(onLoad, [ newAppDetail ])
 
   useEffect(() => {
     if (available?.daySlots && available.daySlots.length > 0)
@@ -88,7 +90,7 @@ const SelectTimeslotPage: FC<PageProp> = ({ route, navigation }) => {
   }
 
   return (
-    <AppContainer isLoading={ isLoading } ContentStyle={ longScroll && { flex: 1 } }>
+    <AppContainer isLoading={ isLoading } ContentStyle={ longScroll && { flex: 1 } } onRefresh={ onLoad }>
       <View style={ [ styles.firstView ] }>
         <Title>Select a { rescheduleId ? 'new ' : '' }Day</Title>
         <View>

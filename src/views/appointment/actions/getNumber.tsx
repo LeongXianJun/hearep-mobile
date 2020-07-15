@@ -30,9 +30,10 @@ const GetNumberPage: FC<PageProp> = ({ navigation }) => {
   const [ hasWorkingTime, setHasWorkingTime ] = useState(true)
   const [ isLoading, setIsLoading ] = useState(true)
 
-  useEffect(() => {
-    if (isLoading && newAppDetail?.medicalStaffId)
+  const onLoad = () => {
+    if (newAppDetail?.medicalStaffId)
       AppointmentStore.getTurn(newAppDetail.medicalStaffId)
+        .then(() => setIsLoading(false))
         .catch(err => {
           if (err.message.includes('This medical staff does not operate')) {
             setIsOffDay(true)
@@ -41,8 +42,13 @@ const GetNumberPage: FC<PageProp> = ({ navigation }) => {
           } else {
             console.log(err)
           }
+          setIsLoading(false)
         })
-        .finally(() => setIsLoading(false))
+  }
+
+  useEffect(() => {
+    if (isLoading && newAppDetail?.medicalStaffId)
+      onLoad()
   }, [ isLoading, newAppDetail ])
 
   const process = () =>
@@ -53,7 +59,7 @@ const GetNumberPage: FC<PageProp> = ({ navigation }) => {
       : undefined
 
   return (
-    <AppContainer isLoading={ isLoading } ContentStyle={ { justifyContent: 'center', alignItems: 'center' } }>
+    <AppContainer isLoading={ isLoading } ContentStyle={ { justifyContent: 'center', alignItems: 'center' } } onRefresh={ onLoad }>
       {
         hasWorkingTime
           ? isOffDay

@@ -14,6 +14,7 @@ interface PageProp {
 
 const LoginPage: FC<PageProp> = ({ route, navigation }) => {
   const { isRegister } = route.params
+  const [ isSubmitting, setIsSubmitting ] = useState(false)
   const [ snackVisible, setSnackVisible ] = useState(false)
   const [ code, setC ] = useState('')
   const [ err, setErr ] = useState('')
@@ -22,10 +23,12 @@ const LoginPage: FC<PageProp> = ({ route, navigation }) => {
     UserStore.setRegister(isRegister)
   }, [ isRegister ])
 
-  const proceed = () =>
-    checkOTPFormet(code)
-      ? AuthUtil.verifyCode(code)
+  const proceed = () => {
+    if (checkOTPFormet(code)) {
+      setIsSubmitting(true)
+      AuthUtil.verifyCode(code)
         .then(() => {
+          setIsSubmitting(false)
           if (isRegister === 'true') {
             navigation.navigate('Register')
           } else {
@@ -35,8 +38,14 @@ const LoginPage: FC<PageProp> = ({ route, navigation }) => {
             })
           }
         })
-        .catch(err => setErr(err.message))
-      : setErr('Format of the OTP code is wrong.')
+        .catch(err => {
+          setIsSubmitting(false)
+          setErr(err.message)
+        })
+    } else {
+      setErr('Format of the OTP code is wrong.')
+    }
+  }
 
   const checkOTPFormet = (otp: string) => /^\d{6}$/.test(otp)
 
@@ -67,7 +76,7 @@ const LoginPage: FC<PageProp> = ({ route, navigation }) => {
           { err }
         </HelperText>
         <View style={ [ styles.lastView, styles.buttons ] }>
-          <Button mode='contained' style={ styles.button } onPress={ proceed }>{ isRegister === 'true' ? 'Continue' : 'Login' }</Button>
+          <Button mode='contained' style={ styles.button } disabled={ isSubmitting } loading={ isSubmitting } onPress={ proceed }>{ isRegister === 'true' ? 'Continue' : 'Login' }</Button>
           <Button style={ { width: '60%' } } onPress={ () => setSnackVisible(true) } loading={ snackVisible } disabled={ snackVisible }>{ 'Request OTP' }</Button>
         </View>
       </View>

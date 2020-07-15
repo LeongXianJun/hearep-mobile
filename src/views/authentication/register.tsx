@@ -47,6 +47,7 @@ const RegisterPage: FC<PageProp> = ({ navigation }) => {
     setIsSubmitting(true)
     UserStore.createUser({ ...info, gender: info.gender as 'M' | 'F' })
       .then(() => {
+        setIsSubmitting(false)
         UserStore.setRegister(false)
         navigation.reset({
           index: 0,
@@ -75,8 +76,6 @@ const RegisterPage: FC<PageProp> = ({ navigation }) => {
             'occupation': ''
           })
         )
-      })
-      .finally(() => {
         setIsSubmitting(false)
       })
   }
@@ -155,7 +154,7 @@ const RegisterPage: FC<PageProp> = ({ navigation }) => {
         }
       </View>
       <View style={ [ styles.lastView, styles.buttons, { flex: 1, justifyContent: 'center', alignItems: 'center' } ] }>
-        <Button mode='contained' loading={ isSubmitting } style={ styles.button } labelStyle={ { color: Colors.text } } onPress={ register }>{ 'Register' }</Button>
+        <Button mode='contained' loading={ isSubmitting } disabled={ isSubmitting } style={ styles.button } labelStyle={ { color: Colors.text } } onPress={ register }>{ 'Register' }</Button>
       </View>
       <DateTimePicker
         isVisible={ isDPVisible }

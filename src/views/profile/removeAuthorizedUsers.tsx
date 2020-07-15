@@ -1,4 +1,4 @@
-import React, { useState, FC } from 'react'
+import React, { useState, FC, useEffect } from 'react'
 import { View, StyleSheet } from 'react-native'
 import { Title, Checkbox, Searchbar, FAB, List } from 'react-native-paper'
 import { withResubAutoSubscriptions } from 'resub'
@@ -26,7 +26,12 @@ const RemoveAuthorizedUsersPage: FC<PageProp> = ({ navigation }) => {
   const { authorized } = patients
 
   const [ checked, setChecked ] = useState<boolean[]>([])
+  const [ isSubmitting, setIsSubmitting ] = useState(false)
   const [ filter, setFilter ] = useState('')
+
+  useEffect(() => {
+    return UserStore.unsubscribeOnAuthStateChanged
+  }, [])
 
   const check = (index: number) => () =>
     setChecked({ ...checked, [ index ]: !checked[ index ] })
@@ -38,10 +43,14 @@ const RemoveAuthorizedUsersPage: FC<PageProp> = ({ navigation }) => {
         : all
       , [])
     if (newUsers.length > 0) {
+      setIsSubmitting(true)
       UserStore.removeAuthorizedUsers(newUsers)
         .then(() => {
-          setChecked([])
           navigation.goBack()
+        })
+        .catch(err => {
+          setIsSubmitting(false)
+          console.log(err)
         })
     }
   }
@@ -78,7 +87,7 @@ const RemoveAuthorizedUsersPage: FC<PageProp> = ({ navigation }) => {
       </View>
       {
         Object.keys(checked).some(c => checked[ Number.parseInt(c) ])
-          ? <FAB icon='plus' style={ styles.fab } onPress={ removeUsers } label={ 'Remove Authorized Users' } />
+          ? <FAB icon='plus' loading={ isSubmitting } disabled={ isSubmitting } style={ styles.fab } onPress={ removeUsers } label={ 'Remove Authorized Users' } />
           : null
       }
     </AppContainer>

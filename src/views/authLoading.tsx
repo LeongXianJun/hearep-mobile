@@ -16,6 +16,16 @@ const AuthLoadingScreen: FC<PageProp> = ({ navigation }) => {
   const isReady = UserStore.ready()
 
   useEffect(() => {
+    const timeout = setTimeout(() => {
+      navigation.reset({ index: 0, routes: [ { name: 'Login' } ] })
+    }, 5000);
+
+    return () => {
+      clearTimeout(timeout)
+    }
+  }, [])
+
+  useEffect(() => {
     if (isReady) {
       navigation.reset({
         index: 0,
@@ -23,7 +33,7 @@ const AuthLoadingScreen: FC<PageProp> = ({ navigation }) => {
       })
     }
 
-    return UserStore.unsubscribe
+    return UserStore.unsubscribeOnAuthStateChanged
   }, [ isReady, navigation ])
 
   return (

@@ -1,7 +1,7 @@
 import React, { FC, useState, useEffect } from 'react'
 import {
   StatusBar, SafeAreaView, KeyboardAvoidingView, ScrollView, View,
-  StyleSheet, Dimensions, Platform, ViewStyle, StyleProp,
+  StyleSheet, Dimensions, Platform, ViewStyle, StyleProp, RefreshControl,
 } from 'react-native'
 import { ActivityIndicator, Snackbar } from 'react-native-paper'
 
@@ -16,9 +16,10 @@ interface ComponentProp {
   ATB?: React.ReactNode
   ContentStyle?: StyleProp<ViewStyle>
   hasNoBar?: boolean
+  onRefresh?: () => void
 }
 
-const AppContainer: FC<ComponentProp> = ({ isLoading = false, children, snackMessage, isKeyboardAvoidingView = false, FAB, ATB, ContentStyle, hasNoBar }) => {
+const AppContainer: FC<ComponentProp> = ({ isLoading = false, children, snackMessage, isKeyboardAvoidingView = false, FAB, ATB, ContentStyle, hasNoBar, onRefresh }) => {
   const [ loading, setLoading ] = useState(isLoading)
   const [ snackVisible, setSnackVisible ] = useState(false)
 
@@ -41,7 +42,13 @@ const AppContainer: FC<ComponentProp> = ({ isLoading = false, children, snackMes
     <React.Fragment>
       <StatusBar barStyle='default' animated backgroundColor={ Colors.primaryVariant } />
       <AreaView style={ styles.container } behavior={ Platform.OS == "ios" ? "padding" : "height" }>
-        <ScrollView style={ { flex: 1 } } contentContainerStyle={ [ styles.content, ContentStyle, hasNoBar && { minHeight: Dimensions.get('window').height - (StatusBar.currentHeight ?? 0) } ] }>
+        <ScrollView
+          style={ { flex: 1 } }
+          contentContainerStyle={ [ styles.content, ContentStyle, hasNoBar && { minHeight: Dimensions.get('window').height - (StatusBar.currentHeight ?? 0) } ] }
+          refreshControl={
+            onRefresh ? <RefreshControl refreshing={ isLoading } onRefresh={ onRefresh } /> : <></>
+          }
+        >
           {
             loading
               ? <View style={ { flex: 1, justifyContent: 'center', alignItems: 'center' } }>
